@@ -89,6 +89,19 @@ class SettingsTrackingController :
                 }
             }
 
+            trackPreference(trackManager.kavita) {
+                val acceptedSources = trackManager.kavita.getAcceptedSources()
+                val hasValidSourceInstalled = sourceManager.getCatalogueSources()
+                    .any { it::class.qualifiedName in acceptedSources }
+
+                if (hasValidSourceInstalled) {
+                    trackManager.kavita.loginNoop()
+                    updatePreference(trackManager.kavita.id)
+                } else {
+                    context.toast(R.string.tracker_kavita_warning, Toast.LENGTH_LONG)
+                }
+            }
+
             infoPreference(R.string.enhanced_tracking_info)
         }
     }
