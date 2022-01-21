@@ -47,12 +47,19 @@ data class ChapterDto(
     val volumeId: Int,
     val created: String
 )
-data class getProgress(
+
+@Serializable
+data class ProgressDto(
     val volumeId: Int,
     val chapterId: Int,
     val pageNum: Int,
     val seriesId: Int,
     val bookScrollId: String
+)
+
+@Serializable
+data class prevChapterInt(
+    val number: Int
 )
 
 @Serializable

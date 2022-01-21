@@ -1,23 +1,16 @@
 package eu.kanade.tachiyomi.data.track.kavita
 
-import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import androidx.annotation.StringRes
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.NoLoginTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.komga.Komga
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import okhttp3.Headers
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.security.MessageDigest
 
 class Kavita(private val context: Context, id: Int) : TrackService(id), EnhancedTrackService, NoLoginTrackService {
 
@@ -44,9 +37,9 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
-            Komga.UNREAD -> getString(R.string.unread)
-            Komga.READING -> getString(R.string.currently_reading)
-            Komga.COMPLETED -> getString(R.string.completed)
+            Kavita.UNREAD -> getString(R.string.unread)
+            Kavita.READING -> getString(R.string.currently_reading)
+            Kavita.COMPLETED -> getString(R.string.completed)
             else -> ""
         }
     }
@@ -62,13 +55,13 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
     override fun displayScore(track: Track): String = ""
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
-        TODO("Update is still WIP")
-//        if (track.status != Komga.COMPLETED) {
-//            if (didReadChapter) {
-//                track.status = Komga.READING
-//            }
-//        }
-//        return api.updateProgress(track)
+//        TODO("Update is still WIP")
+        if (track.status != Kavita.COMPLETED) {
+            if (didReadChapter) {
+                track.status = Kavita.READING
+            }
+        }
+        return api.updateProgress(track)
     }
 
     override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {

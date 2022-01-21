@@ -5,20 +5,15 @@ import android.content.SharedPreferences
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.komga.ReadProgressUpdateDto
-import eu.kanade.tachiyomi.data.track.komga.ReadProgressUpdateV2Dto
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.lang.withIOContext
-import kotlinx.serialization.encodeToString
 import okhttp3.Headers
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -57,9 +52,9 @@ class KavitaApi(private val client: OkHttpClient) {
         }
         return prefApiKey
     }
-
+    fun getCleanedApiUrl(url: String) = "${url.split("/api/").first()}/api"
     fun getToken(url: String) {
-        val cleanedApiUrl = "${url.split("/api/").first()}/api"
+        val cleanedApiUrl = getCleanedApiUrl(url)
         val apiKey = getKavitaPreferencesApiKey(cleanedApiUrl)
         val request = POST(
             "$cleanedApiUrl/Plugin/authenticate?apiKey=$apiKey&pluginName=Tachiyomi-Kavita",
@@ -75,9 +70,10 @@ class KavitaApi(private val client: OkHttpClient) {
 
     suspend fun getTrackSearch(url: String): TrackSearch =
         withIOContext {
-            if (jwtToken.isEmpty()){
+            if (jwtToken.isEmpty()) {
                 getToken(url)
             }
+            println("after token")
             val track: TrackSearch = try {
                 client.newCall(GET(url, headersBuilder().build()))
                     .await()
@@ -87,6 +83,16 @@ class KavitaApi(private val client: OkHttpClient) {
                 println("exception")
                 throw Exception()
             }
+            println("after_trackObtained")
+            val CurrentChapterId: ChapterDto = try {
+                client.newCall(GET("${getCleanedApiUrl(url)}/Reader/continue-point?seriesID=${getIdFromUrl(url)}", headersBuilder().build()))
+                    .await().parseAs<ChapterDto>()
+            } catch (e: Exception) {
+                println("exception in currentchapterID")
+                throw Exception()
+            }
+
+            println("CurrentChapterId")
             val progress = try {
                 client.newCall(
                     GET(getApiVolumesUrl(url), headersBuilder().build())
@@ -97,18 +103,62 @@ class KavitaApi(private val client: OkHttpClient) {
                 println("Exception")
                 throw Exception()
             }
+            println("progress")
             var totalChapters = 0
             for (volume in progress) for (chapter in volume.chapters) {
                 totalChapters += 1
             }
+            val prevChapterId: Int = try {
+                client.newCall(GET("${getCleanedApiUrl(url)}/Reader/prev-chapter?seriesId=${getIdFromUrl(url)}&volumeId=${CurrentChapterId.volumeId}&currentChapterId=${CurrentChapterId.id}", headersBuilder().build()))
+                    .await().parseAs<Int>()
+            } catch (e: Exception) {
+                println("exception")
+                throw Exception()
+            }
+            val request = GET("${getCleanedApiUrl(url)}/Series/chapter?chapterId=$prevChapterId", headersBuilder().build())
+
+            val prevChapterDto: ChapterDto = // try {
+                client.newCall(request)
+                    .await().parseAs<ChapterDto>()
+//            } catch (e: Exception) {
+//                println("exception in currentchapterID")
+//                throw Exception()
+//            }
+            var lastChapterReadRemote = prevChapterDto.number.toFloat()
+            println("prevChapter")
+            if (lastChapterReadRemote < 0) lastChapterReadRemote = 0.toFloat()
             track.apply {
                 cover_url = ""
                 tracking_url = url
                 total_chapters = totalChapters
+                last_chapter_read = lastChapterReadRemote
             }
         }
 
-//    suspend fun updateProgress(track: Track): Track {
+    suspend fun updateProgress(track: Track): Track {
+        if (jwtToken.isEmpty()) {
+            getToken(track.tracking_url)
+        }
+
+        val CurrentChapterId: ChapterDto = try {
+            client.newCall(GET("${getCleanedApiUrl(track.tracking_url)}/Reader/continue-point?seriesID=${getIdFromUrl(track.tracking_url)}", headersBuilder().build()))
+                .await()
+                .parseAs<ChapterDto>()
+        } catch (e: Exception) {
+            println("exception")
+            throw Exception()
+        }
+        val prevChapter: Float = try {
+            client.newCall(GET("${getCleanedApiUrl(track.tracking_url)}/Reader/prev-chapter?seriesId=${getIdFromUrl(track.tracking_url)}&volumeId=${CurrentChapterId.volumeId}&currentChapterId=${CurrentChapterId.id}", headersBuilder().build()))
+                .await().parseAs<Float>()
+        } catch (e: Exception) {
+            println("exception")
+            throw Exception()
+        }
+
+        println(prevChapter)
+        println(track.last_chapter_read)
+        TODO("Send new last chapter")
 //        val payload = if (track.tracking_url.contains("/api/v1/series/")) {
 //            json.encodeToString(ReadProgressUpdateV2Dto(track.last_chapter_read))
 //        } else {
@@ -121,14 +171,13 @@ class KavitaApi(private val client: OkHttpClient) {
 //                .build()
 //        )
 //            .await()
-//        return getTrackSearch(track.tracking_url)
-//    }
-
+        return getTrackSearch(track.tracking_url)
+    }
 
     private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(TrackManager.KAVITA).also {
         it.title = name
         it.summary = "this"
-        it.publishing_status = "Status"
+        it.publishing_status = "Currently reading"
     }
     private fun getApiVolumesUrl(url: String): String {
         return "${url.split("/api/").first()}/api/Series/volumes?seriesId=${getIdFromUrl(url)}"
