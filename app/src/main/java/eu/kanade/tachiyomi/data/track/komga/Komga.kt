@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.NoLoginTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.source.Source
 import okhttp3.Dns
 import okhttp3.OkHttpClient
 
@@ -40,7 +41,7 @@ class Komga(private val context: Context, id: Int) : TrackService(id), EnhancedT
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
             UNREAD -> getString(R.string.unread)
-            READING -> getString(R.string.currently_reading)
+            READING -> getString(R.string.reading)
             COMPLETED -> getString(R.string.completed)
             else -> ""
         }
@@ -59,7 +60,11 @@ class Komga(private val context: Context, id: Int) : TrackService(id), EnhancedT
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                track.status = READING
+                if (track.last_chapter_read.toInt() == track.total_chapters && track.total_chapters > 0) {
+                    track.status = COMPLETED
+                } else {
+                    track.status = READING
+                }
             }
         }
 
@@ -97,6 +102,16 @@ class Komga(private val context: Context, id: Int) : TrackService(id), EnhancedT
         try {
             api.getTrackSearch(manga.url)
         } catch (e: Exception) {
+            null
+        }
+
+    override fun isTrackFrom(track: Track, manga: Manga, source: Source?): Boolean =
+        track.tracking_url == manga.url && source?.let { accept(it) } == true
+
+    override fun migrateTrack(track: Track, manga: Manga, newSource: Source): Track? =
+        if (accept(newSource)) {
+            track.also { track.tracking_url = manga.url }
+        } else {
             null
         }
 }

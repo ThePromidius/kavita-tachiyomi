@@ -44,7 +44,6 @@
     <string name="action_sort_total">Total chapters</string>
     <string name="action_sort_last_read">Last read</string>
     <string name="action_sort_last_checked">Last checked</string>
-    <string name="action_sort_next_updated">Next expected update</string>
     <string name="action_sort_latest_chapter">Latest chapter</string>
     <string name="action_sort_chapter_fetch_date">Date fetched</string>
     <string name="action_sort_date_added">Date added</string>
@@ -119,13 +118,14 @@
     <string name="action_reset">Reset</string>
     <string name="action_undo">Undo</string>
     <string name="action_open_log">Open log</string>
-    <string name="action_show_errors">See full error details</string>
+    <string name="action_show_errors">Tap to see error details</string>
     <string name="action_create">Create</string>
     <string name="action_restore">Restore</string>
     <string name="action_webview_back">Back</string>
     <string name="action_webview_forward">Forward</string>
     <string name="action_webview_refresh">Refresh</string>
     <string name="action_start_downloading_now">Start downloading now</string>
+    <string name="action_faq_and_guides">FAQ and Guides</string>
 
     <!-- Operations -->
     <string name="loading">Loading…</string>
@@ -208,20 +208,22 @@
     <string name="pref_jump_to_chapters">Jump to chapters on open</string>
 
     <string name="pref_category_library_update">Global update</string>
-    <string name="pref_library_update_interval">Update frequency</string>
-    <string name="update_never">Manual</string>
+    <string name="pref_library_update_interval">Automatic updates</string>
+    <string name="update_never">Off</string>
     <string name="update_6hour">Every 6 hours</string>
     <string name="update_12hour">Every 12 hours</string>
     <string name="update_24hour">Daily</string>
     <string name="update_48hour">Every 2 days</string>
     <string name="update_72hour">Every 3 days</string>
     <string name="update_weekly">Weekly</string>
-    <string name="pref_library_update_prioritization">Update order</string>
-    <string name="pref_library_update_restriction">Update restrictions</string>
+    <string name="pref_library_update_restriction">Automatic updates device restrictions</string>
     <string name="connected_to_wifi">Only on Wi-Fi</string>
     <string name="charging">Charging</string>
     <string name="restrictions">Restrictions: %s</string>
-    <string name="pref_update_only_non_completed">Only update ongoing manga</string>
+    <string name="pref_library_update_manga_restriction">Library update restrictions</string>
+    <string name="only_update_restrictions">Only update: %s</string>
+    <string name="pref_update_only_completely_read">Completely read series</string>
+    <string name="pref_update_only_non_completed">Ongoing series</string>
     <string name="pref_library_update_show_tab_badge">Show unread count on Updates icon</string>
     <string name="pref_library_update_refresh_metadata">Automatically refresh metadata</string>
     <string name="pref_library_update_refresh_metadata_summary">Check for new cover and details when updating library</string>
@@ -383,20 +385,21 @@
       <!-- Downloads section -->
     <string name="pref_download_directory">Download location</string>
     <string name="pref_category_delete_chapters">Delete chapters</string>
-    <string name="pref_remove_after_marked_as_read">After marked as read</string>
-    <string name="pref_remove_after_read">Automatically after reading</string>
+    <string name="pref_remove_after_marked_as_read">After manually marked as read</string>
+    <string name="pref_remove_after_read">After reading automatically delete</string>
     <string name="pref_remove_bookmarked_chapters">Allow deleting bookmarked chapters</string>
     <string name="pref_remove_exclude_categories">Excluded categories</string>
     <string name="custom_dir">Custom location</string>
     <string name="disabled">Disabled</string>
     <string name="last_read_chapter">Last read chapter</string>
-    <string name="second_to_last">Second to last chapter</string>
-    <string name="third_to_last">Third to last chapter</string>
-    <string name="fourth_to_last">Fourth to last chapter</string>
-    <string name="fifth_to_last">Fifth to last chapter</string>
+    <string name="second_to_last">Second to last read chapter</string>
+    <string name="third_to_last">Third to last read chapter</string>
+    <string name="fourth_to_last">Fourth to last read chapter</string>
+    <string name="fifth_to_last">Fifth to last read chapter</string>
     <string name="pref_category_auto_download">Auto-download</string>
     <string name="pref_download_new">Download new chapters</string>
     <string name="pref_download_new_categories_details">Manga in excluded categories will not be downloaded even if they are also in included categories.</string>
+    <string name="save_chapter_as_cbz">Save as CBZ archive</string>
 
       <!-- Tracking section -->
     <string name="tracking_guide">Tracking guide</string>
@@ -422,9 +425,9 @@
     <string name="pref_backup_slots">Maximum backups</string>
     <string name="source_not_found_name">Source not found: %1$s</string>
     <string name="tracker_not_logged_in">Not logged in: %1$s</string>
+    <string name="backup_restore_invalid_uri">Error: empty URI</string>
     <string name="backup_created">Backup created</string>
     <string name="invalid_backup_file">Invalid backup file</string>
-    <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
     <string name="invalid_backup_file_missing_data">File is missing data.</string>
     <string name="invalid_backup_file_missing_manga">Backup does not contain any manga.</string>
     <string name="backup_restore_missing_sources">Missing sources:</string>
@@ -451,7 +454,7 @@
       <!-- Advanced section -->
     <string name="label_network">Network</string>
     <string name="pref_clear_cookies">Clear cookies</string>
-    <string name="pref_dns_over_https">DNS over HTTPS</string>
+    <string name="pref_dns_over_https">DNS over HTTPS (DoH)</string>
     <string name="requires_app_restart">Requires app restart to take effect</string>
     <string name="cookies_cleared">Cookies cleared</string>
     <string name="label_data">Data</string>
@@ -488,6 +491,7 @@
     <string name="whats_new">What\'s new</string>
     <string name="help_translate">Help translate</string>
     <string name="licenses">Open source licenses</string>
+    <string name="privacy_policy">Privacy policy</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="updated_version">Updated to v%1$s</string>
 
@@ -559,6 +563,9 @@
     <string name="unknown_author">Unknown author</string>
     <string name="unknown_status">Unknown status</string>
     <string name="licensed">Licensed</string>
+    <string name="publishing_finished">Publishing finished</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="on_hiatus">On hiatus</string>
     <string name="add_to_library">Add to library</string>
     <string name="in_library">In library</string>
     <string name="remove_from_library">Remove from library</string>
@@ -627,13 +634,11 @@
     <string name="add_tracking">Add tracking</string>
     <string name="unread">Unread</string>
     <string name="reading">Reading</string>
-    <string name="currently_reading">Currently reading</string>
     <string name="completed">Completed</string>
     <string name="dropped">Dropped</string>
     <string name="on_hold">On hold</string>
     <string name="paused">Paused</string>
     <string name="plan_to_read">Plan to read</string>
-    <string name="want_to_read">Want to read</string>
     <string name="repeating">Rereading</string>
     <string name="score">Score</string>
     <string name="title">Title</string>
@@ -734,6 +739,7 @@
     </plurals>
     <string name="notification_cover_update_failed">Failed to update cover</string>
     <string name="notification_first_add_to_library">Please add the manga to your library before doing this</string>
+    <string name="library_errors_help">For help on how to fix library update errors, see %1$s</string>
 
     <!-- File Picker Titles -->
     <string name="file_select_cover">Select cover image</string>
