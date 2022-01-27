@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.track.kavita
 
 import kotlinx.serialization.Serializable
-
 @Serializable
 data class SeriesDto(
     val id: Int,
@@ -13,7 +12,7 @@ data class SeriesDto(
     val pages: Int,
     val coverImageLocked: Boolean = true,
     val pagesRead: Int,
-    val userRating: Int,
+    val userRating: Int? = 0,
     val userReview: String? = "",
     val format: Int,
     val created: String? = "",
@@ -58,8 +57,10 @@ data class ProgressDto(
 )
 
 @Serializable
-data class prevChapterInt(
-    val number: Int
+data class PostUpdateChapterDto(
+    val seriesId: Int,
+    val chapterNumber: Float
+
 )
 
 @Serializable

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.kavita
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -55,16 +56,18 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
     override fun displayScore(track: Track): String = ""
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
-//        TODO("Update is still WIP")
+        Log.d("tachiyomi-[kavita][tracking]", "Inside update")
         if (track.status != Kavita.COMPLETED) {
             if (didReadChapter) {
                 track.status = Kavita.READING
+                print(track.last_chapter_read)
             }
         }
         return api.updateProgress(track)
     }
 
     override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
+        Log.d("tachiyomi-[kavita][tracking]", "Inside bind")
         return track
     }
 
@@ -73,6 +76,7 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
     }
 
     override suspend fun refresh(track: Track): Track {
+        Log.d("tachiyomi-[kavita][tracking]", "Inside refresh")
         val remoteTrack = api.getTrackSearch(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
         track.total_chapters = remoteTrack.total_chapters
@@ -95,6 +99,7 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
         try {
             api.getTrackSearch(manga.url)
         } catch (e: Exception) {
+            Log.e("tachiyomi-[kavita][tracking]", "Exception finding match", e)
             null
         }
 }
