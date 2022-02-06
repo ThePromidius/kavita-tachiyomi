@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.track.kavita
 
 import android.app.Application
 import android.content.SharedPreferences
-import android.util.Log
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -12,6 +11,8 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.lang.withIOContext
+import eu.kanade.tachiyomi.util.system.logcat
+import logcat.LogPriority
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -29,14 +30,8 @@ class KavitaApi(private val client: OkHttpClient) {
             .add("Content-Type", "application/json")
             .add("Authorization", "Bearer $jwtToken")
     }
-
-//    var LOG_TAG = "tachiyomi "
     private fun getKavitaPreferencesApiKey(apiUrl: String): String {
         var prefApiKey = ""
-
-//        var myUri = Uri.parse(apiUrl)
-//        var sourceId = myUri.getQueryParameter("sourceID")
-
         for (sourceId in 1..3) {
             val sourceSuffixID by lazy {
                 val key = "${"kavita_$sourceId"}/all/1" // Hardcoded versionID to 1
@@ -44,12 +39,10 @@ class KavitaApi(private val client: OkHttpClient) {
                 (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
                     .reduce(Long::or) and Long.MAX_VALUE
             }
-
             val preferences: SharedPreferences by lazy {
                 Injekt.get<Application>().getSharedPreferences("source_$sourceSuffixID", 0x0000)
             }
             val prefApiUrl = preferences.getString("APIURL", "")!!
-            val LOG_TAG = "[Tachiyomi][Tracking][Kavita]_${preferences.getString("customSourceName",sourceSuffixID.toString())!!.replace(' ','_')}"
 
             if (prefApiUrl.isNotEmpty()) {
                 if (prefApiUrl == getCleanedApiUrl(apiUrl)) {
@@ -65,14 +58,21 @@ class KavitaApi(private val client: OkHttpClient) {
 
     var apiUrl = ""
     private fun getCleanedApiUrl(url: String): String {
+        /**Returns "<kavita_IP-Domain>/api/" from given url,**/
         apiUrl = "${url.split("/api/").first()}/api"
         return apiUrl
     }
     private fun getToken(url: String) {
+        /**
+         * Uses url to compare against each source APIURL's to get the correct source prefference.
+         * Now having source preference we can do getString("APIKEY")
+         * Authenticates to get the token
+         * Saves the token in the var jwtToken
+         * **/
         val cleanedApiUrl = apiUrl
         val apiKey = getKavitaPreferencesApiKey(url)
         if (apiKey.isEmpty()) {
-            Log.e(LOG_TAG, "Could not get api key")
+            logcat(LogPriority.WARN) { "Could not get api key" }
             throw Exception("Could not load Api key")
         }
         val request = POST(
@@ -85,11 +85,11 @@ class KavitaApi(private val client: OkHttpClient) {
                 jwtToken = it.parseAs<AuthenticationDto>().token
             }
             if (it.code == 401) {
-                Log.e(LOG_TAG, "Unauthorized / api key not valid:\nCleaned api URL:${cleanedApiUrl}\nApi key is empty:${apiKey.isEmpty()}\n")
+                logcat(LogPriority.WARN) { "Unauthorized / api key not valid:\nCleaned api URL:${cleanedApiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
                 throw Exception("Unauthorized / api key not valid")
             }
             if (it.code == 500) {
-                Log.e(LOG_TAG, "Error fetching jwd token:\nCleaned api URL:${cleanedApiUrl}\nApi key is empty:${apiKey.isEmpty()}\n")
+                logcat(LogPriority.WARN) { "Error fetching jwd token:\nCleaned api URL:${cleanedApiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
                 throw Exception("Error fetching jwd token")
             }
         }
@@ -98,6 +98,7 @@ class KavitaApi(private val client: OkHttpClient) {
         return "${url.split("/api/").first()}/api/Series/volumes?seriesId=${getIdFromUrl(url)}"
     }
     private fun getIdFromUrl(url: String): Int {
+        /**Strips serie id from Url**/
         return url.split("/").last().toInt()
     }
     private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(TrackManager.KAVITA).also {
@@ -106,21 +107,27 @@ class KavitaApi(private val client: OkHttpClient) {
 //        it.publishing_status = "Reading"
     }
     private fun getTotalChapters(url: String): Int {
+        /**Returns total chapters in the series.
+         * Ignores volumes.
+         * Volumes consisting of 1 file treated as chapter
+         * **/
         val requestUrl = getApiVolumesUrl(url)
         try {
             val listVolumeDto = client.newCall(GET(requestUrl, headersBuilder().build()))
                 .execute()
                 .parseAs<List<VolumeDto>>()
-            var chapterCount = 0
-            for (volume in listVolumeDto) for (chapter in volume.chapters) chapterCount += 1
-            return chapterCount
+            var maxChapter = 0
+            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number.toInt() } == 0) return listVolumeDto.maxOf { it.number }
+
+            return maxChapter
         } catch (e: Exception) {
-            Log.e(LOG_TAG, "exception in getTotalChapters\nRequest:$requestUrl", e)
+            logcat(LogPriority.WARN, e) { "exception in getTotalChapters\nRequest:$requestUrl" }
             throw e
         }
     }
 
 //    private fun isValidKavitaVersion(): String {
+    /**Might be implemented so that people don't come to support because wrong kavita version**/
 //        val requestUrl = "$apiUrl/Server/server-info"
 //        try {
 //            val serverInfoDto = client.newCall(GET(requestUrl, headersBuilder().build()))
@@ -131,19 +138,19 @@ class KavitaApi(private val client: OkHttpClient) {
 //
 //            return serverInfoDto.kavitaVersion
 //
-//
 //        } catch (e: Exception) {
-//            Log.e(LOG_TAG, "exception in getTotalChapters\nRequest:$requestUrl", e)
+//            logcat(LogPriority.WARN,e) { "exception in getTotalChapters\nRequest:$requestUrl" }
 //            throw e
 //        }
 //    }
     private fun getLatestChapterRead(url: String): Float {
+        /**Gets latest chapter read from remote tracking**/
         var requestUrl = "$apiUrl/Reader/continue-point?seriesID=${getIdFromUrl(url)}"
         val currentChapterDto: ChapterDto = try {
             client.newCall(GET(requestUrl, headersBuilder().build()))
                 .execute().parseAs<ChapterDto>()
         } catch (e: Exception) {
-            Log.e(LOG_TAG, "exception in currentChapterDto\nRequest:$requestUrl", e)
+            logcat(LogPriority.WARN, e) { "exception in currentChapterDto\nRequest:$requestUrl" }
             throw e
         }
         requestUrl = "$apiUrl/Reader/prev-chapter?seriesId=${getIdFromUrl(url)}&volumeId=${currentChapterDto.volumeId}&currentChapterId=${currentChapterDto.id}"
@@ -151,8 +158,7 @@ class KavitaApi(private val client: OkHttpClient) {
             client.newCall(GET(requestUrl, headersBuilder().build()))
                 .execute().parseAs<Int>()
         } catch (e: Exception) {
-//            println("exception in prevChapterId")
-            Log.e(LOG_TAG, "[tachiyomi][Kavita]exception in prevChapterId\nRequest:$requestUrl", e)
+            logcat(LogPriority.WARN, e) { "[tachiyomi][Kavita]exception in prevChapterId\nRequest:$requestUrl" }
             throw e
         }
         if (prevChapterId == -1) {
@@ -163,8 +169,7 @@ class KavitaApi(private val client: OkHttpClient) {
             client.newCall(GET(requestUrl, headersBuilder().build()))
                 .execute().parseAs<ChapterDto>()
         } catch (e: Exception) {
-//            println("exception in prevChapterDto")
-            Log.e(LOG_TAG, "exception in prevChapterDto\nCould not get item\nRequest:$requestUrl", e)
+            logcat(LogPriority.WARN, e) { "exception in prevChapterDto\nCould not get item\nRequest:$requestUrl" }
             throw e
         }
         return prevChapterDto.number.toFloat()
@@ -186,6 +191,7 @@ class KavitaApi(private val client: OkHttpClient) {
                     cover_url = serieDto.thumbnail_url.toString()
                     tracking_url = url
                     total_chapters = getTotalChapters(url)
+                    title = ""
                     status = when (serieDto.pagesRead) {
                         serieDto.pages -> Kavita.COMPLETED
                         0 -> Kavita.UNREAD
@@ -194,7 +200,7 @@ class KavitaApi(private val client: OkHttpClient) {
                     last_chapter_read = getLatestChapterRead(url)
                 }
             } catch (e: Exception) {
-                Log.e(LOG_TAG, "Could not get item: $url", e)
+                logcat(LogPriority.WARN, e) { "Could not get item: $url" }
                 throw e
             }
         }

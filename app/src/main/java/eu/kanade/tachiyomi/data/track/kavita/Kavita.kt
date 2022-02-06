@@ -60,7 +60,6 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
         if (track.status != Kavita.COMPLETED) {
             if (didReadChapter) {
                 track.status = Kavita.READING
-                print(track.last_chapter_read)
             }
         }
         return api.updateProgress(track)
