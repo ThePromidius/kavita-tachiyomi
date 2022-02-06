@@ -21,8 +21,6 @@ import dev.chrisbanes.insetter.applyInsetter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.EmptyPreferenceDataStore
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.minusAssign
-import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.databinding.ExtensionDetailControllerBinding
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -35,8 +33,9 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.openInBrowser
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.util.preference.DSL
+import eu.kanade.tachiyomi.util.preference.minusAssign
 import eu.kanade.tachiyomi.util.preference.onChange
-import eu.kanade.tachiyomi.util.preference.preferenceCategory
+import eu.kanade.tachiyomi.util.preference.plusAssign
 import eu.kanade.tachiyomi.util.preference.switchPreference
 import eu.kanade.tachiyomi.util.preference.switchSettingsPreference
 import eu.kanade.tachiyomi.util.system.LocaleHelper
@@ -122,11 +121,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             .map { source -> LocaleHelper.getSourceDisplayName(source.lang, context) to source }
             .sortedWith(compareBy({ (_, source) -> !source.isEnabled() }, { (lang, _) -> lang.lowercase() }))
             .forEach { (lang, source) ->
-                val preferenceBlock = {
-                    sourceSwitchPreference(source, LocaleHelper.getSourceDisplayName(lang, context))
-                }
-
-                preferenceBlock()
+                sourceSwitchPreference(source, lang)
             }
     }
 
@@ -135,19 +130,11 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             .groupBy { (it as CatalogueSource).lang }
             .toSortedMap(compareBy { LocaleHelper.getSourceDisplayName(it, context) })
             .forEach { entry ->
-                val preferenceBlock = {
-                    entry.value
-                        .sortedWith(compareBy({ source -> !source.isEnabled() }, { source -> source.name.lowercase() }))
-                        .forEach { source ->
-                            sourceSwitchPreference(source, source.toString())
-                        }
-                }
-
-                preferenceCategory {
-                    title = LocaleHelper.getSourceDisplayName(entry.key, context)
-
-                    preferenceBlock()
-                }
+                entry.value
+                    .sortedWith(compareBy({ source -> !source.isEnabled() }, { source -> source.name.lowercase() }))
+                    .forEach { source ->
+                        sourceSwitchPreference(source, source.toString())
+                    }
             }
     }
 
@@ -196,12 +183,16 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.extension_details, menu)
 
-        menu.findItem(R.id.action_history).isVisible = presenter.extension?.isUnofficial == false
+        presenter.extension?.let { extension ->
+            menu.findItem(R.id.action_history).isVisible = !extension.isUnofficial
+            menu.findItem(R.id.action_faq_and_guides).isVisible = !extension.isUnofficial
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_history -> openCommitHistory()
+            R.id.action_history -> openChangelog()
+            R.id.action_faq_and_guides -> openReadme()
             R.id.action_enable_all -> toggleAllSources(true)
             R.id.action_disable_all -> toggleAllSources(false)
             R.id.action_clear_cookies -> clearCookies()
@@ -225,14 +216,41 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         }
     }
 
-    private fun openCommitHistory() {
-        val pkgName = presenter.extension!!.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
-        val pkgFactory = presenter.extension!!.pkgFactory
-        val url = when {
-            !pkgFactory.isNullOrEmpty() -> "$URL_EXTENSION_COMMITS/multisrc/src/main/java/eu/kanade/tachiyomi/multisrc/$pkgFactory"
-            else -> "$URL_EXTENSION_COMMITS/src/${pkgName.replace(".", "/")}"
+    private fun openChangelog() {
+        val extension = presenter.extension!!
+        val pkgName = extension.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
+        val pkgFactory = extension.pkgFactory
+        if (extension.hasChangelog) {
+            val url = createUrl(URL_EXTENSION_BLOB, pkgName, pkgFactory, "/CHANGELOG.md")
+            openInBrowser(url)
+            return
         }
+
+        // Falling back on GitHub commit history because there is no explicit changelog in extension
+        val url = createUrl(URL_EXTENSION_COMMITS, pkgName, pkgFactory)
         openInBrowser(url)
+    }
+
+    private fun openReadme() {
+        val extension = presenter.extension!!
+
+        if (!extension.hasReadme) {
+            openInBrowser("https://tachiyomi.org/help/faq/#extensions")
+            return
+        }
+
+        val pkgName = extension.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
+        val pkgFactory = extension.pkgFactory
+        val url = createUrl(URL_EXTENSION_BLOB, pkgName, pkgFactory, "/README.md")
+        openInBrowser(url)
+        return
+    }
+
+    private fun createUrl(url: String, pkgName: String, pkgFactory: String?, path: String = ""): String {
+        return when {
+            !pkgFactory.isNullOrEmpty() -> "$url/multisrc/src/main/java/eu/kanade/tachiyomi/multisrc/$pkgFactory$path"
+            else -> "$url/src/${pkgName.replace(".", "/")}$path"
+        }
     }
 
     private fun clearCookies() {
@@ -261,3 +279,4 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
 private const val PKGNAME_KEY = "pkg_name"
 private const val URL_EXTENSION_COMMITS = "https://github.com/tachiyomiorg/tachiyomi-extensions/commits/master"
+private const val URL_EXTENSION_BLOB = "https://github.com/tachiyomiorg/tachiyomi-extensions/blob/master"

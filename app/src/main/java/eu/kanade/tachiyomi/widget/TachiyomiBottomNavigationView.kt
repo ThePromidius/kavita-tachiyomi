@@ -20,7 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.util.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.applySystemAnimatorScale
 import kotlinx.coroutines.flow.launchIn
 import uy.kohesive.injekt.Injekt
@@ -89,7 +89,7 @@ class TachiyomiBottomNavigationView @JvmOverloads constructor(
      *
      * @param animate True if slide up should be animated
      */
-    fun slideUp(animate: Boolean = true) {
+    fun slideUp(animate: Boolean = true) = post {
         currentAnimator?.cancel()
         clearAnimation()
 
@@ -106,7 +106,7 @@ class TachiyomiBottomNavigationView @JvmOverloads constructor(
      *
      * @param animate True if slide down should be animated
      */
-    fun slideDown(animate: Boolean = true) {
+    fun slideDown(animate: Boolean = true) = post {
         currentAnimator?.cancel()
         clearAnimation()
 

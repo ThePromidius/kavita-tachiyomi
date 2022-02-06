@@ -82,7 +82,6 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
-            style="@style/Widget.Tachiyomi.TabLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
@@ -99,6 +98,12 @@
             app:layout_constraintTop_toBottomOf="@+id/tabs" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <eu.kanade.tachiyomi.widget.ActionModeWithToolbar
+        android:id="@+id/action_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
 
     <include
         android:id="@+id/fab_layout"
