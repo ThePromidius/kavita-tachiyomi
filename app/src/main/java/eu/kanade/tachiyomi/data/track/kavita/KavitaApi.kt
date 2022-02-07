@@ -143,6 +143,18 @@ class KavitaApi(private val client: OkHttpClient) {
 //            throw e
 //        }
 //    }
+    private fun getLatestChapterDto(url: String): ChapterDto {
+        var requestUrl = "$apiUrl/Reader/continue-point?seriesID=${getIdFromUrl(url)}"
+        val currentChapterDto: ChapterDto = try {
+            client.newCall(GET(requestUrl, headersBuilder().build()))
+                .execute().parseAs<ChapterDto>()
+        } catch (e: Exception) {
+            logcat(LogPriority.WARN, e) { "exception in currentChapterDto\nRequest:$requestUrl" }
+            throw e
+        }
+        return currentChapterDto
+    }
+
     private fun getLatestChapterRead(url: String): Float {
         /**Gets latest chapter read from remote tracking**/
         var requestUrl = "$apiUrl/Reader/continue-point?seriesID=${getIdFromUrl(url)}"
@@ -153,6 +165,12 @@ class KavitaApi(private val client: OkHttpClient) {
             logcat(LogPriority.WARN, e) { "exception in currentChapterDto\nRequest:$requestUrl" }
             throw e
         }
+
+//        if (currentChapterDto.pagesRead < currentChapterDto.pages) {
+//            return (currentChapterDto.number).toFloat()
+//        }
+
+
         requestUrl = "$apiUrl/Reader/prev-chapter?seriesId=${getIdFromUrl(url)}&volumeId=${currentChapterDto.volumeId}&currentChapterId=${currentChapterDto.id}"
         val prevChapterId: Int = try {
             client.newCall(GET(requestUrl, headersBuilder().build()))
@@ -161,6 +179,7 @@ class KavitaApi(private val client: OkHttpClient) {
             logcat(LogPriority.WARN, e) { "[tachiyomi][Kavita]exception in prevChapterId\nRequest:$requestUrl" }
             throw e
         }
+        // NOTE: I don't get this case (JOE)
         if (prevChapterId == -1) {
             return (-1).toFloat()
         }
@@ -187,11 +206,21 @@ class KavitaApi(private val client: OkHttpClient) {
 
                 val track = serieDto.toTrack()
 
+                var chapter = getLatestChapterDto(url)
+                var idEncoding = ""
+                if (chapter.number == "0" && chapter.range == "0") {
+                    // This is a volume
+                    idEncoding = "v" + chapter.volumeId
+                } else {
+                    idEncoding = "c" + chapter.id;
+                }
+
                 track.apply {
                     cover_url = serieDto.thumbnail_url.toString()
                     tracking_url = url
                     total_chapters = getTotalChapters(url)
-                    title = "Joe - This is the title"
+                    summary = idEncoding
+                    title = serieDto.name
                     status = when (serieDto.pagesRead) {
                         serieDto.pages -> Kavita.COMPLETED
                         0 -> Kavita.UNREAD
@@ -206,8 +235,9 @@ class KavitaApi(private val client: OkHttpClient) {
         }
 
     suspend fun updateProgress(track: Track): Track {
-        getCleanedApiUrl(track.tracking_url)
-        getToken(track.tracking_url)
+
+
+
         val requestUrl = "$apiUrl/Reader/mark-chapter-until-as-read?seriesId=${getIdFromUrl(track.tracking_url)}&chapterNumber=${track.last_chapter_read}"
         client.newCall(POST(requestUrl, headersBuilder().build(), "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())))
             .await()

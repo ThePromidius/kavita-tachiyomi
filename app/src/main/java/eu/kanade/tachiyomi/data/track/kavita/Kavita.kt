@@ -41,7 +41,7 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
             Kavita.UNREAD -> getString(R.string.unread)
-            Kavita.READING -> "Reading"
+            Kavita.READING -> getString(R.string.reading)
             Kavita.COMPLETED -> getString(R.string.completed)
             else -> ""
         }
