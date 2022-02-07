@@ -191,7 +191,7 @@ class KavitaApi(private val client: OkHttpClient) {
                     cover_url = serieDto.thumbnail_url.toString()
                     tracking_url = url
                     total_chapters = getTotalChapters(url)
-                    title = ""
+                    title = "Joe - This is the title"
                     status = when (serieDto.pagesRead) {
                         serieDto.pages -> Kavita.COMPLETED
                         0 -> Kavita.UNREAD

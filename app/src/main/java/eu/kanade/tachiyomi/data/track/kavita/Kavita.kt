@@ -11,7 +11,9 @@ import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.NoLoginTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import uy.kohesive.injekt.api.get
+import eu.kanade.tachiyomi.source.Source
+import okhttp3.Dns
+import okhttp3.OkHttpClient
 
 class Kavita(private val context: Context, id: Int) : TrackService(id), EnhancedTrackService, NoLoginTrackService {
 
@@ -20,10 +22,10 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
         const val READING = 2
         const val COMPLETED = 3
     }
-//    override val client: OkHttpClient =
-//        networkService.client.newBuilder()
-//            .dns(Dns.SYSTEM) // don't use DNS over HTTPS as it breaks IP addressing
-//            .build()
+    override val client: OkHttpClient =
+        networkService.client.newBuilder()
+            .dns(Dns.SYSTEM) // don't use DNS over HTTPS as it breaks IP addressing
+            .build()
 
     val api by lazy { KavitaApi(client) }
 
@@ -39,7 +41,7 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
             Kavita.UNREAD -> getString(R.string.unread)
-            Kavita.READING -> getString(R.string.currently_reading)
+            Kavita.READING -> "Reading"
             Kavita.COMPLETED -> getString(R.string.completed)
             else -> ""
         }
@@ -57,9 +59,14 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
 
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         Log.d("tachiyomi-[kavita][tracking]", "Inside update")
-        if (track.status != Kavita.COMPLETED) {
+        Log.d("tachiyomi-[kavita][tracking]", track.toString())
+        if (track.status != COMPLETED) {
             if (didReadChapter) {
-                track.status = Kavita.READING
+                if (track.last_chapter_read.toInt() == track.total_chapters && track.total_chapters > 0) {
+                    track.status = COMPLETED
+                } else {
+                    track.status = READING
+                }
             }
         }
         return api.updateProgress(track)
@@ -99,6 +106,16 @@ class Kavita(private val context: Context, id: Int) : TrackService(id), Enhanced
             api.getTrackSearch(manga.url)
         } catch (e: Exception) {
             Log.e("tachiyomi-[kavita][tracking]", "Exception finding match", e)
+            null
+        }
+
+    override fun isTrackFrom(track: Track, manga: Manga, source: Source?): Boolean =
+        track.tracking_url == manga.url && source?.let { accept(it) } == true
+
+    override fun migrateTrack(track: Track, manga: Manga, newSource: Source): Track? =
+        if (accept(newSource)) {
+            track.also { track.tracking_url = manga.url }
+        } else {
             null
         }
 }
