@@ -5,7 +5,16 @@
         android:id="@+id/action_history"
         android:icon="@drawable/ic_history_24dp"
         android:title="@string/whats_new"
-        app:iconTint="?attr/colorOnToolbar"
+        android:visible="false"
+        app:iconTint="?attr/colorOnSurface"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_faq_and_guides"
+        android:icon="@drawable/ic_help_24dp"
+        android:title="@string/action_faq_and_guides"
+        android:visible="false"
+        app:iconTint="?attr/colorOnSurface"
         app:showAsAction="ifRoom" />
 
     <item

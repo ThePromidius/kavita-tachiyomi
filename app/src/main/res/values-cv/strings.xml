@@ -47,7 +47,6 @@
     <string name="default_category_summary">Кашнинчех ыйтмалла</string>
     <string name="charging">Тулать</string>
     <string name="pref_library_update_restriction">Ҫӗнетни чарӑвӗсем</string>
-    <string name="pref_library_update_prioritization">Ҫӗнетни йӗрки</string>
     <string name="update_weekly">Кашни эрне</string>
     <string name="update_48hour">Кашни 2 кун</string>
     <string name="update_24hour">Кашни кун</string>
@@ -382,13 +381,11 @@
     <string name="title">Ят</string>
     <string name="score">Хаклав</string>
     <string name="repeating">Ҫӗнӗрен вулатӑп</string>
-    <string name="want_to_read">Вуласшӑн</string>
     <string name="plan_to_read">Вулӑп</string>
     <string name="paused">Чарнӑ</string>
     <string name="on_hold">Чарнӑ</string>
     <string name="dropped">Пӑрахнӑ</string>
     <string name="completed">Вӗҫленӗ</string>
-    <string name="currently_reading">Халь вулатӑп</string>
     <string name="reading">Вулатӑп</string>
     <string name="confirm_delete_chapters">Эсӗ суйланӑ сыпӑксене катертесшӗнех-и\?</string>
     <string name="download_unread">Вуламанине</string>
@@ -549,8 +546,6 @@
     <string name="spen_next_page">Маллали сыпӑк</string>
     <string name="spen_previous_page">Умӗнхи эл</string>
     <string name="migration_help_guide">Ҫӑл куҫ куҫарассипе пулӑшу</string>
-    <string name="invalid_backup_file_type">Тӗрӗс мар янтӑв файлӗ: %1$s
-\nФайлӗ .proto.gz е .json сӑмахсемпе вӗҫленмелле.</string>
     <string name="pref_category_nsfw_content">NSFW (18+) шалаш</string>
     <string name="file_picker_error">Файлсене суйламалли хушӑм тупӑнман</string>
     <string name="myanimelist_relogin">Тархасшӑн MAL-а ҫӗнӗрен кӗр</string>

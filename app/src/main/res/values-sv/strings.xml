@@ -320,7 +320,6 @@
     <string name="filter_mode_lighten">Ljusna</string>
     <string name="filter_mode_darken">Mörkna</string>
     <string name="label_help">Hjälp</string>
-    <string name="pref_library_update_prioritization">Uppdateringsordning</string>
     <string name="no_results_found">Inga resultat funna</string>
     <string name="migration_selection_prompt">Välj en källa att migrera ifrån</string>
     <string name="action_webview_back">Bakåt</string>
@@ -335,9 +334,7 @@
     <string name="logout_title">Logga ut från %1$s\?</string>
     <string name="logout">Logga ut</string>
     <string name="logout_success">Du är nu utloggad</string>
-    <string name="currently_reading">Läser</string>
     <string name="paused">Pausad</string>
-    <string name="want_to_read">Planerar att läsa</string>
     <string name="label_more">Mer</string>
     <string name="action_sort_latest_chapter">Senaste kapitel</string>
     <string name="action_view_chapters">Visa kapitel</string>
@@ -549,8 +546,6 @@
     <string name="spen_next_page">Nästa sida</string>
     <string name="spen_previous_page">Föregående sida</string>
     <string name="migration_help_guide">Migreringsguide för källor</string>
-    <string name="invalid_backup_file_type">Ogiltig säkerhetskopia: %1$s
-\nDet bör sluta med .proto.gz eller .json.</string>
     <string name="pref_category_nsfw_content">NSFW (18+) källor</string>
     <string name="pref_show_nsfw_source">Visa i källor och tilläggslistor</string>
     <string name="file_picker_error">Ingen filväljare-app hittades</string>
@@ -644,7 +639,6 @@
     <string name="theme_greenapple">Grönt äpple</string>
     <string name="theme_monet">Dynamisk</string>
     <string name="pref_app_theme">App-tema</string>
-    <string name="action_sort_next_updated">Nästa förväntade uppdatering</string>
     <string name="about_dont_kill_my_app">Vissa tillverkare har ytterligare appbegränsningar som dödar bakgrundstjänster. Denna webbplats har mer information om hur du åtgärdar det.</string>
     <string name="label_background_activity">Bakgrundsaktivitet</string>
     <string name="pref_lowest">Lägsta</string>

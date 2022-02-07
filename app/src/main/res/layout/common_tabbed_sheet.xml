@@ -8,11 +8,11 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@drawable/transparent_tabs_background">
 
         <!-- Remove background color so rounded sheet corners work -->
         <com.google.android.material.tabs.TabLayout
-            style="@style/Widget.Tachiyomi.TabLayout"
             android:id="@+id/tabs"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

@@ -39,13 +39,13 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     override fun getLogoColor() = Color.rgb(51, 37, 50)
 
     override fun getStatusList(): List<Int> {
-        return listOf(READING, PLAN_TO_READ, COMPLETED, ON_HOLD, DROPPED)
+        return listOf(READING, COMPLETED, ON_HOLD, DROPPED, PLAN_TO_READ)
     }
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
-            READING -> getString(R.string.currently_reading)
-            PLAN_TO_READ -> getString(R.string.want_to_read)
+            READING -> getString(R.string.reading)
+            PLAN_TO_READ -> getString(R.string.plan_to_read)
             COMPLETED -> getString(R.string.completed)
             ON_HOLD -> getString(R.string.on_hold)
             DROPPED -> getString(R.string.dropped)
@@ -80,7 +80,15 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun update(track: Track, didReadChapter: Boolean): Track {
         if (track.status != COMPLETED) {
             if (didReadChapter) {
-                track.status = READING
+                if (track.last_chapter_read.toInt() == track.total_chapters && track.total_chapters > 0) {
+                    track.status = COMPLETED
+                    track.finished_reading_date = System.currentTimeMillis()
+                } else {
+                    track.status = READING
+                    if (track.last_chapter_read == 1F) {
+                        track.started_reading_date = System.currentTimeMillis()
+                    }
+                }
             }
         }
 

@@ -5,7 +5,6 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.CheckBoxPreference
-import androidx.preference.DialogPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
 import androidx.preference.MultiSelectListPreference
@@ -66,19 +65,19 @@ inline fun PreferenceGroup.checkBoxPreference(block: (@DSL CheckBoxPreference).(
 }
 
 inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).() -> Unit): EditTextPreference {
-    return initThenAdd(EditTextPreference(context), block).also(::initDialog)
+    return initThenAdd(EditTextPreference(context), block)
 }
 
 inline fun PreferenceGroup.listPreference(block: (@DSL ListPreference).() -> Unit): ListPreference {
-    return initThenAdd(ListPreference(context), block).also(::initDialog)
+    return initThenAdd(ListPreference(context), block)
 }
 
 inline fun PreferenceGroup.intListPreference(block: (@DSL IntListPreference).() -> Unit): IntListPreference {
-    return initThenAdd(IntListPreference(context), block).also(::initDialog)
+    return initThenAdd(IntListPreference(context), block)
 }
 
 inline fun PreferenceGroup.multiSelectListPreference(block: (@DSL MultiSelectListPreference).() -> Unit): MultiSelectListPreference {
-    return initThenAdd(MultiSelectListPreference(context), block).also(::initDialog)
+    return initThenAdd(MultiSelectListPreference(context), block)
 }
 
 inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {
@@ -87,14 +86,6 @@ inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).
 
 inline fun PreferenceScreen.preferenceScreen(block: (@DSL PreferenceScreen).() -> Unit): PreferenceScreen {
     return addThenInit(preferenceManager.createPreferenceScreen(context), block)
-}
-
-fun initDialog(dialogPreference: DialogPreference) {
-    with(dialogPreference) {
-        if (dialogTitle == null) {
-            dialogTitle = title
-        }
-    }
 }
 
 inline fun <P : Preference> PreferenceGroup.add(p: P): P {
@@ -121,6 +112,17 @@ inline fun <P : Preference> PreferenceGroup.addThenInit(p: P, block: P.() -> Uni
         addPreference(this)
         block()
     }
+}
+
+inline fun <T> Preference.bindTo(preference: com.tfcporciuncula.flow.Preference<T>) {
+    key = preference.key
+    defaultValue = preference.defaultValue
+}
+
+inline fun <T> ListPreference.bindTo(preference: com.tfcporciuncula.flow.Preference<T>) {
+    key = preference.key
+    // ListPreferences persist values as strings, even when we're using our IntListPreference
+    defaultValue = preference.defaultValue.toString()
 }
 
 inline fun Preference.onClick(crossinline block: () -> Unit) {

@@ -112,7 +112,6 @@
     <string name="update_24hour">ყოველდღე</string>
     <string name="update_48hour">ყოველ 2 დღეში ერთხელ</string>
     <string name="update_weekly">ყოველ კვირა</string>
-    <string name="pref_library_update_prioritization">ბიბლიოთეკის განახლების რიგითობა</string>
     <string name="pref_library_update_restriction">ბიბლიოთეკის განახლების შეზღუდვები</string>
     <string name="charging">იტენება</string>
     <string name="pref_update_only_non_completed">მხოლოდ განაახლე მიმდინარე მანგა</string>
@@ -317,13 +316,11 @@
     <string name="manga_tracking_tab">თვალტყურის დევნება</string>
     <string name="add_tracking">თვალი ადევნე</string>
     <string name="reading">ვკითხულობ</string>
-    <string name="currently_reading">ამჟამად ვკითხულობ</string>
     <string name="completed">შესრულებულია</string>
     <string name="dropped">გადაგდებული</string>
     <string name="on_hold">ლოდინის რეჟიმში</string>
     <string name="paused">დაპაუზებული</string>
     <string name="plan_to_read">ვგეგმავ წაკითხვას</string>
-    <string name="want_to_read">მსურს წაკითხვა</string>
     <string name="repeating">თავიდან ვკითხულობ</string>
     <string name="score">შეფასება</string>
     <string name="title">სათაური</string>

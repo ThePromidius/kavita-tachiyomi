@@ -15,10 +15,12 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ExtensionControllerBinding
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.base.controller.withFadeTransaction
 import eu.kanade.tachiyomi.ui.browse.BrowseController
 import eu.kanade.tachiyomi.ui.browse.extension.details.ExtensionDetailsController
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -56,7 +58,8 @@ open class ExtensionController :
         return ExtensionPresenter()
     }
 
-    override fun createBinding(inflater: LayoutInflater) = ExtensionControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        ExtensionControllerBinding.inflate(inflater)
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
@@ -141,6 +144,7 @@ open class ExtensionController :
         }
 
         searchView.queryTextChanges()
+            .drop(1) // Drop first event after subscribed
             .filter { router.backstack.lastOrNull()?.controller == this }
             .onEach {
                 query = it.toString()
@@ -189,11 +193,27 @@ open class ExtensionController :
 
     private fun updateExtensionsList() {
         if (query.isNotBlank()) {
-            val extensionNames = query.split(",")
+            val queries = query.split(",")
             adapter?.updateDataSet(
                 extensions.filter {
-                    extensionNames.any { queriedName ->
-                        it.extension.name.contains(queriedName, ignoreCase = true)
+                    queries.any { query ->
+                        when (it.extension) {
+                            is Extension.Available -> {
+                                it.extension.sources.any {
+                                    it.name.contains(query, ignoreCase = true) ||
+                                        it.baseUrl.contains(query, ignoreCase = true) ||
+                                        it.id == query.toLongOrNull()
+                                } || it.extension.name.contains(query, ignoreCase = true)
+                            }
+                            is Extension.Installed -> {
+                                it.extension.sources.any {
+                                    it.name.contains(query, ignoreCase = true) ||
+                                        it.id == query.toLongOrNull() ||
+                                        if (it is HttpSource) { it.baseUrl.contains(query, ignoreCase = true) } else false
+                                } || it.extension.name.contains(query, ignoreCase = true)
+                            }
+                            is Extension.Untrusted -> it.extension.name.contains(query, ignoreCase = true)
+                        }
                     }
                 }
             )
