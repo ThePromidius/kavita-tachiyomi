@@ -170,7 +170,6 @@ class KavitaApi(private val client: OkHttpClient) {
 //            return (currentChapterDto.number).toFloat()
 //        }
 
-
         requestUrl = "$apiUrl/Reader/prev-chapter?seriesId=${getIdFromUrl(url)}&volumeId=${currentChapterDto.volumeId}&currentChapterId=${currentChapterDto.id}"
         val prevChapterId: Int = try {
             client.newCall(GET(requestUrl, headersBuilder().build()))
@@ -212,7 +211,7 @@ class KavitaApi(private val client: OkHttpClient) {
                     // This is a volume
                     idEncoding = "v" + chapter.volumeId
                 } else {
-                    idEncoding = "c" + chapter.id;
+                    idEncoding = "c" + chapter.id
                 }
 
                 track.apply {
@@ -235,9 +234,6 @@ class KavitaApi(private val client: OkHttpClient) {
         }
 
     suspend fun updateProgress(track: Track): Track {
-
-
-
         val requestUrl = "$apiUrl/Reader/mark-chapter-until-as-read?seriesId=${getIdFromUrl(track.tracking_url)}&chapterNumber=${track.last_chapter_read}"
         client.newCall(POST(requestUrl, headersBuilder().build(), "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())))
             .await()
