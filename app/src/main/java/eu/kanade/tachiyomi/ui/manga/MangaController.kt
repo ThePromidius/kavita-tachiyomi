@@ -48,6 +48,7 @@ import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaControllerBinding
+import eu.kanade.tachiyomi.network.HttpException
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -382,6 +383,8 @@ class MangaController :
         val fab = actionFab ?: return
         if (adapter.items.any { it.read }) {
             fab.text = context.getString(R.string.action_resume)
+        } else {
+            fab.text = context.getString(R.string.action_start)
         }
         if (adapter.items.any { !it.read }) {
             fab.show()
@@ -471,6 +474,12 @@ class MangaController :
     fun onFetchMangaInfoError(error: Throwable) {
         isRefreshingInfo = false
         updateRefreshing()
+
+        // Ignore early hints "errors" that aren't handled by OkHttp
+        if (error is HttpException && error.code == 103) {
+            return
+        }
+
         activity?.toast(error.message)
     }
 
@@ -890,15 +899,20 @@ class MangaController :
 
     private fun openChapter(chapter: Chapter, sharedElement: View? = null) {
         val activity = activity ?: return
-        val intent = ReaderActivity.newIntent(activity, presenter.manga, chapter)
         activity.apply {
+            val intent = ReaderActivity.newIntent(activity, presenter.manga, chapter)
             if (sharedElement != null) {
                 val activityOptions = ActivityOptions.makeSceneTransitionAnimation(
                     activity,
                     sharedElement,
                     ReaderActivity.SHARED_ELEMENT_NAME
                 )
-                startActivity(intent, activityOptions.toBundle())
+                startActivity(
+                    intent.apply {
+                        putExtra(ReaderActivity.EXTRA_IS_TRANSITION, true)
+                    },
+                    activityOptions.toBundle(),
+                )
             } else {
                 startActivity(intent)
             }

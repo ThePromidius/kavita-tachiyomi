@@ -30,6 +30,7 @@ import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.graphics.ColorUtils
+import androidx.core.transition.addListener
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -43,6 +44,7 @@ import com.google.android.material.slider.Slider
 import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import dev.chrisbanes.insetter.applyInsetter
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -110,6 +112,7 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         private const val ENABLED_BUTTON_IMAGE_ALPHA = 255
         private const val DISABLED_BUTTON_IMAGE_ALPHA = 64
 
+        const val EXTRA_IS_TRANSITION = "${BuildConfig.APPLICATION_ID}.READER_IS_TRANSITION"
         const val SHARED_ELEMENT_NAME = "reader_shared_element_root"
     }
 
@@ -158,15 +161,17 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         applyAppTheme(preferences)
 
         // Setup shared element transitions
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        findViewById<View>(android.R.id.content)?.let { contentView ->
-            contentView.transitionName = SHARED_ELEMENT_NAME
-            setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
-            window.sharedElementEnterTransition = buildContainerTransform(true)
-            window.sharedElementReturnTransition = buildContainerTransform(false)
+        if (intent.extras?.getBoolean(EXTRA_IS_TRANSITION) == true) {
+            window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+            findViewById<View>(android.R.id.content)?.let { contentView ->
+                contentView.transitionName = SHARED_ELEMENT_NAME
+                setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+                window.sharedElementEnterTransition = buildContainerTransform(true)
+                window.sharedElementReturnTransition = buildContainerTransform(false)
 
-            // Postpone custom transition until manga ready
-            postponeEnterTransition()
+                // Postpone custom transition until manga ready
+                postponeEnterTransition()
+            }
         }
 
         super.onCreate(savedInstanceState)
@@ -605,7 +610,14 @@ class ReaderActivity : BaseRxActivity<ReaderActivityBinding, ReaderPresenter>() 
         val newViewer = ReadingModeType.toViewer(presenter.getMangaReadingMode(), this)
 
         updateCropBordersShortcut()
-        setOrientation(presenter.getMangaOrientationType())
+        if (window.sharedElementEnterTransition is MaterialContainerTransform) {
+            // Wait until transition is complete to avoid crash on API 26
+            window.sharedElementEnterTransition.addListener(
+                onEnd = { setOrientation(presenter.getMangaOrientationType()) }
+            )
+        } else {
+            setOrientation(presenter.getMangaOrientationType())
+        }
 
         // Destroy previous viewer if there was one
         if (prevViewer != null) {

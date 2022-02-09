@@ -6,7 +6,7 @@ import android.os.Environment
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.preference.PreferenceManager
-import com.tfcporciuncula.flow.FlowSharedPreferences
+import com.fredporciuncula.flow.preferences.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -57,7 +57,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastAppUnlock() = flowPrefs.getLong("last_app_unlock", 0)
 
-    fun secureScreen() = flowPrefs.getBoolean("secure_screen", false)
+    fun secureScreen() = flowPrefs.getEnum("secure_screen_v2", Values.SecureScreenMode.INCOGNITO)
 
     fun hideNotificationContent() = prefs.getBoolean(Keys.hideNotificationContent, false)
 
