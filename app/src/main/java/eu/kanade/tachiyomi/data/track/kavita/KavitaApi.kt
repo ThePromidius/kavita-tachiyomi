@@ -79,7 +79,7 @@ class KavitaApi(private val client: OkHttpClient) {
         val request = POST(
             "$cleanedApiUrl/Plugin/authenticate?apiKey=$apiKey&pluginName=Tachiyomi-Kavita",
             headersBuilder().build(),
-            "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+            "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()),
         )
         client.newCall(request).execute().use {
             if (it.code == 200) {
@@ -104,7 +104,7 @@ class KavitaApi(private val client: OkHttpClient) {
     }
     private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(TrackManager.KAVITA).also {
         it.title = name
-        it.summary = "this is the summary"
+        it.summary = ""
     }
     private fun getTotalChapters(url: String): Int {
         /*Returns total chapters in the series.
@@ -118,7 +118,7 @@ class KavitaApi(private val client: OkHttpClient) {
                 .parseAs<List<VolumeDto>>()
             var volumeNumber = 0
             var maxChapterNumber = 0
-            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number.toInt() } == 0) volumeNumber++ else if (maxChapterNumber <volume.chapters.maxOf { it.number.toInt() }) maxChapterNumber = volume.chapters.maxOf { it.number.toInt() }
+            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number.toInt() } == 0) volumeNumber++ else if (maxChapterNumber < volume.chapters.maxOf { it.number.toInt() }) maxChapterNumber = volume.chapters.maxOf { it.number.toInt() }
 
 //            if (maxChapter == 0) {
 //                maxChapter = listVolumeDto.size
@@ -150,53 +150,25 @@ class KavitaApi(private val client: OkHttpClient) {
 //    }
 
     private fun getLatestChapterRead(url: String): Float {
-        /*Gets latest chapter read from remote tracking*/
-        var requestUrl = "$apiUrl/Reader/continue-point?seriesId=${getIdFromUrl(url)}"
-        val currentChapterDto: ChapterDto = try {
+        val serieId = getIdFromUrl(url)
+        val requestUrl = "$apiUrl/Tachiyomi/latest-chapter?seriesId=$serieId"
+        try {
             client.newCall(GET(requestUrl, headersBuilder().build()))
-                .execute().parseAs<ChapterDto>()
+                .execute().use {
+                    if (it.code == 200) {
+                        return it.parseAs<ChapterDto>().number.toFloat()
+                    }
+                    if (it.code == 204) {
+                        return 0F
+                    }
+                }
         } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "exception in currentChapterDto\nRequest:$requestUrl" }
+            logcat(
+                LogPriority.WARN, e,
+            ) { "exception in latest-chapter\nCould not get item\nRequest:$requestUrl" }
             throw e
         }
-        requestUrl = "$apiUrl/Reader/prev-chapter?seriesId=${getIdFromUrl(url)}&volumeId=${currentChapterDto.volumeId}&currentChapterId=${currentChapterDto.id}"
-        val prevChapterId: Int = try {
-            client.newCall(GET(requestUrl, headersBuilder().build()))
-                .execute().parseAs<Int>()
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "[tachiyomi][Kavita]exception in prevChapterId\nRequest:$requestUrl" }
-            throw e
-        }
-        if (prevChapterId == -1) {
-            return (-1).toFloat()
-        }
-        requestUrl = "$apiUrl/Series/chapter?chapterId=$prevChapterId"
-        val prevChapterDto: ChapterDto = try {
-            client.newCall(GET(requestUrl, headersBuilder().build()))
-                .execute().parseAs<ChapterDto>()
-        } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "exception in prevChapterDto\nCould not get item\nRequest:$requestUrl" }
-            throw e
-        }
-        var latestChapterRead = prevChapterDto.number.toFloat()
-        // If prevChapterDto.number == "0", this is a volume and not a chapter. Encoding needed
-        // We need volume number
-        if (latestChapterRead == 0F) {
-            val requestUrl = "$apiUrl/Series/volume?volumeId=${prevChapterDto.volumeId}"
-            val prevChapterVolumeDto: VolumeDto = try {
-                client.newCall(GET(requestUrl, headersBuilder().build()))
-                    .execute().parseAs<VolumeDto>()
-            } catch (e: Exception) {
-                logcat(
-                    LogPriority.WARN,
-                    e
-                ) { "exception in prevChapterDto\nCould not get item\nRequest:$requestUrl" }
-                throw e
-            }
-            latestChapterRead = prevChapterVolumeDto.number.toFloat() / 100
-        }
-
-        return latestChapterRead
+        return 0F
     }
 
     suspend fun getTrackSearch(url: String): TrackSearch =
@@ -205,7 +177,7 @@ class KavitaApi(private val client: OkHttpClient) {
             getToken(url)
             try {
                 val serieDto: SeriesDto =
-                    client.newCall(GET(url, headersBuilder().build()),)
+                    client.newCall(GET(url, headersBuilder().build()))
                         .await()
                         .parseAs<SeriesDto>()
 
@@ -231,7 +203,7 @@ class KavitaApi(private val client: OkHttpClient) {
         }
 
     suspend fun updateProgress(track: Track): Track {
-        val requestUrl = "$apiUrl/Reader/mark-chapter-until-as-read?seriesId=${getIdFromUrl(track.tracking_url)}&chapterNumber=${track.last_chapter_read}"
+        val requestUrl = "$apiUrl/Tachiyomi/mark-chapter-until-as-read?seriesId=${getIdFromUrl(track.tracking_url)}&chapterNumber=${track.last_chapter_read}"
         client.newCall(POST(requestUrl, headersBuilder().build(), "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())))
             .await()
         return getTrackSearch(track.tracking_url)
