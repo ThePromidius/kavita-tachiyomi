@@ -118,7 +118,11 @@ class KavitaApi(private val client: OkHttpClient) {
                 .parseAs<List<VolumeDto>>()
             var volumeNumber = 0
             var maxChapterNumber = 0
-            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number.toInt() } == 0) volumeNumber++ else if (maxChapterNumber < volume.chapters.maxOf { it.number.toInt() }) maxChapterNumber = volume.chapters.maxOf { it.number.toInt() }
+            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number.toFloat() } == 0f) {
+                volumeNumber++
+            } else if (maxChapterNumber < volume.chapters.maxOf { it.number.toFloat() }) {
+                maxChapterNumber = volume.chapters.maxOf { it.number.toFloat().toInt() }
+            }
 
 //            if (maxChapter == 0) {
 //                maxChapter = listVolumeDto.size
