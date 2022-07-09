@@ -23,7 +23,6 @@ import java.security.MessageDigest
 
 class KavitaApi(private val client: OkHttpClient) {
     var jwtToken = ""
-    var LOG_TAG = "[Tachiyomi][Tracking][Kavita]"
     private fun headersBuilder(): Headers.Builder {
         return Headers.Builder()
             .add("User-Agent", "Tachiyomi Kavita v${BuildConfig.VERSION_NAME}")
@@ -118,15 +117,12 @@ class KavitaApi(private val client: OkHttpClient) {
                 .parseAs<List<VolumeDto>>()
             var volumeNumber = 0
             var maxChapterNumber = 0
-            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number.toFloat() } == 0f) {
+            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number!!.toFloat() } == 0f) {
                 volumeNumber++
-            } else if (maxChapterNumber < volume.chapters.maxOf { it.number.toFloat() }) {
-                maxChapterNumber = volume.chapters.maxOf { it.number.toFloat().toInt() }
+            } else if (maxChapterNumber < volume.chapters.maxOf { it.number!!.toFloat() }) {
+                maxChapterNumber = volume.chapters.maxOf { it.number!!.toFloat().toInt() }
             }
 
-//            if (maxChapter == 0) {
-//                maxChapter = listVolumeDto.size
-//            }
             val returnMaxChapter = if (maxChapterNumber > volumeNumber) maxChapterNumber else volumeNumber
             return returnMaxChapter
         } catch (e: Exception) {
@@ -135,24 +131,6 @@ class KavitaApi(private val client: OkHttpClient) {
         }
     }
 
-//    private fun isValidKavitaVersion(): String {
-    /*Might be implemented so that people don't come to support because wrong kavita version*/
-//        val requestUrl = "$apiUrl/Server/server-info"
-//        try {
-//            val serverInfoDto = client.newCall(GET(requestUrl, headersBuilder().build()))
-//                .execute()
-//                .parseAs<ServerInfoDto>()
-//
-//
-//            return serverInfoDto.kavitaVersion
-//
-//
-//        } catch (e: Exception) {
-//        logcat(LogPriority.WARN,e) { "exception in getTotalChapters\nRequest:$requestUrl" }
-//            throw e
-//        }
-//    }
-
     private fun getLatestChapterRead(url: String): Float {
         val serieId = getIdFromUrl(url)
         val requestUrl = "$apiUrl/Tachiyomi/latest-chapter?seriesId=$serieId"
@@ -160,16 +138,14 @@ class KavitaApi(private val client: OkHttpClient) {
             client.newCall(GET(requestUrl, headersBuilder().build()))
                 .execute().use {
                     if (it.code == 200) {
-                        return it.parseAs<ChapterDto>().number.toFloat()
+                        return it.parseAs<ChapterDto>().number!!.replace(",", ".").toFloat()
                     }
                     if (it.code == 204) {
                         return 0F
                     }
                 }
         } catch (e: Exception) {
-            logcat(
-                LogPriority.WARN, e,
-            ) { "exception in latest-chapter\nCould not get item\nRequest:$requestUrl" }
+            logcat(LogPriority.WARN, e,) { "exception in latest-chapter\nCould not get item\nRequest:$requestUrl" }
             throw e
         }
         return 0F
