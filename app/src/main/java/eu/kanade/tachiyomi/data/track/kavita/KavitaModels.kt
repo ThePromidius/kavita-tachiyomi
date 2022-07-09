@@ -17,7 +17,7 @@ data class SeriesDto(
     val format: Int,
     val created: String? = "",
     val libraryId: Int,
-    val libraryName: String? = ""
+    val libraryName: String? = "",
 )
 
 @Serializable
@@ -30,21 +30,21 @@ data class VolumeDto(
     val lastModified: String,
     val created: String,
     val seriesId: Int,
-    val chapters: List<ChapterDto> = emptyList()
+    val chapters: List<ChapterDto> = emptyList(),
 )
 
 @Serializable
 data class ChapterDto(
-    val id: Int,
-    val range: String,
-    val number: String,
-    val pages: Int,
-    val isSpecial: Boolean,
-    val title: String,
-    val pagesRead: Int,
-    val coverImageLocked: Boolean,
-    val volumeId: Int,
-    val created: String
+    val id: Int? = -1,
+    val range: String? = "",
+    val number: String? = "-1",
+    val pages: Int? = 0,
+    val isSpecial: Boolean? = false,
+    val title: String? = "",
+    val pagesRead: Int? = 0,
+    val coverImageLocked: Boolean? = false,
+    val volumeId: Int? = -1,
+    val created: String? = "",
 )
 
 @Serializable
@@ -53,13 +53,13 @@ data class ProgressDto(
     val chapterId: Int,
     val pageNum: Int,
     val seriesId: Int,
-    val bookScrollId: String
+    val bookScrollId: String,
 )
 
 @Serializable
 data class PostUpdateChapterDto(
     val seriesId: Int,
-    val chapterNumber: Float
+    val chapterNumber: Float,
 
 )
 
@@ -67,5 +67,5 @@ data class PostUpdateChapterDto(
 data class AuthenticationDto(
     val username: String,
     val token: String,
-    val apiKey: String
+    val apiKey: String,
 )
