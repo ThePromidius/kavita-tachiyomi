@@ -46,9 +46,7 @@ class KavitaApi(private val client: OkHttpClient) {
 
             if (prefApiUrl.isNotEmpty()) {
                 if (prefApiUrl == getCleanedApiUrl(apiUrl)) {
-                    prefApiKey = Injekt.get<Application>()
-                        .getSharedPreferences("source_$sourceSuffixID", 0x0000)
-                        .getString("APIKEY", "")!!
+                    prefApiKey = preferences.getString("APIKEY", "")!!
                     break
                 }
             }
@@ -97,12 +95,12 @@ class KavitaApi(private val client: OkHttpClient) {
     }
     
     private fun getApiVolumesUrl(url: String): String {
-        return "${url.split("/api/").first()}/api/Series/volumes?seriesId=${getIdFromUrl(url)}"
+        return "${getCleanedApiUrl(url)}/Series/volumes?seriesId=${getIdFromUrl(url)}"
     }
     
     private fun getIdFromUrl(url: String): Int {
         /*Strips serie id from Url*/
-        return url.split("/").last().toInt()
+        return url.substringAfterLast("/").toInt()
     }
     
     private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(TrackManager.KAVITA).also {
@@ -122,10 +120,12 @@ class KavitaApi(private val client: OkHttpClient) {
                 .parseAs<List<VolumeDto>>()
             var volumeNumber = 0
             var maxChapterNumber = 0
-            for (volume in listVolumeDto) if (volume.chapters.maxOf { it.number!!.toFloat() } == 0f) {
-                volumeNumber++
-            } else if (maxChapterNumber < volume.chapters.maxOf { it.number!!.toFloat() }) {
-                maxChapterNumber = volume.chapters.maxOf { it.number!!.toFloat().toInt() }
+            for (volume in listVolumeDto) {
+                if (volume.chapters.maxOf { it.number!!.toFloat() } == 0f) {
+                    volumeNumber++
+                } else if (maxChapterNumber < volume.chapters.maxOf { it.number!!.toFloat() }) {
+                    maxChapterNumber = volume.chapters.maxOf { it.number!!.toFloat().toInt() }
+                }
             }
 
             return if (maxChapterNumber > volumeNumber) maxChapterNumber else volumeNumber
