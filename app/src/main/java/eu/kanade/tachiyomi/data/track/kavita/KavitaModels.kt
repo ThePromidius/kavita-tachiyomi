@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.track.kavita
 
 import kotlinx.serialization.Serializable
+
 @Serializable
 data class SeriesDto(
     val id: Int,
