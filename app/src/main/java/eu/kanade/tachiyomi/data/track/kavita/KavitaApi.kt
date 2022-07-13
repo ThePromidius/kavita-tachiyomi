@@ -62,6 +62,7 @@ class KavitaApi(private val client: OkHttpClient) {
         apiUrl = "${url.split("/api/").first()}/api"
         return apiUrl
     }
+    
     private fun getToken(url: String) {
         /*
          * Uses url to compare against each source APIURL's to get the correct custom source preference.
@@ -94,17 +95,21 @@ class KavitaApi(private val client: OkHttpClient) {
             }
         }
     }
+    
     private fun getApiVolumesUrl(url: String): String {
         return "${url.split("/api/").first()}/api/Series/volumes?seriesId=${getIdFromUrl(url)}"
     }
+    
     private fun getIdFromUrl(url: String): Int {
         /*Strips serie id from Url*/
         return url.split("/").last().toInt()
     }
+    
     private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(TrackManager.KAVITA).also {
         it.title = name
         it.summary = ""
     }
+    
     private fun getTotalChapters(url: String): Int {
         /*Returns total chapters in the series.
          * Ignores volumes.
@@ -123,8 +128,7 @@ class KavitaApi(private val client: OkHttpClient) {
                 maxChapterNumber = volume.chapters.maxOf { it.number!!.toFloat().toInt() }
             }
 
-            val returnMaxChapter = if (maxChapterNumber > volumeNumber) maxChapterNumber else volumeNumber
-            return returnMaxChapter
+            return if (maxChapterNumber > volumeNumber) maxChapterNumber else volumeNumber
         } catch (e: Exception) {
             logcat(LogPriority.WARN, e) { "Exception fetching Total Chapters\nRequest:$requestUrl" }
             throw e
