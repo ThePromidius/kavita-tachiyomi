@@ -49,22 +49,6 @@ data class ChapterDto(
 )
 
 @Serializable
-data class ProgressDto(
-    val volumeId: Int,
-    val chapterId: Int,
-    val pageNum: Int,
-    val seriesId: Int,
-    val bookScrollId: String,
-)
-
-@Serializable
-data class PostUpdateChapterDto(
-    val seriesId: Int,
-    val chapterNumber: Float,
-
-)
-
-@Serializable
 data class AuthenticationDto(
     val username: String,
     val token: String,
