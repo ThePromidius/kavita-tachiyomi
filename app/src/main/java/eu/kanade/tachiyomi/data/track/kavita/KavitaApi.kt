@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.SharedPreferences
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
@@ -23,6 +22,10 @@ import java.security.MessageDigest
 
 class KavitaApi(private val client: OkHttpClient) {
     var jwtToken = ""
+    var apiUrl = ""
+        set(value) {
+            field = "${value.split("/api/").first()}/api"
+        }
     private fun headersBuilder(): Headers.Builder {
         return Headers.Builder()
             .add("User-Agent", "Tachiyomi Kavita v${BuildConfig.VERSION_NAME}")
@@ -45,7 +48,7 @@ class KavitaApi(private val client: OkHttpClient) {
             val prefApiUrl = preferences.getString("APIURL", "")!!
 
             if (prefApiUrl.isNotEmpty()) {
-                if (prefApiUrl == getCleanedApiUrl(apiUrl)) {
+                if (prefApiUrl == apiUrl) {
                     prefApiKey = preferences.getString("APIKEY", "")!!
                     break
                 }
@@ -54,28 +57,20 @@ class KavitaApi(private val client: OkHttpClient) {
         return prefApiKey
     }
 
-    var apiUrl = ""
-    private fun getCleanedApiUrl(url: String): String {
-        /*Returns "<kavita_IP-Domain>/api/" from given url,*/
-        apiUrl = "${url.split("/api/").first()}/api"
-        return apiUrl
-    }
-    
-    private fun getToken(url: String) {
+    private fun getToken() {
         /*
          * Uses url to compare against each source APIURL's to get the correct custom source preference.
          * Now having source preference we can do getString("APIKEY")
          * Authenticates to get the token
          * Saves the token in the var jwtToken
          */
-        val cleanedApiUrl = apiUrl
-        val apiKey = getKavitaPreferencesApiKey(url)
+        val apiKey = getKavitaPreferencesApiKey(apiUrl)
         if (apiKey.isEmpty()) {
             logcat(LogPriority.WARN) { "Could not get api key" }
             throw Exception("Could not load Api key")
         }
         val request = POST(
-            "$cleanedApiUrl/Plugin/authenticate?apiKey=$apiKey&pluginName=Tachiyomi-Kavita",
+            "$apiUrl/Plugin/authenticate?apiKey=$apiKey&pluginName=Tachiyomi-Kavita",
             headersBuilder().build(),
             "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()),
         )
@@ -84,30 +79,25 @@ class KavitaApi(private val client: OkHttpClient) {
                 jwtToken = it.parseAs<AuthenticationDto>().token
             }
             if (it.code == 401) {
-                logcat(LogPriority.WARN) { "Unauthorized / api key not valid:\nCleaned api URL:${cleanedApiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
+                logcat(LogPriority.WARN) { "Unauthorized / api key not valid:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
                 throw Exception("Unauthorized / api key not valid")
             }
             if (it.code == 500) {
-                logcat(LogPriority.WARN) { "Error fetching jwd token:\nCleaned api URL:${cleanedApiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
+                logcat(LogPriority.WARN) { "Error fetching jwd token:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
                 throw Exception("Error fetching jwd token")
             }
         }
     }
-    
+
     private fun getApiVolumesUrl(url: String): String {
-        return "${getCleanedApiUrl(url)}/Series/volumes?seriesId=${getIdFromUrl(url)}"
+        return "$apiUrl/Series/volumes?seriesId=${getIdFromUrl(url)}"
     }
-    
+
     private fun getIdFromUrl(url: String): Int {
         /*Strips serie id from Url*/
         return url.substringAfterLast("/").toInt()
     }
-    
-    private fun SeriesDto.toTrack(): TrackSearch = TrackSearch.create(TrackManager.KAVITA).also {
-        it.title = name
-        it.summary = ""
-    }
-    
+
     private fun getTotalChapters(url: String): Int {
         /*Returns total chapters in the series.
          * Ignores volumes.
@@ -149,7 +139,7 @@ class KavitaApi(private val client: OkHttpClient) {
                     }
                 }
         } catch (e: Exception) {
-            logcat(LogPriority.WARN, e,) { "exception in latest-chapter\nCould not get item\nRequest:$requestUrl" }
+            logcat(LogPriority.WARN, e) { "exception in latest-chapter\nCould not get item\nRequest:$requestUrl" }
             throw e
         }
         return 0F
@@ -157,8 +147,8 @@ class KavitaApi(private val client: OkHttpClient) {
 
     suspend fun getTrackSearch(url: String): TrackSearch =
         withIOContext {
-            getCleanedApiUrl(url)
-            getToken(url)
+            apiUrl = url
+            getToken()
             try {
                 val serieDto: SeriesDto =
                     client.newCall(GET(url, headersBuilder().build()))
