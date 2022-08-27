@@ -11,8 +11,12 @@ import eu.kanade.tachiyomi.data.track.NoLoginTrackService
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.Source
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.Dns
 import okhttp3.OkHttpClient
+import uy.kohesive.injekt.injectLazy
 
 class Kavita(private val context: Context, id: Long) : TrackService(id), EnhancedTrackService, NoLoginTrackService {
 
@@ -21,6 +25,10 @@ class Kavita(private val context: Context, id: Long) : TrackService(id), Enhance
         const val READING = 2
         const val COMPLETED = 3
     }
+    private val json: Json by injectLazy()
+
+    private val interceptor by lazy { KavitaInterceptor(this) }
+
     override val client: OkHttpClient =
         networkService.client.newBuilder()
             .dns(Dns.SYSTEM)
@@ -112,4 +120,17 @@ class Kavita(private val context: Context, id: Long) : TrackService(id), Enhance
         } else {
             null
         }
+
+    fun saveToken(oauth: eu.kanade.tachiyomi.data.track.kavita.OAuth?) {
+        preferences.trackToken(this).set(json.encodeToString(oauth))
+    }
+
+
+    fun restoreToken(): OAuth? {
+        return try {
+            json.decodeFromString<OAuth>(preferences.trackToken(this).get())
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
