@@ -62,3 +62,9 @@ data class AuthenticationDto(
     val token: String,
     val apiKey: String,
 )
+
+data class SourceAuth(
+    var sourceId: Int,
+    var apiUrl: String = "",
+    var jwtToken: String = "",
+)
