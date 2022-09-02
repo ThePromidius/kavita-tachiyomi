@@ -13,6 +13,8 @@ import okhttp3.Dns
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
+import java.net.SocketTimeoutException
 
 class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor) {
     private val authClient = client.newBuilder().dns(Dns.SYSTEM).addInterceptor(interceptor).build()
@@ -32,19 +34,33 @@ class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor
             "$apiUrl/Plugin/authenticate?apiKey=$apiKey&pluginName=Tachiyomi-Kavita",
             body = "{}".toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull()),
         )
-        client.newCall(request).execute().use {
-            if (it.code == 200) {
-                return it.parseAs<AuthenticationDto>().token
+        try {
+            client.newCall(request).execute().use {
+                if (it.code == 200) {
+                    return it.parseAs<AuthenticationDto>().token
+                }
+                if (it.code == 401) {
+                    logcat(LogPriority.WARN) { "Unauthorized / api key not valid:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
+                    throw Exception("Unauthorized / api key not valid")
+                }
+                if (it.code == 500) {
+                    logcat(LogPriority.WARN) { "Error fetching jwd token:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
+                    throw Exception("Error fetching jwd token")
+                }
             }
-            if (it.code == 401) {
-                logcat(LogPriority.WARN) { "Unauthorized / api key not valid:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
-                throw Exception("Unauthorized / api key not valid")
+            // Not sure which one to cathc
+        } catch (e: SocketTimeoutException) {
+            logcat(LogPriority.WARN) {
+                "Could not fetch jwt token. Probably due to connectivity issue or the url '$apiUrl' is not available. Skipping"
             }
-            if (it.code == 500) {
-                logcat(LogPriority.WARN) { "Error fetching jwd token:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
-                throw Exception("Error fetching jwd token")
+            return null
+        } catch (e: Exception) {
+            logcat(LogPriority.ERROR) {
+                "Unhandled Exception fetching jwt token for url: '$apiUrl'"
             }
+            throw e
         }
+
         return null
     }
 

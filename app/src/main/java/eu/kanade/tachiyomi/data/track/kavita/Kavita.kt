@@ -128,13 +128,18 @@ class Kavita(private val context: Context, id: Long) : TrackService(id), Enhance
             }
             val prefApiUrl = preferences.getString("APIURL", "")!!
             if (prefApiUrl.isEmpty()) {
-                // Source not configured skip
+                // Source not configured. Skip
                 continue
             }
             val prefApiKey = preferences.getString("APIKEY", "")!!
+            val token = api.getNewToken(apiUrl = prefApiUrl, apiKey = prefApiKey)
+
+            if (token.isNullOrEmpty()) {
+                // Source is not accessible. Skip
+                continue
+            }
             authentication.apiUrl = prefApiUrl
-            authentication.jwtToken = api.getNewToken(apiUrl = prefApiUrl, apiKey = prefApiKey)
-                .toString()
+            authentication.jwtToken = token.toString()
         }
         authentications = oauth
     }
