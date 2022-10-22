@@ -5,7 +5,7 @@ import eu.kanade.tachiyomi.core.preference.PreferenceStore
 
 class NetworkPreferences(
     private val preferenceStore: PreferenceStore,
-    private val verboseLogging: Boolean = false
+    private val verboseLogging: Boolean = false,
 ) {
 
     fun verboseLogging(): Preference<Boolean> {
@@ -17,7 +17,6 @@ class NetworkPreferences(
     }
 
     fun defaultUserAgent(): Preference<String> {
-        return preferenceStore.getString("default_user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0")
+        return preferenceStore.getString("default_user_agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0")
     }
-
 }

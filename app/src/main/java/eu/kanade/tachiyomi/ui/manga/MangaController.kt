@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
@@ -14,11 +13,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.os.bundleOf
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.data.chapter.NoChaptersException
-import eu.kanade.domain.manga.model.toDbManga
 import eu.kanade.presentation.components.ChangeCategoryDialog
 import eu.kanade.presentation.components.ChapterDownloadAction
 import eu.kanade.presentation.components.DuplicateMangaDialog
@@ -27,7 +26,6 @@ import eu.kanade.presentation.manga.DownloadAction
 import eu.kanade.presentation.manga.MangaScreen
 import eu.kanade.presentation.manga.components.DeleteChaptersDialog
 import eu.kanade.presentation.manga.components.DownloadCustomAmountDialog
-import eu.kanade.presentation.util.calculateWindowWidthSizeClass
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -54,6 +52,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recent.history.HistoryController
 import eu.kanade.tachiyomi.ui.recent.updates.UpdatesController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.system.isTabletUi
 import eu.kanade.tachiyomi.util.system.logcat
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
@@ -114,10 +113,13 @@ class MangaController : FullComposeController<MangaPresenter> {
         val isHttpSource = remember { successState.source is HttpSource }
         val scope = rememberCoroutineScope()
 
+        val configuration = LocalConfiguration.current
+        val isTabletUi = remember { configuration.isTabletUi() } // won't survive config change
+
         MangaScreen(
             state = successState,
             snackbarHostState = snackbarHostState,
-            windowWidthSizeClass = calculateWindowWidthSizeClass(),
+            isTabletUi = isTabletUi,
             onBackClicked = router::popCurrentController,
             onChapterClicked = this::openChapter,
             onDownloadChapter = this::onDownloadChapters.takeIf { !successState.source.isLocalOrStub() },
@@ -161,6 +163,7 @@ class MangaController : FullComposeController<MangaPresenter> {
                 DeleteChaptersDialog(
                     onDismissRequest = onDismissRequest,
                     onConfirm = {
+                        presenter.toggleAllSelection(false)
                         deleteChapters(dialog.chapters)
                     },
                 )
@@ -195,17 +198,6 @@ class MangaController : FullComposeController<MangaPresenter> {
         }
     }
 
-    // Let Compose view handle this
-    override fun handleBack(): Boolean {
-        val dispatcher = (activity as? OnBackPressedDispatcherOwner)?.onBackPressedDispatcher ?: return false
-        return if (dispatcher.hasEnabledCallbacks()) {
-            dispatcher.onBackPressed()
-            true
-        } else {
-            false
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
         settingsSheet = ChaptersSettingsSheet(router, presenter)
         trackSheet = TrackSheet(this, (activity as MainActivity).supportFragmentManager)
@@ -227,7 +219,7 @@ class MangaController : FullComposeController<MangaPresenter> {
         val source = presenter.source as? HttpSource ?: return
 
         val url = try {
-            source.mangaDetailsRequest(manga.toDbManga()).url.toString()
+            source.getMangaUrl(manga.toSManga())
         } catch (e: Exception) {
             return
         }
@@ -237,12 +229,12 @@ class MangaController : FullComposeController<MangaPresenter> {
         startActivity(intent)
     }
 
-    fun shareManga() {
+    private fun shareManga() {
         val context = view?.context ?: return
         val manga = presenter.manga ?: return
         val source = presenter.source as? HttpSource ?: return
         try {
-            val url = source.mangaDetailsRequest(manga.toDbManga()).url.toString()
+            val url = source.getMangaUrl(manga.toSManga())
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, url)
@@ -256,13 +248,13 @@ class MangaController : FullComposeController<MangaPresenter> {
     private fun onFavoriteClick() {
         presenter.toggleFavorite(
             onRemoved = this::onFavoriteRemoved,
-            onAdded = { activity?.toast(activity?.getString(R.string.manga_added_library)) },
+            onAdded = { activity?.toast(R.string.manga_added_library) },
         )
     }
 
     private fun onFavoriteRemoved() {
         val context = activity ?: return
-        context.toast(activity?.getString(R.string.manga_removed_library))
+        context.toast(R.string.manga_removed_library)
         viewScope.launch {
             if (!presenter.hasDownloads()) return@launch
             val result = snackbarHostState.showSnackbar(
@@ -367,7 +359,7 @@ class MangaController : FullComposeController<MangaPresenter> {
 
     fun onFetchChaptersError(error: Throwable) {
         if (error is NoChaptersException) {
-            activity?.toast(activity?.getString(R.string.no_chapters_error))
+            activity?.toast(R.string.no_chapters_error)
         } else {
             activity?.toast(error.message)
         }
@@ -388,8 +380,7 @@ class MangaController : FullComposeController<MangaPresenter> {
                     }
                 }
                 ChapterDownloadAction.START_NOW -> {
-                    val chapterId = items.singleOrNull()?.chapter?.id ?: return@launch
-                    presenter.startDownloadingNow(chapterId)
+                    downloadChapters(items.map { it.chapter }, startNow = true)
                 }
                 ChapterDownloadAction.CANCEL -> {
                     val chapterId = items.singleOrNull()?.chapter?.id ?: return@launch
@@ -402,8 +393,13 @@ class MangaController : FullComposeController<MangaPresenter> {
         }
     }
 
-    private suspend fun downloadChapters(chapters: List<DomainChapter>) {
-        presenter.downloadChapters(chapters)
+    private suspend fun downloadChapters(chapters: List<DomainChapter>, startNow: Boolean = false) {
+        if (startNow) {
+            val chapterId = chapters.singleOrNull()?.id ?: return
+            presenter.startDownloadingNow(chapterId)
+        } else {
+            presenter.downloadChapters(chapters)
+        }
 
         if (!presenter.isFavoritedManga) {
             val result = snackbarHostState.showSnackbar(

@@ -3,13 +3,11 @@ package eu.kanade.presentation.browse.components
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
-import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Help
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -17,17 +15,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import eu.kanade.domain.library.model.LibraryDisplayMode
 import eu.kanade.presentation.browse.BrowseSourceState
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.AppBarActions
 import eu.kanade.presentation.components.DropdownMenu
+import eu.kanade.presentation.components.RadioMenuItem
 import eu.kanade.presentation.components.SearchToolbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.ui.library.setting.LibraryDisplayMode
 
 @Composable
 fun BrowseSourceToolbar(
@@ -38,8 +39,8 @@ fun BrowseSourceToolbar(
     navigateUp: () -> Unit,
     onWebViewClick: () -> Unit,
     onHelpClick: () -> Unit,
-    onSearch: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior,
+    onSearch: (String) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
     if (state.searchQuery == null) {
         BrowseSourceRegularToolbar(
@@ -54,12 +55,17 @@ fun BrowseSourceToolbar(
             scrollBehavior = scrollBehavior,
         )
     } else {
+        val cancelSearch = { state.searchQuery = null }
         BrowseSourceSearchToolbar(
             searchQuery = state.searchQuery!!,
             onSearchQueryChanged = { state.searchQuery = it },
-            navigateUp = { state.searchQuery = null },
+            placeholderText = stringResource(R.string.action_search_hint),
+            navigateUp = cancelSearch,
             onResetClick = { state.searchQuery = "" },
-            onSearchClick = onSearch,
+            onSearchClick = {
+                onSearch(it)
+                cancelSearch()
+            },
             scrollBehavior = scrollBehavior,
         )
     }
@@ -75,7 +81,7 @@ fun BrowseSourceRegularToolbar(
     onSearchClick: () -> Unit,
     onWebViewClick: () -> Unit,
     onHelpClick: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior,
+    scrollBehavior: TopAppBarScrollBehavior?,
 ) {
     AppBar(
         navigateUp = navigateUp,
@@ -91,7 +97,7 @@ fun BrowseSourceRegularToolbar(
                     ),
                     AppBar.Action(
                         title = stringResource(R.string.action_display_mode),
-                        icon = Icons.Filled.ViewModule,
+                        icon = if (displayMode == LibraryDisplayMode.List) Icons.Filled.ViewList else Icons.Filled.ViewModule,
                         onClick = { selectingDisplayMode = true },
                     ),
                     if (isLocalSource) {
@@ -113,42 +119,24 @@ fun BrowseSourceRegularToolbar(
                 expanded = selectingDisplayMode,
                 onDismissRequest = { selectingDisplayMode = false },
             ) {
-                DropdownMenuItem(
+                RadioMenuItem(
                     text = { Text(text = stringResource(R.string.action_display_comfortable_grid)) },
-                    onClick = { onDisplayModeChange(LibraryDisplayMode.ComfortableGrid) },
-                    trailingIcon = {
-                        if (displayMode == LibraryDisplayMode.ComfortableGrid) {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = "",
-                            )
-                        }
-                    },
-                )
-                DropdownMenuItem(
+                    isChecked = displayMode == LibraryDisplayMode.ComfortableGrid,
+                ) {
+                    onDisplayModeChange(LibraryDisplayMode.ComfortableGrid)
+                }
+                RadioMenuItem(
                     text = { Text(text = stringResource(R.string.action_display_grid)) },
-                    onClick = { onDisplayModeChange(LibraryDisplayMode.CompactGrid) },
-                    trailingIcon = {
-                        if (displayMode == LibraryDisplayMode.CompactGrid) {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = "",
-                            )
-                        }
-                    },
-                )
-                DropdownMenuItem(
+                    isChecked = displayMode == LibraryDisplayMode.CompactGrid,
+                ) {
+                    onDisplayModeChange(LibraryDisplayMode.CompactGrid)
+                }
+                RadioMenuItem(
                     text = { Text(text = stringResource(R.string.action_display_list)) },
-                    onClick = { onDisplayModeChange(LibraryDisplayMode.List) },
-                    trailingIcon = {
-                        if (displayMode == LibraryDisplayMode.List) {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = "",
-                            )
-                        }
-                    },
-                )
+                    isChecked = displayMode == LibraryDisplayMode.List,
+                ) {
+                    onDisplayModeChange(LibraryDisplayMode.List)
+                }
             }
         },
         scrollBehavior = scrollBehavior,
@@ -159,18 +147,25 @@ fun BrowseSourceRegularToolbar(
 fun BrowseSourceSearchToolbar(
     searchQuery: String,
     onSearchQueryChanged: (String) -> Unit,
+    placeholderText: String?,
     navigateUp: () -> Unit,
     onResetClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior,
+    onSearchClick: (String) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior?,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+
     SearchToolbar(
         searchQuery = searchQuery,
         onChangeSearchQuery = onSearchQueryChanged,
+        placeholderText = placeholderText,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(
             onSearch = {
-                onSearchClick()
+                onSearchClick(searchQuery)
+                focusManager.clearFocus()
+                keyboardController?.hide()
             },
         ),
         onClickCloseSearch = navigateUp,

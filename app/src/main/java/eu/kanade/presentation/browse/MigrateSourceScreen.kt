@@ -3,10 +3,8 @@ package eu.kanade.presentation.browse
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -34,28 +32,33 @@ import eu.kanade.presentation.components.BadgeGroup
 import eu.kanade.presentation.components.EmptyScreen
 import eu.kanade.presentation.components.LoadingScreen
 import eu.kanade.presentation.components.ScrollbarLazyColumn
+import eu.kanade.presentation.components.Scroller.STICKY_HEADER_KEY_PREFIX
 import eu.kanade.presentation.theme.header
-import eu.kanade.presentation.util.bottomNavPaddingValues
 import eu.kanade.presentation.util.horizontalPadding
 import eu.kanade.presentation.util.plus
+import eu.kanade.presentation.util.secondaryItemAlpha
 import eu.kanade.presentation.util.topPaddingValues
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.browse.migration.sources.MigrationSourcesPresenter
-import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.copyToClipboard
 
 @Composable
 fun MigrateSourceScreen(
     presenter: MigrationSourcesPresenter,
+    contentPadding: PaddingValues,
     onClickItem: (Source) -> Unit,
 ) {
     val context = LocalContext.current
     when {
         presenter.isLoading -> LoadingScreen()
-        presenter.isEmpty -> EmptyScreen(textResource = R.string.information_empty_library)
+        presenter.isEmpty -> EmptyScreen(
+            textResource = R.string.information_empty_library,
+            modifier = Modifier.padding(contentPadding),
+        )
         else ->
             MigrateSourceList(
                 list = presenter.items,
+                contentPadding = contentPadding,
                 onClickItem = onClickItem,
                 onLongClickItem = { source ->
                     val sourceId = source.id.toString()
@@ -72,6 +75,7 @@ fun MigrateSourceScreen(
 @Composable
 private fun MigrateSourceList(
     list: List<Pair<Source, Long>>,
+    contentPadding: PaddingValues,
     onClickItem: (Source) -> Unit,
     onLongClickItem: (Source) -> Unit,
     sortingMode: SetMigrateSorting.Mode,
@@ -80,9 +84,9 @@ private fun MigrateSourceList(
     onToggleSortingDirection: () -> Unit,
 ) {
     ScrollbarLazyColumn(
-        contentPadding = bottomNavPaddingValues + WindowInsets.navigationBars.asPaddingValues() + topPaddingValues,
+        contentPadding = contentPadding + topPaddingValues,
     ) {
-        stickyHeader(key = "header") {
+        stickyHeader(key = STICKY_HEADER_KEY_PREFIX) {
             Row(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.background)
@@ -98,7 +102,7 @@ private fun MigrateSourceList(
                 IconButton(onClick = onToggleSortingMode) {
                     when (sortingMode) {
                         SetMigrateSorting.Mode.ALPHABETICAL -> Icon(Icons.Outlined.SortByAlpha, contentDescription = stringResource(R.string.action_sort_alpha))
-                        SetMigrateSorting.Mode.TOTAL -> Icon(Icons.Outlined.Numbers, contentDescription = stringResource(R.string.action_sort_total))
+                        SetMigrateSorting.Mode.TOTAL -> Icon(Icons.Outlined.Numbers, contentDescription = stringResource(R.string.action_sort_count))
                     }
                 }
                 IconButton(onClick = onToggleSortingDirection) {
@@ -112,7 +116,7 @@ private fun MigrateSourceList(
 
         items(
             items = list,
-            key = { (source, _) -> source.id },
+            key = { (source, _) -> "migrate-${source.id}" },
         ) { (source, count) ->
             MigrateSourceItem(
                 modifier = Modifier.animateItemPlacement(),
@@ -145,7 +149,7 @@ private fun MigrateSourceItem(
                 Badge(text = "$count")
             }
         },
-        content = { source, showLanguageInContent ->
+        content = { _, sourceLangString ->
             Column(
                 modifier = Modifier
                     .padding(horizontal = horizontalPadding)
@@ -161,9 +165,10 @@ private fun MigrateSourceItem(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (showLanguageInContent) {
+                    if (sourceLangString != null) {
                         Text(
-                            text = LocaleHelper.getDisplayName(source.lang),
+                            modifier = Modifier.secondaryItemAlpha(),
+                            text = sourceLangString,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.bodySmall,
@@ -171,6 +176,7 @@ private fun MigrateSourceItem(
                     }
                     if (source.isStub) {
                         Text(
+                            modifier = Modifier.secondaryItemAlpha(),
                             text = stringResource(R.string.not_installed),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,

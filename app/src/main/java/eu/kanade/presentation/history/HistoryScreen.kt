@@ -1,9 +1,12 @@
 package eu.kanade.presentation.history
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.paging.LoadState
 import eu.kanade.domain.history.model.HistoryWithRelations
 import eu.kanade.presentation.components.EmptyScreen
 import eu.kanade.presentation.components.LoadingScreen
@@ -18,6 +21,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recent.history.HistoryPresenter
 import eu.kanade.tachiyomi.ui.recent.history.HistoryPresenter.Dialog
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.widget.TachiyomiBottomNavigationView
 import kotlinx.coroutines.flow.collectLatest
 import java.util.Date
 
@@ -39,20 +43,29 @@ fun HistoryScreen(
             )
         },
     ) { contentPadding ->
-        val items = presenter.getLazyHistory()
-        when {
-            items.loadState.refresh is LoadState.Loading && items.itemCount < 1 -> LoadingScreen()
-            items.loadState.refresh is LoadState.NotLoading && items.itemCount < 1 -> EmptyScreen(textResource = R.string.information_no_recent_manga)
-            else -> HistoryContent(
-                history = items,
-                contentPadding = contentPadding,
-                onClickCover = onClickCover,
-                onClickResume = onClickResume,
-                onClickDelete = { presenter.dialog = Dialog.Delete(it) },
-            )
+        val items by presenter.getHistory().collectAsState(initial = null)
+        val contentPaddingWithNavBar = TachiyomiBottomNavigationView.withBottomNavPadding(contentPadding)
+        items.let {
+            if (it == null) {
+                LoadingScreen()
+            } else if (it.isEmpty()) {
+                EmptyScreen(
+                    textResource = R.string.information_no_recent_manga,
+                    modifier = Modifier.padding(contentPaddingWithNavBar),
+                )
+            } else {
+                HistoryContent(
+                    history = it,
+                    contentPadding = contentPaddingWithNavBar,
+                    onClickCover = onClickCover,
+                    onClickResume = onClickResume,
+                    onClickDelete = { item -> presenter.dialog = Dialog.Delete(item) },
+                )
+            }
         }
-        LaunchedEffect(items.loadState.refresh) {
-            if (items.loadState.refresh is LoadState.NotLoading) {
+
+        LaunchedEffect(items) {
+            if (items != null) {
                 (presenter.view?.activity as? MainActivity)?.ready = true
             }
         }

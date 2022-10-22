@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.browse.source.browse
 
 import android.os.Bundle
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -52,8 +53,8 @@ open class BrowseSourceController(bundle: Bundle) :
 
         BrowseSourceScreen(
             presenter = presenter,
-            navigateUp = { router.popCurrentController() },
-            onFabClick = { filterSheet?.show() },
+            navigateUp = ::navigateUp,
+            openFilterSheet = { filterSheet?.show() },
             onMangaClick = { router.pushController(MangaController(it.id, true)) },
             onMangaLongClick = { manga ->
                 scope.launchIO {
@@ -90,6 +91,7 @@ open class BrowseSourceController(bundle: Bundle) :
                     onConfirm = {
                         presenter.changeMangaFavorite(dialog.manga)
                     },
+                    mangaToRemove = dialog.manga,
                 )
             }
             is Dialog.ChangeMangaCategory -> {
@@ -108,8 +110,21 @@ open class BrowseSourceController(bundle: Bundle) :
             null -> {}
         }
 
+        BackHandler(onBack = ::navigateUp)
+
         LaunchedEffect(presenter.filters) {
             initFilterSheet()
+        }
+    }
+
+    private fun navigateUp() {
+        when {
+            presenter.searchQuery != null -> presenter.searchQuery = null
+            presenter.isUserQuery -> {
+                val (_, filters) = presenter.currentFilter as BrowseSourcePresenter.Filter.UserInput
+                presenter.search(query = "", filters = filters)
+            }
+            else -> router.popCurrentController()
         }
     }
 
@@ -121,10 +136,10 @@ open class BrowseSourceController(bundle: Bundle) :
         filterSheet = SourceFilterSheet(
             activity!!,
             onFilterClicked = {
-                presenter.setSourceFilter(presenter.filters)
+                presenter.search(filters = presenter.filters)
             },
             onResetClicked = {
-                presenter.resetFilter()
+                presenter.reset()
                 filterSheet?.setFilters(presenter.filterItems)
             },
         )
@@ -138,8 +153,7 @@ open class BrowseSourceController(bundle: Bundle) :
      * @param newQuery the new query.
      */
     fun searchWithQuery(newQuery: String) {
-        presenter.searchQuery = newQuery
-        presenter.search()
+        presenter.search(newQuery)
     }
 
     /**
@@ -180,10 +194,9 @@ open class BrowseSourceController(bundle: Bundle) :
         }
 
         if (genreExists) {
-            filterSheet?.setFilters(presenter.filterItems)
+            filterSheet?.setFilters(defaultFilters.toItems())
 
-            presenter.searchQuery = ""
-            presenter.setFilter(defaultFilters)
+            presenter.search(filters = defaultFilters)
         } else {
             searchWithQuery(genreName)
         }

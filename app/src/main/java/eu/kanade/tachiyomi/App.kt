@@ -11,7 +11,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Looper
 import android.webkit.WebView
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -27,19 +26,21 @@ import coil.disk.DiskCache
 import coil.util.DebugLogger
 import eu.kanade.data.DatabaseHandler
 import eu.kanade.domain.DomainModule
+import eu.kanade.domain.base.BasePreferences
+import eu.kanade.domain.ui.UiPreferences
+import eu.kanade.domain.ui.model.setAppCompatDelegateThemeMode
+import eu.kanade.tachiyomi.crash.CrashActivity
+import eu.kanade.tachiyomi.crash.GlobalExceptionHandler
 import eu.kanade.tachiyomi.data.coil.DomainMangaKeyer
 import eu.kanade.tachiyomi.data.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.coil.MangaCoverKeyer
 import eu.kanade.tachiyomi.data.coil.MangaKeyer
 import eu.kanade.tachiyomi.data.coil.TachiyomiImageDecoder
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferenceValues
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.glance.UpdatesGridGlanceWidget
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.NetworkPreferences
 import eu.kanade.tachiyomi.ui.base.delegate.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.preference.asHotFlow
 import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import eu.kanade.tachiyomi.util.system.isDevFlavor
@@ -63,7 +64,7 @@ import java.security.Security
 
 class App : Application(), DefaultLifecycleObserver, ImageLoaderFactory {
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val basePreferences: BasePreferences by injectLazy()
     private val networkPreferences: NetworkPreferences by injectLazy()
 
     private val disableIncognitoReceiver = DisableIncognitoReceiver()
@@ -71,6 +72,8 @@ class App : Application(), DefaultLifecycleObserver, ImageLoaderFactory {
     @SuppressLint("LaunchActivityFromNotification")
     override fun onCreate() {
         super<Application>.onCreate()
+
+        GlobalExceptionHandler.initialize(applicationContext, CrashActivity::class.java)
 
         // TLS 1.3 support for Android < 10
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -93,7 +96,7 @@ class App : Application(), DefaultLifecycleObserver, ImageLoaderFactory {
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
         // Show notification to disable Incognito Mode when it's enabled
-        preferences.incognitoMode().changes()
+        basePreferences.incognitoMode().changes()
             .onEach { enabled ->
                 val notificationManager = NotificationManagerCompat.from(this)
                 if (enabled) {
@@ -120,16 +123,7 @@ class App : Application(), DefaultLifecycleObserver, ImageLoaderFactory {
             }
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
 
-        preferences.themeMode()
-            .asHotFlow {
-                AppCompatDelegate.setDefaultNightMode(
-                    when (it) {
-                        PreferenceValues.ThemeMode.light -> AppCompatDelegate.MODE_NIGHT_NO
-                        PreferenceValues.ThemeMode.dark -> AppCompatDelegate.MODE_NIGHT_YES
-                        PreferenceValues.ThemeMode.system -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-                    },
-                )
-            }.launchIn(ProcessLifecycleOwner.get().lifecycleScope)
+        setAppCompatDelegateThemeMode(Injekt.get<UiPreferences>().themeMode().get())
 
         // Updates widget update
         Injekt.get<DatabaseHandler>()
@@ -230,7 +224,7 @@ class App : Application(), DefaultLifecycleObserver, ImageLoaderFactory {
         private var registered = false
 
         override fun onReceive(context: Context, intent: Intent) {
-            preferences.incognitoMode().set(false)
+            basePreferences.incognitoMode().set(false)
         }
 
         fun register() {

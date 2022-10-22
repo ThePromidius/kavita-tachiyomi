@@ -27,7 +27,7 @@ android {
         applicationId = "eu.kanade.tachiyomi"
         minSdk = AndroidConfig.minSdk
         targetSdk = AndroidConfig.targetSdk
-        versionCode = 84
+        versionCode = 88
         versionName = "0.13.6"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
@@ -75,10 +75,20 @@ android {
             applicationIdSuffix = debugType.applicationIdSuffix
             matchingFallbacks.add("release")
         }
+        create("benchmark") {
+            initWith(getByName("release"))
+
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks.add("release")
+            isDebuggable = false
+            versionNameSuffix = "-benchmark"
+            applicationIdSuffix = ".benchmark"
+        }
     }
 
     sourceSets {
         getByName("preview").res.srcDirs("src/debug/res")
+        getByName("benchmark").res.srcDirs("src/debug/res")
     }
 
     flavorDimensions.add("default")
@@ -122,7 +132,6 @@ android {
     }
 
     lint {
-        disable.addAll(listOf("MissingTranslation", "ExtraTranslation"))
         abortOnError = false
         checkReleaseBuilds = false
     }
@@ -132,12 +141,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     sqldelight {
@@ -157,7 +166,6 @@ dependencies {
     implementation(compose.activity)
     implementation(compose.foundation)
     implementation(compose.material3.core)
-    implementation(compose.material3.windowsizeclass)
     implementation(compose.material3.adapter)
     implementation(compose.material.icons)
     implementation(compose.animation)
@@ -169,6 +177,7 @@ dependencies {
     implementation(compose.accompanist.flowlayout)
     implementation(compose.accompanist.pager.core)
     implementation(compose.accompanist.pager.indicators)
+    implementation(compose.accompanist.permissions)
 
     implementation(androidx.paging.runtime)
     implementation(androidx.paging.compose)
@@ -193,6 +202,7 @@ dependencies {
     implementation(androidx.recyclerview)
     implementation(androidx.viewpager)
     implementation(androidx.glance)
+    implementation(androidx.profileinstaller)
 
     implementation(androidx.bundles.lifecycle)
 
@@ -212,9 +222,6 @@ dependencies {
 
     // Data serialization (JSON, protobuf)
     implementation(kotlinx.bundles.serialization)
-
-    // JavaScript engine
-    implementation(libs.bundles.js.engine)
 
     // HTML parser
     implementation(libs.jsoup)
@@ -246,7 +253,6 @@ dependencies {
 
     // UI libraries
     implementation(libs.material)
-    implementation(libs.androidprocessbutton)
     implementation(libs.flexible.adapter.core)
     implementation(libs.flexible.adapter.ui)
     implementation(libs.photoview)
@@ -257,6 +263,8 @@ dependencies {
     implementation(libs.markwon)
     implementation(libs.aboutLibraries.compose)
     implementation(libs.cascade)
+    implementation(libs.numberpicker)
+    implementation(libs.bundles.voyager)
 
     // Conductor
     implementation(libs.bundles.conductor)
@@ -282,6 +290,15 @@ dependencies {
     implementation(libs.leakcanary.plumber)
 }
 
+androidComponents {
+    beforeVariants { variantBuilder ->
+        // Disables standardBenchmark
+        if (variantBuilder.buildType == "benchmark") {
+            variantBuilder.enable = variantBuilder.productFlavors.containsAll(listOf("default" to "dev"))
+        }
+    }
+}
+
 tasks {
     withType<Test> {
         useJUnitPlatform()
@@ -299,19 +316,19 @@ tasks {
         kotlinOptions.freeCompilerArgs += listOf(
             "-opt-in=coil.annotation.ExperimentalCoilApi",
             "-opt-in=com.google.accompanist.pager.ExperimentalPagerApi",
+            "-opt-in=com.google.accompanist.permissions.ExperimentalPermissionsApi",
+            "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-opt-in=androidx.compose.ui.ExperimentalComposeUiApi",
             "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-opt-in=androidx.compose.animation.ExperimentalAnimationApi",
             "-opt-in=androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi",
-            "-opt-in=androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi",
             "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-opt-in=kotlinx.coroutines.FlowPreview",
             "-opt-in=kotlinx.coroutines.InternalCoroutinesApi",
             "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
         )
     }
-
-
 
     preBuild {
         val ktlintTask = if (System.getenv("GITHUB_BASE_REF") == null) formatKotlin else lintKotlin

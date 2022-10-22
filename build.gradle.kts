@@ -11,9 +11,9 @@ buildscript {
 plugins {
     alias(androidx.plugins.application) apply false
     alias(androidx.plugins.library) apply false
+    alias(androidx.plugins.test) apply false
     alias(kotlinx.plugins.android) apply false
     alias(libs.plugins.kotlinter)
-    alias(libs.plugins.versionsx)
 }
 
 subprojects {

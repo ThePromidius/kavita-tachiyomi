@@ -2,6 +2,10 @@
 <resources>
     <string name="app_name" translatable="false">Tachiyomi</string>
 
+    <!-- Generic strings -->
+    <string name="on">On</string>
+    <string name="off">Off</string>
+
     <!-- Models -->
     <string name="name">Name</string>
     <string name="categories">Categories</string>
@@ -39,6 +43,7 @@
     <string name="action_filter_tracked">Tracked</string>
     <string name="action_filter_unread">Unread</string>
     <string name="action_filter_started">Started</string>
+    <!-- reserved for #4048 -->
     <string name="action_filter_empty">Remove filter</string>
     <string name="action_sort_alpha">Alphabetically</string>
     <string name="action_sort_count">Total manga</string>
@@ -50,6 +55,7 @@
     <string name="action_sort_chapter_fetch_date">Chapter fetch date</string>
     <string name="action_sort_date_added">Date added</string>
     <string name="action_search">Search</string>
+    <string name="action_search_hint">Search…</string>
     <string name="action_search_settings">Search settings</string>
     <string name="action_global_search">Global search</string>
     <string name="action_select_all">Select all</string>
@@ -58,11 +64,9 @@
     <string name="action_mark_as_unread">Mark as unread</string>
     <string name="action_mark_previous_as_read">Mark previous as read</string>
     <string name="action_download">Download</string>
-    <string name="action_download_unread">Download unread chapters</string>
     <string name="action_bookmark">Bookmark chapter</string>
     <string name="action_remove_bookmark">Unbookmark chapter</string>
     <string name="action_delete">Delete</string>
-    <string name="action_update">Update</string>
     <string name="action_update_library">Update library</string>
     <string name="action_enable_all">Enable all</string>
     <string name="action_disable_all">Disable all</string>
@@ -124,11 +128,11 @@
     <string name="action_share">Share</string>
     <string name="action_save">Save</string>
     <string name="action_reset">Reset</string>
+    <!-- missing undo feature after Compose rewrite #7454 -->
     <string name="action_undo">Undo</string>
     <string name="action_close">Close</string>
     <string name="action_open_log">Open log</string>
     <string name="action_show_errors">Tap to see details</string>
-    <string name="action_create">Create</string>
     <string name="action_restore">Restore</string>
     <string name="action_webview_back">Back</string>
     <string name="action_webview_forward">Forward</string>
@@ -154,6 +158,17 @@
     <string name="pref_category_advanced">Advanced</string>
     <string name="pref_category_about">About</string>
 
+    <string name="pref_general_summary">App language, notifications</string>
+    <string name="pref_appearance_summary">Theme, date &amp; time format</string>
+    <string name="pref_library_summary">Categories, global update</string>
+    <string name="pref_reader_summary">Reading mode, display, navigation</string>
+    <string name="pref_downloads_summary">Automatic download, download ahead</string>
+    <string name="pref_tracking_summary">One-way progress sync, enhanced sync</string>
+    <string name="pref_browse_summary">Sources, extensions, global search</string>
+    <string name="pref_backup_summary">Manual &amp; automatic backups</string>
+    <string name="pref_security_summary">App lock, secure screen</string>
+    <string name="pref_advanced_summary">Dump crash logs, battery optimizations</string>
+
       <!-- General section -->
     <string name="pref_category_theme">Theme</string>
     <string name="pref_theme_mode">Dark mode</string>
@@ -172,7 +187,6 @@
     <string name="theme_yotsuba">Yotsuba</string>
     <string name="theme_tidalwave">Tidal Wave</string>
     <string name="pref_dark_theme_pure_black">Pure black dark mode</string>
-    <string name="pref_category_navigation">Navigation</string>
     <string name="pref_side_nav_icon_alignment">Side navigation icon alignment</string>
     <string name="alignment_top">Top</string>
     <string name="alignment_center">Center</string>
@@ -294,9 +308,9 @@
     <string name="pref_fullscreen">Fullscreen</string>
     <string name="pref_show_navigation_mode">Show tap zones overlay</string>
     <string name="pref_show_navigation_mode_summary">Briefly show when reader is opened</string>
-    <string name="pref_dual_page_split">Dual page split</string>
-    <string name="pref_dual_page_invert">Invert dual page split placement</string>
-    <string name="pref_dual_page_invert_summary">If the placement of the dual page split doesn\'t match reading direction</string>
+    <string name="pref_dual_page_split">Split wide pages</string>
+    <string name="pref_dual_page_invert">Invert split page placement</string>
+    <string name="pref_dual_page_invert_summary">If the placement of the split wide pages don\'t match reading direction</string>
     <string name="pref_long_strip_split">Split tall images (BETA)</string>
     <string name="pref_cutout_short">Show content in cutout area</string>
     <string name="pref_page_transitions">Animate page transitions</string>
@@ -307,8 +321,6 @@
     <string name="pref_true_color">32-bit color</string>
     <string name="pref_true_color_summary">Reduces banding, but may impact performance</string>
     <string name="pref_crop_borders">Crop borders</string>
-    <string name="on">On</string>
-    <string name="off">Off</string>
     <string name="pref_custom_brightness">Custom brightness</string>
     <string name="pref_grayscale">Grayscale</string>
     <string name="pref_inverted_colors">Inverted</string>
@@ -363,7 +375,7 @@
     <string name="scale_type_fit_height">Fit height</string>
     <string name="scale_type_original_size">Original size</string>
     <string name="scale_type_smart_fit">Smart fit</string>
-    <string name="pref_navigate_pan">Navigate to pan</string>
+    <string name="pref_navigate_pan">Pan wide images when tapping</string>
     <string name="pref_landscape_zoom">Zoom landscape image</string>
     <string name="pref_zoom_start">Zoom start position</string>
     <string name="zoom_start_automatic">Automatic</string>
@@ -409,6 +421,7 @@
     <string name="pref_remove_bookmarked_chapters">Allow deleting bookmarked chapters</string>
     <string name="pref_remove_exclude_categories">Excluded categories</string>
     <string name="custom_dir">Custom location</string>
+    <string name="invalid_location">Invalid location: %s</string>
     <string name="disabled">Disabled</string>
     <string name="last_read_chapter">Last read chapter</string>
     <string name="second_to_last">Second to last read chapter</string>
@@ -453,8 +466,6 @@
     <string name="pref_backup_service_category">Automatic backups</string>
     <string name="pref_backup_interval">Backup frequency</string>
     <string name="pref_backup_slots">Maximum backups</string>
-    <string name="tracker_not_logged_in">Not logged in: %1$s</string>
-    <string name="backup_restore_invalid_uri">Error: empty URI</string>
     <string name="backup_created">Backup created</string>
     <string name="invalid_backup_file">Invalid backup file</string>
     <string name="invalid_backup_file_missing_manga">Backup does not contain any manga.</string>
@@ -486,6 +497,7 @@
     <string name="pref_dns_over_https">DNS over HTTPS (DoH)</string>
     <string name="pref_user_agent_string">Default user agent string</string>
     <string name="error_user_agent_string_blank">User agent string can not be blank</string>
+    <string name="error_user_agent_string_invalid">Invalid user agent string</string>
     <string name="pref_reset_user_agent_string">Reset default user agent string</string>
     <string name="requires_app_restart">Requires app restart to take effect</string>
     <string name="cookies_cleared">Cookies cleared</string>
@@ -500,7 +512,7 @@
     <string name="clear_database_source_item_count">%1$d non-library manga in database</string>
     <string name="clear_database_confirmation">Are you sure? Read chapters and progress of non-library manga will be lost</string>
     <string name="clear_database_completed">Entries deleted</string>
-    <string name="database_clean">Database clean</string>
+    <string name="database_clean">Nothing to clear</string>
     <string name="pref_clear_webview_data">Clear WebView data</string>
     <string name="webview_data_deleted">WebView data cleared</string>
     <string name="pref_refresh_library_covers">Refresh library covers</string>
@@ -560,7 +572,6 @@
     <string name="logout_title">Log out from %1$s?</string>
     <string name="logout">Log out</string>
     <string name="logout_success">You are now logged out</string>
-    <string name="invalid_login">Could not log in</string>
     <string name="unknown_error">Unknown error</string>
 
     <!-- Library fragment -->
@@ -572,6 +583,7 @@
     <string name="tabs_header">Tabs</string>
 
     <!-- Catalogue fragment -->
+    <!-- missing prompt after Compose rewrite #7901 -->
     <string name="no_more_results">No more results</string>
     <string name="no_results_found">No results found</string>
     <!-- Do not translate "WebView" -->
@@ -592,14 +604,11 @@
     <string name="local_filter_order_by">Order by</string>
     <string name="date">Date</string>
 
-    <!-- Manga activity -->
-    <string name="manga_not_in_db">This manga has been removed from the database.</string>
-
     <!-- Manga info fragment -->
-    <string name="description">Description</string>
     <string name="ongoing">Ongoing</string>
     <string name="unknown">Unknown</string>
     <string name="unknown_author">Unknown author</string>
+    <!-- reserved for #6163 -->
     <string name="unknown_status">Unknown status</string>
     <string name="licensed">Licensed</string>
     <string name="publishing_finished">Publishing finished</string>
@@ -607,8 +616,9 @@
     <string name="on_hiatus">On hiatus</string>
     <string name="add_to_library">Add to library</string>
     <string name="in_library">In library</string>
+    <!-- missing confirm menu after Compose rewrite #7901 -->
     <string name="remove_from_library">Remove from library</string>
-    <string name="manga_info_full_title_label">Title</string>
+    <string name="unknown_title">Unknown title</string>
     <string name="confirm_manga_add_duplicate">You have an entry in your library with the same name but from a different source (%1$s).\n\nDo you still wish to continue?</string>
     <string name="manga_added_library">Added to library</string>
     <string name="manga_removed_library">Removed from library</string>
@@ -632,7 +642,6 @@
     <string name="chapter_paused">Paused</string>
     <string name="show_title">Source title</string>
     <string name="show_chapter_number">Chapter number</string>
-    <string name="sorting_mode">Sorting mode</string>
     <string name="sort_by_source">By source</string>
     <string name="sort_by_number">By chapter number</string>
     <string name="sort_by_upload_date">By upload date</string>
@@ -650,7 +659,6 @@
     <string name="error_saving_cover">Error saving cover</string>
     <string name="error_sharing_cover">Error sharing cover</string>
     <string name="confirm_delete_chapters">Are you sure you want to delete the selected chapters?</string>
-    <string name="invalid_download_dir">Invalid download location</string>
     <string name="chapter_settings">Chapter settings</string>
     <string name="confirm_set_chapter_settings">Are you sure you want to save these settings as default?</string>
     <string name="also_set_chapter_settings_for_library">Also apply to all manga in my library</string>
@@ -697,14 +705,13 @@
     <string name="track_started_reading_date">Start date</string>
     <string name="track_finished_reading_date">Finish date</string>
     <string name="track_type">Type</string>
-    <string name="track_author">Author</string>
-    <string name="error_invalid_date_supplied">Invalid date supplied</string>
     <string name="myanimelist_relogin">Please login to MAL again</string>
     <string name="source_unsupported">Source is not supported</string>
     <string name="error_no_match">No match found</string>
 
     <!-- Category activity -->
     <string name="error_category_exists">A category with this name already exists!</string>
+    <!-- missing undo feature after Compose rewrite #7454 -->
     <string name="snack_categories_deleted">Categories deleted</string>
 
     <!-- Dialog option with checkbox view -->
@@ -722,7 +729,6 @@
     <string name="share_page_info">%1$s: %2$s, page %3$d</string>
     <string name="chapter_progress">Page: %1$d</string>
     <string name="no_next_chapter">Next chapter not found</string>
-    <string name="no_previous_chapter">Previous chapter not found</string>
     <string name="decode_image_error">The image couldn\'t be loaded</string>
     <string name="confirm_set_image_as_cover">Use this image as cover art?</string>
     <string name="pref_category_for_this_series">For this series</string>
@@ -770,6 +776,11 @@
     <string name="empty_screen">Well, this is awkward</string>
     <string name="not_installed">Not installed</string>
 
+    <!-- Crash screen -->
+    <string name="crash_screen_title">An Unexpected Error Occurred</string>
+    <string name="crash_screen_description">%s ran into an unexpected error. We suggest you screenshot this message, dump the crash logs, and then share it in our support channel on Discord.</string>
+    <string name="crash_screen_restart_application">Restart the application</string>
+
     <!-- Downloads activity and service -->
     <string name="download_queue_error">Couldn\'t download chapters. You can try again in the downloads section</string>
     <string name="download_insufficient_space">Couldn\'t download chapters due to low storage space</string>
@@ -804,6 +815,7 @@
     <string name="skipped_reason_completed">Skipped because series is complete</string>
     <string name="skipped_reason_not_caught_up">Skipped because there are unread chapters</string>
     <string name="skipped_reason_not_started">Skipped because no chapters are read</string>
+    <string name="skipped_reason_not_always_update">Skipped because series does not require updates</string>
 
     <!-- File Picker Titles -->
     <string name="file_select_cover">Select cover image</string>
@@ -813,6 +825,7 @@
     <!--UpdateCheck-->
     <string name="update_check_confirm">Download</string>
     <string name="update_check_open">Open on GitHub</string>
+    <!-- reserved for future use -->
     <string name="update_check_eol">This Android version is no longer supported</string>
     <string name="update_check_no_new_updates">No new updates available</string>
     <string name="update_check_look_for_updates">Searching for updates…</string>
@@ -875,5 +888,5 @@
     <!-- App widget -->
     <string name="appwidget_updates_description">See your recently updated manga</string>
     <string name="appwidget_unavailable_locked">Widget not available when app lock is enabled</string>
-    <string name="remove_manga">You are about to remove this manga from your library</string>
+    <string name="remove_manga">You are about to remove \"%s\" from your library</string>
 </resources>

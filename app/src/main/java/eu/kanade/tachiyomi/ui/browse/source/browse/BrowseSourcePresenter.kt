@@ -19,10 +19,13 @@ import androidx.paging.map
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.core.prefs.CheckboxState
 import eu.kanade.core.prefs.mapAsCheckboxState
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.category.interactor.GetCategories
 import eu.kanade.domain.category.interactor.SetMangaCategories
 import eu.kanade.domain.chapter.interactor.GetChapterByMangaId
+import eu.kanade.domain.chapter.interactor.SetMangaDefaultChapterFlags
 import eu.kanade.domain.chapter.interactor.SyncChaptersWithTrackServiceTwoWay
+import eu.kanade.domain.library.service.LibraryPreferences
 import eu.kanade.domain.manga.interactor.GetDuplicateLibraryManga
 import eu.kanade.domain.manga.interactor.GetManga
 import eu.kanade.domain.manga.interactor.InsertManga
@@ -30,6 +33,7 @@ import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.manga.model.toDbManga
 import eu.kanade.domain.manga.model.toMangaUpdate
 import eu.kanade.domain.source.interactor.GetRemoteManga
+import eu.kanade.domain.source.service.SourcePreferences
 import eu.kanade.domain.track.interactor.InsertTrack
 import eu.kanade.domain.track.model.toDomainTrack
 import eu.kanade.presentation.browse.BrowseSourceState
@@ -37,7 +41,6 @@ import eu.kanade.presentation.browse.BrowseSourceStateImpl
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.toDomainManga
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.EnhancedTrackService
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -61,18 +64,16 @@ import eu.kanade.tachiyomi.ui.browse.source.filter.TextItem
 import eu.kanade.tachiyomi.ui.browse.source.filter.TextSectionItem
 import eu.kanade.tachiyomi.ui.browse.source.filter.TriStateItem
 import eu.kanade.tachiyomi.ui.browse.source.filter.TriStateSectionItem
-import eu.kanade.tachiyomi.util.chapter.ChapterSettingsHelper
 import eu.kanade.tachiyomi.util.lang.launchIO
 import eu.kanade.tachiyomi.util.lang.withIOContext
+import eu.kanade.tachiyomi.util.lang.withNonCancellableContext
 import eu.kanade.tachiyomi.util.removeCovers
 import eu.kanade.tachiyomi.util.system.logcat
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -85,7 +86,9 @@ open class BrowseSourcePresenter(
     searchQuery: String? = null,
     private val state: BrowseSourceStateImpl = BrowseSourceState(searchQuery) as BrowseSourceStateImpl,
     private val sourceManager: SourceManager = Injekt.get(),
-    private val preferences: PreferencesHelper = Injekt.get(),
+    preferences: BasePreferences = Injekt.get(),
+    sourcePreferences: SourcePreferences = Injekt.get(),
+    private val libraryPreferences: LibraryPreferences = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val getRemoteManga: GetRemoteManga = Injekt.get(),
     private val getManga: GetManga = Injekt.get(),
@@ -93,6 +96,7 @@ open class BrowseSourcePresenter(
     private val getCategories: GetCategories = Injekt.get(),
     private val getChapterByMangaId: GetChapterByMangaId = Injekt.get(),
     private val setMangaCategories: SetMangaCategories = Injekt.get(),
+    private val setMangaDefaultChapterFlags: SetMangaDefaultChapterFlags = Injekt.get(),
     private val insertManga: InsertManga = Injekt.get(),
     private val updateManga: UpdateManga = Injekt.get(),
     private val insertTrack: InsertTrack = Injekt.get(),
@@ -101,7 +105,7 @@ open class BrowseSourcePresenter(
 
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged } }
 
-    var displayMode by preferences.sourceDisplayMode().asState()
+    var displayMode by sourcePreferences.sourceDisplayMode().asState()
 
     val isDownloadOnly: Boolean by preferences.downloadedOnly().asState()
     val isIncognitoMode: Boolean by preferences.incognitoMode().asState()
@@ -110,7 +114,7 @@ open class BrowseSourcePresenter(
     fun getColumnsPreferenceForCurrentOrientation(): State<GridCells> {
         val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
         return produceState<GridCells>(initialValue = GridCells.Adaptive(128.dp), isLandscape) {
-            (if (isLandscape) preferences.landscapeColumns() else preferences.portraitColumns())
+            (if (isLandscape) libraryPreferences.landscapeColumns() else libraryPreferences.portraitColumns())
                 .changes()
                 .collectLatest { columns ->
                     value = if (columns == 0) GridCells.Adaptive(128.dp) else GridCells.Fixed(columns)
@@ -151,21 +155,25 @@ open class BrowseSourcePresenter(
         }
     }
 
-    fun setFilter(filters: FilterList) {
-        state.filters = filters
-    }
-
-    fun resetFilter() {
+    fun reset() {
+        state.filters = source!!.getFilterList()
         if (currentFilter !is Filter.UserInput) return
-        state.currentFilter = (currentFilter as Filter.UserInput).copy(filters = source!!.getFilterList())
+        state.currentFilter = (currentFilter as Filter.UserInput).copy(filters = state.filters)
     }
 
-    fun search(query: String? = null) {
-        var new = Filter.valueOf(query ?: searchQuery ?: "")
-        if (new is Filter.UserInput && currentFilter is Filter.UserInput) {
-            new = new.copy(filters = currentFilter.filters)
+    fun search(query: String? = null, filters: FilterList? = null) {
+        Filter.valueOf(query ?: "").let {
+            if (it !is Filter.UserInput) {
+                state.currentFilter = it
+                return
+            }
         }
-        state.currentFilter = new
+
+        val input: Filter.UserInput = if (currentFilter is Filter.UserInput) currentFilter as Filter.UserInput else Filter.UserInput()
+        state.currentFilter = input.copy(
+            query = query ?: input.query,
+            filters = filters ?: input.filters,
+        )
     }
 
     override fun onCreate(savedState: Bundle?) {
@@ -206,17 +214,13 @@ open class BrowseSourcePresenter(
      */
     private suspend fun initializeManga(manga: DomainManga) {
         if (manga.thumbnailUrl != null || manga.initialized) return
-        withContext(NonCancellable) {
-            val db = manga.toDbManga()
+        withNonCancellableContext {
             try {
-                val networkManga = source!!.getMangaDetails(db.copy())
-                db.copyFrom(networkManga)
-                db.initialized = true
-                updateManga.await(
-                    db
-                        .toDomainManga()
-                        ?.toMangaUpdate()!!,
-                )
+                val networkManga = source!!.getMangaDetails(manga.toSManga())
+                val updatedManga = manga.copyFrom(networkManga)
+                    .copy(initialized = true)
+
+                updateManga.await(updatedManga.toMangaUpdate())
             } catch (e: Exception) {
                 logcat(LogPriority.ERROR, e)
             }
@@ -233,15 +237,15 @@ open class BrowseSourcePresenter(
             var new = manga.copy(
                 favorite = !manga.favorite,
                 dateAdded = when (manga.favorite) {
-                    true -> Date().time
-                    false -> 0
+                    true -> 0
+                    false -> Date().time
                 },
             )
 
             if (!new.favorite) {
                 new = new.removeCovers(coverCache)
             } else {
-                ChapterSettingsHelper.applySettingDefaults(manga.id)
+                setMangaDefaultChapterFlags.await(manga)
 
                 autoAddTrack(manga)
             }
@@ -257,7 +261,7 @@ open class BrowseSourcePresenter(
     fun addFavorite(manga: DomainManga) {
         presenterScope.launch {
             val categories = getCategories()
-            val defaultCategoryId = preferences.defaultCategory().get()
+            val defaultCategoryId = libraryPreferences.defaultCategory().get()
             val defaultCategory = categories.find { it.id == defaultCategoryId.toLong() }
 
             when {
@@ -266,7 +270,6 @@ open class BrowseSourcePresenter(
                     moveMangaToCategories(manga, defaultCategory)
 
                     changeMangaFavorite(manga)
-                    // activity.toast(activity.getString(R.string.manga_added_library))
                 }
 
                 // Automatic 'Default' or no categories
@@ -274,7 +277,6 @@ open class BrowseSourcePresenter(
                     moveMangaToCategories(manga)
 
                     changeMangaFavorite(manga)
-                    // activity.toast(activity.getString(R.string.manga_added_library))
                 }
 
                 // Choose a category
@@ -304,18 +306,6 @@ open class BrowseSourcePresenter(
                     logcat(LogPriority.WARN, e) { "Could not match manga: ${manga.title} with service $service" }
                 }
             }
-    }
-
-    /**
-     * Set the filter states for the current source.
-     *
-     * @param filters a list of active filters.
-     */
-    fun setSourceFilter(filters: FilterList) {
-        state.currentFilter = when (val filter = currentFilter) {
-            Filter.Latest, Filter.Popular -> Filter.UserInput(filters = filters)
-            is Filter.UserInput -> filter.copy(filters = filters)
-        }
     }
 
     /**

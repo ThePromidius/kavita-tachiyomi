@@ -1,17 +1,24 @@
 package eu.kanade.presentation.library.components
 
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import androidx.compose.ui.util.fastAny
+import eu.kanade.domain.library.model.LibraryManga
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 
 @Composable
 fun LibraryCoverOnlyGrid(
     items: List<LibraryItem>,
+    showDownloadBadges: Boolean,
+    showUnreadBadges: Boolean,
+    showLocalBadges: Boolean,
+    showLanguageBadges: Boolean,
     columns: Int,
+    contentPadding: PaddingValues,
     selection: List<LibraryManga>,
     onClick: (LibraryManga) -> Unit,
     onLongClick: (LibraryManga) -> Unit,
@@ -21,6 +28,7 @@ fun LibraryCoverOnlyGrid(
     LazyLibraryGrid(
         modifier = Modifier.fillMaxSize(),
         columns = columns,
+        contentPadding = contentPadding,
     ) {
         globalSearchItem(searchQuery, onGlobalSearchClicked)
 
@@ -30,7 +38,11 @@ fun LibraryCoverOnlyGrid(
         ) { libraryItem ->
             LibraryCoverOnlyGridItem(
                 item = libraryItem,
-                isSelected = libraryItem.manga in selection,
+                showDownloadBadge = showDownloadBadges,
+                showUnreadBadge = showUnreadBadges,
+                showLocalBadge = showLocalBadges,
+                showLanguageBadge = showLanguageBadges,
+                isSelected = selection.fastAny { it.id == libraryItem.libraryManga.id },
                 onClick = onClick,
                 onLongClick = onLongClick,
             )
@@ -41,32 +53,38 @@ fun LibraryCoverOnlyGrid(
 @Composable
 fun LibraryCoverOnlyGridItem(
     item: LibraryItem,
+    showDownloadBadge: Boolean,
+    showUnreadBadge: Boolean,
+    showLocalBadge: Boolean,
+    showLanguageBadge: Boolean,
     isSelected: Boolean,
     onClick: (LibraryManga) -> Unit,
     onLongClick: (LibraryManga) -> Unit,
 ) {
-    val manga = item.manga
+    val libraryManga = item.libraryManga
+    val manga = libraryManga.manga
     LibraryGridCover(
         modifier = Modifier
             .selectedOutline(isSelected)
             .combinedClickable(
                 onClick = {
-                    onClick(manga)
+                    onClick(libraryManga)
                 },
                 onLongClick = {
-                    onLongClick(manga)
+                    onLongClick(libraryManga)
                 },
             ),
         mangaCover = eu.kanade.domain.manga.model.MangaCover(
-            manga.id!!,
+            manga.id,
             manga.source,
             manga.favorite,
-            manga.thumbnail_url,
-            manga.cover_last_modified,
+            manga.thumbnailUrl,
+            manga.coverLastModified,
         ),
-        downloadCount = item.downloadCount,
-        unreadCount = item.unreadCount,
-        isLocal = item.isLocal,
-        language = item.sourceLanguage,
+        item = item,
+        showDownloadBadge = showDownloadBadge,
+        showUnreadBadge = showUnreadBadge,
+        showLocalBadge = showLocalBadge,
+        showLanguageBadge = showLanguageBadge,
     )
 }

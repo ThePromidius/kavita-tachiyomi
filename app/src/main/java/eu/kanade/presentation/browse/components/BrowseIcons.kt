@@ -49,7 +49,7 @@ fun SourceIcon(
         source.isStub && icon == null -> {
             Image(
                 imageVector = Icons.Default.Warning,
-                contentDescription = "",
+                contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
                 modifier = modifier.then(defaultModifier),
             )
@@ -57,14 +57,14 @@ fun SourceIcon(
         icon != null -> {
             Image(
                 bitmap = icon,
-                contentDescription = "",
+                contentDescription = null,
                 modifier = modifier.then(defaultModifier),
             )
         }
         else -> {
             Image(
                 painter = painterResource(id = R.mipmap.ic_local_source),
-                contentDescription = "",
+                contentDescription = null,
                 modifier = modifier.then(defaultModifier),
             )
         }
@@ -81,12 +81,11 @@ fun ExtensionIcon(
         is Extension.Available -> {
             AsyncImage(
                 model = extension.iconUrl,
-                contentDescription = "",
+                contentDescription = null,
                 placeholder = ColorPainter(Color(0x1F888888)),
                 error = rememberResourceBitmapPainter(id = R.drawable.cover_error),
                 modifier = modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .then(defaultModifier),
+                    .clip(RoundedCornerShape(4.dp)),
             )
         }
         is Extension.Installed -> {
@@ -94,20 +93,20 @@ fun ExtensionIcon(
             when (icon) {
                 Result.Error -> Image(
                     bitmap = ImageBitmap.imageResource(id = R.mipmap.ic_local_source),
-                    contentDescription = "",
-                    modifier = modifier.then(defaultModifier),
+                    contentDescription = null,
+                    modifier = modifier,
                 )
-                Result.Loading -> Box(modifier = modifier.then(defaultModifier))
+                Result.Loading -> Box(modifier = modifier)
                 is Result.Success -> Image(
                     bitmap = (icon as Result.Success<ImageBitmap>).value,
-                    contentDescription = "",
-                    modifier = modifier.then(defaultModifier),
+                    contentDescription = null,
+                    modifier = modifier,
                 )
             }
         }
         is Extension.Untrusted -> Image(
             imageVector = Icons.Default.Dangerous,
-            contentDescription = "",
+            contentDescription = null,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
             modifier = modifier.then(defaultModifier),
         )

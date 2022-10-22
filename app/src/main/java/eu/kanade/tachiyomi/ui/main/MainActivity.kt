@@ -31,7 +31,9 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import dev.chrisbanes.insetter.applyInsetter
+import eu.kanade.domain.library.service.LibraryPreferences
 import eu.kanade.domain.source.service.SourcePreferences
+import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -63,7 +65,7 @@ import eu.kanade.tachiyomi.util.lang.launchUI
 import eu.kanade.tachiyomi.util.preference.asHotFlow
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getThemeColor
-import eu.kanade.tachiyomi.util.system.isTablet
+import eu.kanade.tachiyomi.util.system.isTabletUi
 import eu.kanade.tachiyomi.util.system.logcat
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.setNavigationBarTransparentCompat
@@ -80,6 +82,8 @@ import uy.kohesive.injekt.injectLazy
 class MainActivity : BaseActivity() {
 
     private val sourcePreferences: SourcePreferences by injectLazy()
+    private val libraryPreferences: LibraryPreferences by injectLazy()
+    private val uiPreferences: UiPreferences by injectLazy()
 
     lateinit var binding: MainActivityBinding
 
@@ -113,10 +117,15 @@ class MainActivity : BaseActivity() {
         val didMigration = if (savedInstanceState == null) {
             Migrations.upgrade(
                 context = applicationContext,
-                preferences = preferences,
+                basePreferences = preferences,
+                uiPreferences = uiPreferences,
+                preferenceStore = Injekt.get(),
                 networkPreferences = Injekt.get(),
                 sourcePreferences = sourcePreferences,
                 securityPreferences = Injekt.get(),
+                libraryPreferences = libraryPreferences,
+                readerPreferences = Injekt.get(),
+                backupPreferences = Injekt.get(),
             )
         } else {
             false
@@ -149,7 +158,7 @@ class MainActivity : BaseActivity() {
         setSplashScreenExitAnimation(splashScreen)
 
         if (binding.sideNav != null) {
-            preferences.sideNavIconAlignment()
+            uiPreferences.sideNavIconAlignment()
                 .asHotFlow {
                     binding.sideNav?.menuGravity = when (it) {
                         1 -> Gravity.CENTER
@@ -255,7 +264,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        merge(preferences.showUpdatesNavBadge().changes(), preferences.unreadUpdatesCount().changes())
+        merge(libraryPreferences.showUpdatesNavBadge().changes(), libraryPreferences.unreadUpdatesCount().changes())
             .onEach { setUnreadUpdatesBadge() }
             .launchIn(lifecycleScope)
 
@@ -385,7 +394,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setUnreadUpdatesBadge() {
-        val updates = if (preferences.showUpdatesNavBadge().get()) preferences.unreadUpdatesCount().get() else 0
+        val updates = if (libraryPreferences.showUpdatesNavBadge().get()) libraryPreferences.unreadUpdatesCount().get() else 0
         if (updates > 0) {
             nav.getOrCreateBadge(R.id.nav_updates).apply {
                 number = updates
@@ -505,7 +514,7 @@ class MainActivity : BaseActivity() {
             lifecycleScope.launchUI { resetExitConfirmation() }
         } else if (backstackSize == 1 || !router.handleBack()) {
             // Regular back (i.e. closing the app)
-            if (preferences.autoClearChapterCache().get()) {
+            if (libraryPreferences.autoClearChapterCache().get()) {
                 chapterCache.clear()
             }
             super.onBackPressed()
@@ -601,7 +610,7 @@ class MainActivity : BaseActivity() {
         binding.appbar.isVisible = !isComposeController
         binding.controllerContainer.enableScrollingBehavior(!isComposeController)
 
-        if (!isTablet()) {
+        if (!isTabletUi()) {
             // Save lift state
             if (isPush) {
                 if (router.backstackSize > 1) {

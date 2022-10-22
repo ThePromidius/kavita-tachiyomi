@@ -5,8 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.security.UnlockActivity
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
@@ -25,8 +25,8 @@ interface SecureActivityDelegate {
     companion object {
         fun onApplicationCreated() {
             val lockDelay = Injekt.get<SecurityPreferences>().lockAppAfter().get()
-            if (lockDelay == 0) {
-                // Restore always active app lock
+            if (lockDelay <= 0) {
+                // Restore always active/on start app lock
                 // Delayed lock will be restored later on activity resume
                 lockState = LockState.ACTIVE
             }
@@ -39,8 +39,12 @@ interface SecureActivityDelegate {
                 preferences.lastAppClosed().set(Date().time)
             }
             if (!AuthenticatorUtil.isAuthenticating) {
-                lockState = if (preferences.lockAppAfter().get() >= 0) {
+                val lockAfter = preferences.lockAppAfter().get()
+                lockState = if (lockAfter > 0) {
                     LockState.PENDING
+                } else if (lockAfter == -1) {
+                    // Never lock on idle
+                    LockState.INACTIVE
                 } else {
                     LockState.ACTIVE
                 }
@@ -66,7 +70,7 @@ class SecureActivityDelegateImpl : SecureActivityDelegate, DefaultLifecycleObser
 
     private lateinit var activity: AppCompatActivity
 
-    private val preferences: PreferencesHelper by injectLazy()
+    private val preferences: BasePreferences by injectLazy()
     private val securityPreferences: SecurityPreferences by injectLazy()
 
     override fun registerSecureActivity(activity: AppCompatActivity) {

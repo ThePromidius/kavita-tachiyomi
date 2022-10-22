@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-fun Source.icon(): Drawable? = Injekt.get<ExtensionManager>().getAppIconForSource(this)
+fun Source.icon(): Drawable? = Injekt.get<ExtensionManager>().getAppIconForSource(this.id)
 
 fun Source.getPreferenceKey(): String = "source_$id"
 
@@ -28,4 +28,6 @@ fun Source.getNameForMangaInfo(): String {
     }
 }
 
-fun Source.isLocalOrStub(): Boolean = id == LocalSource.ID || this is SourceManager.StubSource
+fun Source.isLocal(): Boolean = id == LocalSource.ID
+
+fun Source.isLocalOrStub(): Boolean = isLocal() || this is SourceManager.StubSource

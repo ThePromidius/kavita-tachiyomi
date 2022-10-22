@@ -26,7 +26,6 @@
     <string name="action_bookmark">Hoofdstuk toevoegen aan bladwijzers</string>
     <string name="action_remove_bookmark">Hoofdstuk verwijderen uit bladwijzers</string>
     <string name="action_delete">Verwijderen</string>
-    <string name="action_update">Bijwerken</string>
     <string name="action_edit">Bewerken</string>
     <string name="action_add">Toevoegen</string>
     <string name="action_add_category">Categorie toevoegen</string>
@@ -56,7 +55,6 @@
     <string name="action_reset">Opnieuw instellen</string>
     <string name="action_undo">Ongedaan maken</string>
     <string name="action_open_log">Open log</string>
-    <string name="action_create">Aanmaken</string>
     <string name="action_restore">Herstellen</string>
     <string name="loading">Laden…</string>
     <string name="pref_category_general">Algemeen</string>
@@ -138,8 +136,6 @@
     <string name="updating_category">Categorie bijwerken</string>
     <string name="no_more_results">Geen verdere resultaten</string>
     <string name="local_source">Lokale bron</string>
-    <string name="manga_not_in_db">Deze manga is verwijderd uit de database.</string>
-    <string name="description">Beschrijving</string>
     <string name="unknown">Onbekend</string>
     <string name="remove_from_library">Verwijderen uit bibliotheek</string>
     <string name="display_mode_chapter">Hoofdstuk %1$s</string>
@@ -148,7 +144,6 @@
     <string name="chapter_paused">Gepauzeerd</string>
     <string name="show_title">Brontitel</string>
     <string name="show_chapter_number">Hoofdstuknummer</string>
-    <string name="sorting_mode">Sorteermodus</string>
     <string name="sort_by_source">Op bron</string>
     <string name="sort_by_number">Op hoofdstuknummer</string>
     <string name="manga_download">Downloaden</string>
@@ -173,7 +168,6 @@
     <string name="cover_updated">Omslagfoto bijgewerkt</string>
     <string name="chapter_progress">Pagina: %1$d</string>
     <string name="no_next_chapter">Volgend hoofdstuk niet gevonden</string>
-    <string name="no_previous_chapter">Vorig hoofdstuk niet gevonden</string>
     <string name="confirm_set_image_as_cover">Deze afbeelding als omslagfoto gebruiken\?</string>
     <string name="notification_new_chapters">Nieuwe hoofdstukken gevonden</string>
     <string name="notification_first_add_to_library">Voeg de manga eerst aan je bibliotheek toe voordat je dit doet</string>
@@ -241,7 +235,6 @@
     <string name="update_check_notification_download_error">Fout bij het downloaden</string>
     <string name="action_filter_bookmarked">Met bladwijzer</string>
     <string name="login_success">Ingelogd</string>
-    <string name="invalid_login">Kon niet inloggen</string>
     <string name="licensed">Gelicenseerd</string>
     <string name="plan_to_read">Van plan te lezen</string>
     <string name="action_global_search">Globaal zoeken</string>
@@ -276,7 +269,6 @@
     <string name="double_tap_anim_speed_0">Geen animatie</string>
     <string name="double_tap_anim_speed_normal">Normaal</string>
     <string name="double_tap_anim_speed_fast">Snel</string>
-    <string name="manga_info_full_title_label">Titel</string>
     <string name="manga_added_library">Toegevoegd aan bibliotheek</string>
     <string name="manga_removed_library">Verwijderd uit bibliotheek</string>
     <string name="copied_to_clipboard">Gekopieerd naar het klembord:
@@ -288,7 +280,6 @@
     <string name="track_status">Status</string>
     <string name="track_start_date">Gestart</string>
     <string name="track_type">Soort</string>
-    <string name="track_author">Auteur</string>
     <string name="transition_finished">Afgerond:</string>
     <string name="transition_current">Huidige:</string>
     <string name="transition_next">Volgende:</string>
@@ -316,7 +307,6 @@
     <string name="action_webview_forward">Vooruit</string>
     <string name="action_webview_refresh">Vernieuwen</string>
     <string name="pref_category_library">Bibliotheek</string>
-    <string name="invalid_download_dir">Ongeldige downloadlocatie</string>
     <string name="ext_obsolete">Verouderd</string>
     <string name="obsolete_extension_message">Deze extensie is niet meer beschikbaar.</string>
     <string name="pref_date_format">Datumformaat</string>
@@ -387,7 +377,6 @@
     <string name="notification_check_updates">Zoeken naar nieuwe hoofdstukken</string>
     <string name="recent_manga_time">Hfst. %1$s - %2$s</string>
     <string name="updating_library">Bibliotheek bijwerken</string>
-    <string name="error_invalid_date_supplied">Ongeldige datum opgegeven</string>
     <string name="add_tracking">Tracking toevoegen</string>
     <string name="manga_info_collapse">Minder</string>
     <string name="manga_info_expand">Meer</string>
@@ -458,7 +447,6 @@
     <string name="backup_restore_missing_sources">Missende bronnen:</string>
     <string name="invalid_backup_file_missing_manga">Back-up bevat geen manga.</string>
     <string name="invalid_backup_file">Ongeldig backupbestand</string>
-    <string name="tracker_not_logged_in">Niet ingelogd: %1$s</string>
     <string name="pref_show_reading_mode_summary">Laat huidige modus kort zien als lezer geopend wordt</string>
     <string name="pref_show_reading_mode">Toon leesmodus</string>
     <string name="pref_library_update_refresh_metadata">Metadata automatisch bijwerken</string>
@@ -488,7 +476,6 @@
     <string name="whats_new">Wat is er nieuw</string>
     <string name="pref_category_reading_mode">Leesmodus</string>
     <string name="pref_category_theme">Thema</string>
-    <string name="action_download_unread">Ongelezen hoofdstukken downloaden</string>
     <string name="action_sort_date_added">Datum toegevoegd</string>
     <plurals name="num_trackers">
         <item quantity="one">%d tracker</item>
@@ -548,7 +535,7 @@
     <string name="action_display_show_number_of_items">Aantal items tonen</string>
     <string name="action_filter_tracked">Getracked</string>
     <string name="right_and_left_nav">Rechts en links</string>
-    <string name="pref_dual_page_split">Dubbele pagina\'s opsplitsen</string>
+    <string name="pref_dual_page_split">Brede pagina\'s opsplitsen</string>
     <string name="backup_restore_content_full">Data uit het back-upbestand zal worden teruggezet.
 \n
 \nJe zult missende extensies opnieuw moeten installeren, en opnieuw moeten inloggen bij de trackingdiensten om deze weer te gebruiken.</string>
@@ -556,8 +543,8 @@
     <string name="nav_zone_left">Links</string>
     <string name="nav_zone_next">Volgende</string>
     <string name="nav_zone_prev">Vorige</string>
-    <string name="pref_dual_page_invert_summary">Als de plaats van de dubble-paginasplitsing niet overeenkomt met de leesrichting</string>
-    <string name="pref_dual_page_invert">Plaatsing van dubbele-paginasplitsing omkeren</string>
+    <string name="pref_dual_page_invert_summary">Als de paginasplitsing in de breedte niet overeenkomt met de leesrichting</string>
+    <string name="pref_dual_page_invert">paginasplitsing omkeren</string>
     <string name="pref_show_navigation_mode_summary">Laat de tikzones zien als de lezer wordt geopend</string>
     <string name="pref_show_navigation_mode">Navigatielayout als overlay laten zien</string>
     <string name="pref_dns_over_https">DNS over HTTPS (DoH)</string>
@@ -655,7 +642,7 @@
     <string name="ext_installer_legacy">Verouderd</string>
     <string name="ext_installer_shizuku_stopped">Shizuku wordt niet uitgevoerd</string>
     <string name="ext_installer_pref">Installatieprogramma</string>
-    <string name="backup_info">Het is erg aangeraden om automatische back-ups te gebruiken en deze op meerdere plekken te bewaren.</string>
+    <string name="backup_info">Je zou kopies van back-ups ook in andere plaatsen moeten hebben.</string>
     <string name="connected_to_wifi">Alleen via Wi-Fi</string>
     <string name="pref_verbose_logging">Uitgebreide logging</string>
     <string name="notification_size_warning">Waarschuwing: grote updates schaden bronnen en kunnen leiden tot slomere updates en verhoogd batterijgebruik</string>
@@ -679,7 +666,6 @@
     <string name="publishing_finished">Uitgave voltooid</string>
     <string name="cancelled">Geannuleerd</string>
     <string name="on_hiatus">Gepauzeerd</string>
-    <string name="backup_restore_invalid_uri">Fout: lege URI</string>
     <string name="action_faq_and_guides">Veelgestelde vragen en handleidingen</string>
     <string name="webtoon_side_padding_5">5%</string>
     <string name="confirm_manga_add_duplicate">Je hebt een manga in je bibliotheek met dezelfde naam maar van een andere bron (%1$s).
@@ -710,4 +696,34 @@
     <string name="download_notifier_split_failed">Kan gedownloade afbeelding niet splitsen</string>
     <string name="loader_rar5_error">RARv5-indeling wordt niet ondersteund</string>
     <string name="download_notifier_split_page_not_found">Pagina %d niet gevonden tijdens het splitsen</string>
+    <string name="internal_error">InternalError: Bekijk de crash logs voor meer informatie</string>
+    <string name="theme_lavender">Lavendel</string>
+    <string name="action_sort_last_manga_update">Laatst bijgewerkte manga</string>
+    <string name="action_remove_everything">Alles verwijderen</string>
+    <string name="delete_category_confirmation">Wenst u categorie \"%s\" te verwijderen\?</string>
+    <string name="delete_category">Categorie verwijderen</string>
+    <string name="action_close">Sluiten</string>
+    <string name="theme_tidalwave">Vloedgolf</string>
+    <string name="disabled_nav">Uitgeschakeld</string>
+    <string name="network_not_metered">Alleen op ongelimiteerd netwerk</string>
+    <string name="auto_download_while_reading">Automatisch downloaden tijdens het lezen</string>
+    <string name="ext_info_language">Taal</string>
+    <string name="multi_lang">Meedere</string>
+    <string name="ext_info_age_rating">Classificatie per leeftijd</string>
+    <string name="pref_long_strip_split">Grote afbeeldingen splitsen (BETA)</string>
+    <string name="ext_info_version">Versie</string>
+    <string name="battery_not_low">Wanneer de batterij niet leeg is</string>
+    <string name="pref_app_language">Taal van de applicatie</string>
+    <string name="empty_backup_error">Geen bibliotheek inzendingen om te backuppen</string>
+    <string name="action_sort_unread_count">Ongelezen aantal</string>
+    <string name="download_ahead_info">Werkt alleen bij vermeldingen in de bibliotheek en als het huidige hoofdstuk en het volgende al gedownload zijn</string>
+    <string name="pref_user_agent_string">Standaard \'user-agent-string\'</string>
+    <string name="pref_duplicate_pinned_sources">Laat gedupliceerde vastgezette bronnen zien</string>
+    <string name="pref_duplicate_pinned_sources_summary">Herhaal vastgezetten bronnen in hun respectieve taal groepen</string>
+    <plurals name="next_unread_chapters">
+        <item quantity="one">Volgende ongelezen hoofdstuk</item>
+        <item quantity="other">Volgende aantal %d ongelezen hoofdstukken</item>
+    </plurals>
+    <string name="action_search_hint">Zoek…</string>
+    <string name="missing_storage_permission">Opslag bevoegdheden niet verleent</string>
 </resources>

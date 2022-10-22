@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.network
 
 import android.content.Context
-import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
 import eu.kanade.tachiyomi.network.interceptor.Http103Interceptor
 import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
@@ -70,6 +69,6 @@ class NetworkHelper(context: Context) {
     }
 
     val defaultUserAgent by lazy {
-        preferences.defaultUserAgent().get()
+        preferences.defaultUserAgent().get().trim()
     }
 }

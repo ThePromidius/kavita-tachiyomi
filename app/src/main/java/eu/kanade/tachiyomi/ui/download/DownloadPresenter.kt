@@ -11,16 +11,12 @@ import eu.kanade.tachiyomi.util.system.logcat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.LogPriority
 import uy.kohesive.injekt.injectLazy
 
-/**
- * Presenter of [DownloadController].
- */
 class DownloadPresenter : BasePresenter<DownloadController>() {
 
     val downloadManager: DownloadManager by injectLazy()
@@ -38,7 +34,7 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
         super.onCreate(savedState)
 
         presenterScope.launch {
-            downloadQueue.getUpdatedAsFlow()
+            downloadQueue.updatedFlow()
                 .catch { error -> logcat(LogPriority.ERROR, error) }
                 .map { downloads ->
                     downloads
@@ -53,9 +49,9 @@ class DownloadPresenter : BasePresenter<DownloadController>() {
         }
     }
 
-    fun getDownloadStatusFlow() = downloadQueue.getStatusAsFlow()
+    fun getDownloadStatusFlow() = downloadQueue.statusFlow()
 
-    fun getDownloadProgressFlow() = downloadQueue.getProgressAsFlow()
+    fun getDownloadProgressFlow() = downloadQueue.progressFlow()
 
     /**
      * Pauses the download queue.

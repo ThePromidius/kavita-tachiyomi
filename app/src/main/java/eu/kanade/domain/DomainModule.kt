@@ -21,6 +21,7 @@ import eu.kanade.domain.category.interactor.UpdateCategory
 import eu.kanade.domain.category.repository.CategoryRepository
 import eu.kanade.domain.chapter.interactor.GetChapter
 import eu.kanade.domain.chapter.interactor.GetChapterByMangaId
+import eu.kanade.domain.chapter.interactor.SetMangaDefaultChapterFlags
 import eu.kanade.domain.chapter.interactor.SetReadStatus
 import eu.kanade.domain.chapter.interactor.ShouldUpdateDbChapter
 import eu.kanade.domain.chapter.interactor.SyncChaptersWithSource
@@ -31,7 +32,7 @@ import eu.kanade.domain.download.interactor.DeleteDownload
 import eu.kanade.domain.extension.interactor.GetExtensionLanguages
 import eu.kanade.domain.extension.interactor.GetExtensionSources
 import eu.kanade.domain.extension.interactor.GetExtensionsByType
-import eu.kanade.domain.history.interactor.DeleteHistoryTable
+import eu.kanade.domain.history.interactor.DeleteAllHistory
 import eu.kanade.domain.history.interactor.GetHistory
 import eu.kanade.domain.history.interactor.GetNextChapter
 import eu.kanade.domain.history.interactor.RemoveHistoryById
@@ -95,6 +96,7 @@ class DomainModule : InjektModule {
         addFactory { GetNextChapter(get()) }
         addFactory { ResetViewerFlags(get()) }
         addFactory { SetMangaChapterFlags(get()) }
+        addFactory { SetMangaDefaultChapterFlags(get(), get(), get()) }
         addFactory { SetMangaViewerFlags(get()) }
         addFactory { InsertManga(get()) }
         addFactory { UpdateManga(get()) }
@@ -115,7 +117,7 @@ class DomainModule : InjektModule {
         addFactory { SyncChaptersWithTrackServiceTwoWay(get(), get()) }
 
         addSingletonFactory<HistoryRepository> { HistoryRepositoryImpl(get()) }
-        addFactory { DeleteHistoryTable(get()) }
+        addFactory { DeleteAllHistory(get()) }
         addFactory { GetHistory(get()) }
         addFactory { UpsertHistory(get()) }
         addFactory { RemoveHistoryById(get()) }

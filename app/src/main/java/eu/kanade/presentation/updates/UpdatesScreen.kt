@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlipToBack
@@ -24,8 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.ChapterDownloadAction
 import eu.kanade.presentation.components.EmptyScreen
@@ -33,10 +32,8 @@ import eu.kanade.presentation.components.LazyColumn
 import eu.kanade.presentation.components.LoadingScreen
 import eu.kanade.presentation.components.MangaBottomActionMenu
 import eu.kanade.presentation.components.Scaffold
-import eu.kanade.presentation.components.SwipeRefreshIndicator
+import eu.kanade.presentation.components.SwipeRefresh
 import eu.kanade.presentation.components.VerticalFastScroller
-import eu.kanade.presentation.util.bottomNavPaddingValues
-import eu.kanade.presentation.util.plus
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
@@ -46,6 +43,7 @@ import eu.kanade.tachiyomi.ui.recent.updates.UpdatesPresenter
 import eu.kanade.tachiyomi.ui.recent.updates.UpdatesPresenter.Dialog
 import eu.kanade.tachiyomi.ui.recent.updates.UpdatesPresenter.Event
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.widget.TachiyomiBottomNavigationView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -93,19 +91,22 @@ fun UpdateScreen(
                 onMultiBookmarkClicked = presenter::bookmarkUpdates,
                 onMultiMarkAsReadClicked = presenter::markUpdatesRead,
                 onMultiDeleteClicked = {
-                    val updateItems = presenter.selected.map { it.item }
-                    presenter.dialog = Dialog.DeleteConfirmation(updateItems)
+                    presenter.dialog = Dialog.DeleteConfirmation(it)
                 },
             )
         },
     ) { contentPadding ->
+        val contentPaddingWithNavBar = TachiyomiBottomNavigationView.withBottomNavPadding(contentPadding)
         when {
             presenter.isLoading -> LoadingScreen()
-            presenter.uiModels.isEmpty() -> EmptyScreen(textResource = R.string.information_no_recent)
+            presenter.uiModels.isEmpty() -> EmptyScreen(
+                textResource = R.string.information_no_recent,
+                modifier = Modifier.padding(contentPaddingWithNavBar),
+            )
             else -> {
                 UpdateScreenContent(
                     presenter = presenter,
-                    contentPadding = contentPadding,
+                    contentPadding = contentPaddingWithNavBar,
                     onUpdateLibrary = onUpdateLibrary,
                     onClickCover = onClickCover,
                 )
@@ -123,20 +124,11 @@ private fun UpdateScreenContent(
 ) {
     val context = LocalContext.current
     val updatesListState = rememberLazyListState()
-
-    // During selection mode bottom nav is not visible
-    val contentPaddingWithNavBar = contentPadding +
-        if (presenter.selectionMode) {
-            PaddingValues()
-        } else {
-            bottomNavPaddingValues
-        }
-
     val scope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
 
     SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+        refreshing = isRefreshing,
         onRefresh = {
             val started = onUpdateLibrary()
             if (!started) return@SwipeRefresh
@@ -147,46 +139,36 @@ private fun UpdateScreenContent(
                 isRefreshing = false
             }
         },
-        swipeEnabled = presenter.selectionMode.not(),
-        indicatorPadding = contentPaddingWithNavBar,
-        indicator = { s, trigger ->
-            SwipeRefreshIndicator(
-                state = s,
-                refreshTriggerDistance = trigger,
-            )
-        },
+        enabled = presenter.selectionMode.not(),
+        indicatorPadding = contentPadding,
     ) {
-        if (presenter.uiModels.isEmpty()) {
-            EmptyScreen(textResource = R.string.information_no_recent)
-        } else {
-            VerticalFastScroller(
-                listState = updatesListState,
-                topContentPadding = contentPaddingWithNavBar.calculateTopPadding(),
-                endContentPadding = contentPaddingWithNavBar.calculateEndPadding(LocalLayoutDirection.current),
+        VerticalFastScroller(
+            listState = updatesListState,
+            topContentPadding = contentPadding.calculateTopPadding(),
+            endContentPadding = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
+        ) {
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                state = updatesListState,
+                contentPadding = contentPadding,
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxHeight(),
-                    state = updatesListState,
-                    contentPadding = contentPaddingWithNavBar,
-                ) {
-                    if (presenter.lastUpdated > 0L) {
-                        updatesLastUpdatedItem(presenter.lastUpdated)
-                    }
-
-                    updatesUiItems(
-                        uiModels = presenter.uiModels,
-                        selectionMode = presenter.selectionMode,
-                        onUpdateSelected = presenter::toggleSelection,
-                        onClickCover = onClickCover,
-                        onClickUpdate = {
-                            val intent = ReaderActivity.newIntent(context, it.update.mangaId, it.update.chapterId)
-                            context.startActivity(intent)
-                        },
-                        onDownloadChapter = presenter::downloadChapters,
-                        relativeTime = presenter.relativeTime,
-                        dateFormat = presenter.dateFormat,
-                    )
+                if (presenter.lastUpdated > 0L) {
+                    updatesLastUpdatedItem(presenter.lastUpdated)
                 }
+
+                updatesUiItems(
+                    uiModels = presenter.uiModels,
+                    selectionMode = presenter.selectionMode,
+                    onUpdateSelected = presenter::toggleSelection,
+                    onClickCover = onClickCover,
+                    onClickUpdate = {
+                        val intent = ReaderActivity.newIntent(context, it.update.mangaId, it.update.chapterId)
+                        context.startActivity(intent)
+                    },
+                    onDownloadChapter = presenter::downloadChapters,
+                    relativeTime = presenter.relativeTime,
+                    dateFormat = presenter.dateFormat,
+                )
             }
         }
     }
@@ -197,8 +179,8 @@ private fun UpdateScreenContent(
             UpdatesDeleteConfirmationDialog(
                 onDismissRequest = onDismissDialog,
                 onConfirm = {
-                    presenter.deleteChapters(dialog.toDelete)
                     presenter.toggleAllSelection(false)
+                    presenter.deleteChapters(dialog.toDelete)
                 },
             )
         }
@@ -261,7 +243,7 @@ private fun UpdatesAppBar(
 
 @Composable
 private fun UpdatesBottomBar(
-    selected: List<UpdatesUiModel.Item>,
+    selected: List<UpdatesItem>,
     onDownloadChapter: (List<UpdatesItem>, ChapterDownloadAction) -> Unit,
     onMultiBookmarkClicked: (List<UpdatesItem>, bookmark: Boolean) -> Unit,
     onMultiMarkAsReadClicked: (List<UpdatesItem>, read: Boolean) -> Unit,
@@ -271,25 +253,25 @@ private fun UpdatesBottomBar(
         visible = selected.isNotEmpty(),
         modifier = Modifier.fillMaxWidth(),
         onBookmarkClicked = {
-            onMultiBookmarkClicked.invoke(selected.map { it.item }, true)
-        }.takeIf { selected.any { !it.item.update.bookmark } },
+            onMultiBookmarkClicked.invoke(selected, true)
+        }.takeIf { selected.any { !it.update.bookmark } },
         onRemoveBookmarkClicked = {
-            onMultiBookmarkClicked.invoke(selected.map { it.item }, false)
-        }.takeIf { selected.all { it.item.update.bookmark } },
+            onMultiBookmarkClicked.invoke(selected, false)
+        }.takeIf { selected.all { it.update.bookmark } },
         onMarkAsReadClicked = {
-            onMultiMarkAsReadClicked(selected.map { it.item }, true)
-        }.takeIf { selected.any { !it.item.update.read } },
+            onMultiMarkAsReadClicked(selected, true)
+        }.takeIf { selected.any { !it.update.read } },
         onMarkAsUnreadClicked = {
-            onMultiMarkAsReadClicked(selected.map { it.item }, false)
-        }.takeIf { selected.any { it.item.update.read } },
+            onMultiMarkAsReadClicked(selected, false)
+        }.takeIf { selected.any { it.update.read } },
         onDownloadClicked = {
-            onDownloadChapter(selected.map { it.item }, ChapterDownloadAction.START)
+            onDownloadChapter(selected, ChapterDownloadAction.START)
         }.takeIf {
-            selected.any { it.item.downloadStateProvider() != Download.State.DOWNLOADED }
+            selected.any { it.downloadStateProvider() != Download.State.DOWNLOADED }
         },
         onDeleteClicked = {
-            onMultiDeleteClicked(selected.map { it.item })
-        }.takeIf { selected.any { it.item.downloadStateProvider() == Download.State.DOWNLOADED } },
+            onMultiDeleteClicked(selected)
+        }.takeIf { selected.any { it.downloadStateProvider() == Download.State.DOWNLOADED } },
     )
 }
 

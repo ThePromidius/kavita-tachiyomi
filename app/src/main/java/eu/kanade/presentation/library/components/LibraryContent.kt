@@ -2,6 +2,8 @@ package eu.kanade.presentation.library.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,20 +14,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalLayoutDirection
 import com.google.accompanist.pager.rememberPagerState
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.core.prefs.PreferenceMutableState
 import eu.kanade.domain.category.model.Category
-import eu.kanade.presentation.components.EmptyScreen
-import eu.kanade.presentation.components.SwipeRefreshIndicator
+import eu.kanade.domain.library.model.LibraryDisplayMode
+import eu.kanade.domain.library.model.LibraryManga
+import eu.kanade.presentation.components.SwipeRefresh
 import eu.kanade.presentation.library.LibraryState
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.ui.library.LibraryItem
-import eu.kanade.tachiyomi.ui.library.setting.LibraryDisplayMode
-import eu.kanade.tachiyomi.widget.EmptyView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -35,22 +32,31 @@ fun LibraryContent(
     contentPadding: PaddingValues,
     currentPage: () -> Int,
     isLibraryEmpty: Boolean,
-    isDownloadOnly: Boolean,
-    isIncognitoMode: Boolean,
     showPageTabs: Boolean,
     showMangaCount: Boolean,
     onChangeCurrentPage: (Int) -> Unit,
     onMangaClicked: (Long) -> Unit,
     onToggleSelection: (LibraryManga) -> Unit,
+    onToggleRangeSelection: (LibraryManga) -> Unit,
     onRefresh: (Category?) -> Boolean,
     onGlobalSearchClicked: () -> Unit,
     getNumberOfMangaForCategory: @Composable (Long) -> State<Int?>,
     getDisplayModeForPage: @Composable (Int) -> LibraryDisplayMode,
     getColumnsForOrientation: (Boolean) -> PreferenceMutableState<Int>,
     getLibraryForPage: @Composable (Int) -> List<LibraryItem>,
+    showDownloadBadges: Boolean,
+    showUnreadBadges: Boolean,
+    showLocalBadges: Boolean,
+    showLanguageBadges: Boolean,
+    isDownloadOnly: Boolean,
+    isIncognitoMode: Boolean,
 ) {
     Column(
-        modifier = Modifier.padding(contentPadding),
+        modifier = Modifier.padding(
+            top = contentPadding.calculateTopPadding(),
+            start = contentPadding.calculateStartPadding(LocalLayoutDirection.current),
+            end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
+        ),
     ) {
         val categories = state.categories
         val coercedCurrentPage = remember { currentPage().coerceAtMost(categories.lastIndex) }
@@ -72,17 +78,17 @@ fun LibraryContent(
 
         val onClickManga = { manga: LibraryManga ->
             if (state.selectionMode.not()) {
-                onMangaClicked(manga.id!!)
+                onMangaClicked(manga.manga.id)
             } else {
                 onToggleSelection(manga)
             }
         }
         val onLongClickManga = { manga: LibraryManga ->
-            onToggleSelection(manga)
+            onToggleRangeSelection(manga)
         }
 
         SwipeRefresh(
-            state = rememberSwipeRefreshState(isRefreshing = isRefreshing),
+            refreshing = isRefreshing,
             onRefresh = {
                 val started = onRefresh(categories[currentPage()])
                 if (!started) return@SwipeRefresh
@@ -93,33 +99,20 @@ fun LibraryContent(
                     isRefreshing = false
                 }
             },
-            indicator = { s, trigger ->
-                SwipeRefreshIndicator(
-                    state = s,
-                    refreshTriggerDistance = trigger,
-                )
-            },
+            enabled = state.selectionMode.not(),
         ) {
-            if (state.searchQuery.isNullOrEmpty() && isLibraryEmpty) {
-                val handler = LocalUriHandler.current
-                EmptyScreen(
-                    R.string.information_empty_library,
-                    listOf(
-                        EmptyView.Action(R.string.getting_started_guide, R.drawable.ic_help_24dp) {
-                            handler.openUri("https://tachiyomi.org/help/guides/getting-started")
-                        },
-                    ),
-                )
-                return@SwipeRefresh
-            }
-
             LibraryPager(
                 state = pagerState,
+                contentPadding = PaddingValues(bottom = contentPadding.calculateBottomPadding()),
                 pageCount = categories.size,
                 selectedManga = state.selection,
                 getDisplayModeForPage = getDisplayModeForPage,
                 getColumnsForOrientation = getColumnsForOrientation,
                 getLibraryForPage = getLibraryForPage,
+                showDownloadBadges = showDownloadBadges,
+                showUnreadBadges = showUnreadBadges,
+                showLocalBadges = showLocalBadges,
+                showLanguageBadges = showLanguageBadges,
                 onClickManga = onClickManga,
                 onLongClickManga = onLongClickManga,
                 onGlobalSearchClicked = onGlobalSearchClicked,

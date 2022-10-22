@@ -51,11 +51,11 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class eu.kanade.tachiyomi.**$$serializer { *; }
--keepclassmembers class eu.kanade.tachiyomi.** {
+-keep,includedescriptorclasses class eu.kanade.**$$serializer { *; }
+-keepclassmembers class eu.kanade.** {
     *** Companion;
 }
--keepclasseswithmembers class eu.kanade.tachiyomi.** {
+-keepclasseswithmembers class eu.kanade.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
@@ -64,3 +64,6 @@
     <methods>;
 }
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
+
+# XmlUtil
+-keep public enum nl.adaptivity.xmlutil.EventType { *; }

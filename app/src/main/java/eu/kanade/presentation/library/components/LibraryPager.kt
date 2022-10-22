@@ -1,6 +1,7 @@
 package eu.kanade.presentation.library.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,13 +13,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import eu.kanade.core.prefs.PreferenceMutableState
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.domain.library.model.LibraryDisplayMode
+import eu.kanade.domain.library.model.LibraryManga
 import eu.kanade.tachiyomi.ui.library.LibraryItem
-import eu.kanade.tachiyomi.ui.library.setting.LibraryDisplayMode
 
 @Composable
 fun LibraryPager(
     state: PagerState,
+    contentPadding: PaddingValues,
     pageCount: Int,
     selectedManga: List<LibraryManga>,
     searchQuery: String?,
@@ -26,6 +28,10 @@ fun LibraryPager(
     getDisplayModeForPage: @Composable (Int) -> LibraryDisplayMode,
     getColumnsForOrientation: (Boolean) -> PreferenceMutableState<Int>,
     getLibraryForPage: @Composable (Int) -> List<LibraryItem>,
+    showDownloadBadges: Boolean,
+    showUnreadBadges: Boolean,
+    showLocalBadges: Boolean,
+    showLanguageBadges: Boolean,
     onClickManga: (LibraryManga) -> Unit,
     onLongClickManga: (LibraryManga) -> Unit,
 ) {
@@ -54,6 +60,11 @@ fun LibraryPager(
             LibraryDisplayMode.List -> {
                 LibraryList(
                     items = library,
+                    showDownloadBadges = showDownloadBadges,
+                    showUnreadBadges = showUnreadBadges,
+                    showLocalBadges = showLocalBadges,
+                    showLanguageBadges = showLanguageBadges,
+                    contentPadding = contentPadding,
                     selection = selectedManga,
                     onClick = onClickManga,
                     onLongClick = onLongClickManga,
@@ -64,7 +75,12 @@ fun LibraryPager(
             LibraryDisplayMode.CompactGrid -> {
                 LibraryCompactGrid(
                     items = library,
+                    showDownloadBadges = showDownloadBadges,
+                    showUnreadBadges = showUnreadBadges,
+                    showLocalBadges = showLocalBadges,
+                    showLanguageBadges = showLanguageBadges,
                     columns = columns,
+                    contentPadding = contentPadding,
                     selection = selectedManga,
                     onClick = onClickManga,
                     onLongClick = onLongClickManga,
@@ -75,7 +91,12 @@ fun LibraryPager(
             LibraryDisplayMode.ComfortableGrid -> {
                 LibraryComfortableGrid(
                     items = library,
+                    showDownloadBadges = showDownloadBadges,
+                    showUnreadBadges = showUnreadBadges,
+                    showLocalBadges = showLocalBadges,
+                    showLanguageBadges = showLanguageBadges,
                     columns = columns,
+                    contentPadding = contentPadding,
                     selection = selectedManga,
                     onClick = onClickManga,
                     onLongClick = onLongClickManga,
@@ -86,7 +107,12 @@ fun LibraryPager(
             LibraryDisplayMode.CoverOnlyGrid -> {
                 LibraryCoverOnlyGrid(
                     items = library,
+                    showDownloadBadges = showDownloadBadges,
+                    showUnreadBadges = showUnreadBadges,
+                    showLocalBadges = showLocalBadges,
+                    showLanguageBadges = showLanguageBadges,
                     columns = columns,
+                    contentPadding = contentPadding,
                     selection = selectedManga,
                     onClick = onClickManga,
                     onLongClick = onLongClickManga,

@@ -1,6 +1,7 @@
 package eu.kanade.presentation.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -19,8 +21,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.surfaceColorAtElevation
@@ -38,10 +40,12 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import eu.kanade.presentation.util.secondaryItemAlpha
 import eu.kanade.tachiyomi.R
-import kotlinx.coroutines.delay
 
 @Composable
 fun AppBar(
@@ -64,7 +68,10 @@ fun AppBar(
 
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    val isActionMode by derivedStateOf { actionModeCounter > 0 }
+    val isActionMode by remember(actionModeCounter) {
+        derivedStateOf { actionModeCounter > 0 }
+    }
+
     AppBar(
         modifier = modifier,
         titleContent = {
@@ -113,7 +120,7 @@ fun AppBar(
     Column(
         modifier = modifier,
     ) {
-        SmallTopAppBar(
+        TopAppBar(
             navigationIcon = {
                 if (isActionMode) {
                     IconButton(onClick = onCancelActionMode) {
@@ -217,6 +224,7 @@ fun AppBarActions(
 fun SearchToolbar(
     searchQuery: String,
     onChangeSearchQuery: (String) -> Unit,
+    placeholderText: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     onClickCloseSearch: () -> Unit,
@@ -224,8 +232,11 @@ fun SearchToolbar(
     incognitoMode: Boolean = false,
     downloadedOnlyMode: Boolean = false,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
-    val focusRequester = remember { FocusRequester.Default }
+    val focusRequester = remember { FocusRequester() }
+
     AppBar(
         titleContent = {
             BasicTextField(
@@ -234,11 +245,41 @@ fun SearchToolbar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(focusRequester),
-                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onBackground),
+                textStyle = MaterialTheme.typography.titleMedium.copy(
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 18.sp,
+                ),
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onBackground),
+                visualTransformation = visualTransformation,
+                interactionSource = interactionSource,
+                decorationBox = { innerTextField ->
+                    TextFieldDefaults.TextFieldDecorationBox(
+                        value = searchQuery,
+                        innerTextField = innerTextField,
+                        enabled = true,
+                        singleLine = true,
+                        visualTransformation = visualTransformation,
+                        interactionSource = interactionSource,
+                        placeholder = {
+                            if (!placeholderText.isNullOrEmpty()) {
+                                Text(
+                                    modifier = Modifier.secondaryItemAlpha(),
+                                    text = placeholderText,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Normal,
+                                    ),
+                                )
+                            }
+                        },
+                    )
+                },
             )
         },
         navigationIcon = Icons.Outlined.ArrowBack,
@@ -256,8 +297,6 @@ fun SearchToolbar(
         scrollBehavior = scrollBehavior,
     )
     LaunchedEffect(focusRequester) {
-        // TODO: https://issuetracker.google.com/issues/204502668
-        delay(100)
         focusRequester.requestFocus()
     }
 }

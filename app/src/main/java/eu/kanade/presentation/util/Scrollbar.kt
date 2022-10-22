@@ -48,12 +48,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.draw.CacheDrawScope
-import androidx.compose.ui.draw.DrawResult
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -63,11 +62,18 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastSumBy
+import eu.kanade.presentation.components.Scroller.STICKY_HEADER_KEY_PREFIX
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
+/**
+ * Draws horizontal scrollbar to a LazyList.
+ *
+ * Set key with [STICKY_HEADER_KEY_PREFIX] prefix to any sticky header item in the list.
+ */
 fun Modifier.drawHorizontalScrollbar(
     state: LazyListState,
     reverseScrolling: Boolean = false,
@@ -75,6 +81,11 @@ fun Modifier.drawHorizontalScrollbar(
     positionOffsetPx: Float = 0f,
 ): Modifier = drawScrollbar(state, Orientation.Horizontal, reverseScrolling, positionOffsetPx)
 
+/**
+ * Draws vertical scrollbar to a LazyList.
+ *
+ * Set key with [STICKY_HEADER_KEY_PREFIX] prefix to any sticky header item in the list.
+ */
 fun Modifier.drawVerticalScrollbar(
     state: LazyListState,
     reverseScrolling: Boolean = false,
@@ -107,7 +118,7 @@ private fun Modifier.drawScrollbar(
         0f
     } else {
         items
-            .first()
+            .fastFirstOrNull { (it.key as? String)?.startsWith(STICKY_HEADER_KEY_PREFIX)?.not() ?: true }!!
             .run {
                 val startPadding = if (reverseDirection) layoutInfo.afterContentPadding else layoutInfo.beforeContentPadding
                 startPadding + ((estimatedItemSize * index - offset) / totalSize * viewportSize)
@@ -117,13 +128,11 @@ private fun Modifier.drawScrollbar(
         orientation, reverseDirection, atEnd, showScrollbar,
         thickness, color, alpha, thumbSize, startOffset, positionOffset,
     )
-    onDrawWithContent {
-        drawContent()
-        drawScrollbar()
-    }
+    drawContent()
+    drawScrollbar()
 }
 
-private fun CacheDrawScope.onDrawScrollbar(
+private fun ContentDrawScope.onDrawScrollbar(
     orientation: Orientation,
     reverseDirection: Boolean,
     atEnd: Boolean,
@@ -167,13 +176,13 @@ private fun CacheDrawScope.onDrawScrollbar(
 private fun Modifier.drawScrollbar(
     orientation: Orientation,
     reverseScrolling: Boolean,
-    onBuildDrawCache: CacheDrawScope.(
+    onDraw: ContentDrawScope.(
         reverseDirection: Boolean,
         atEnd: Boolean,
         thickness: Float,
         color: Color,
         alpha: () -> Float,
-    ) -> DrawResult,
+    ) -> Unit,
 ): Modifier = composed {
     val scrolled = remember {
         MutableSharedFlow<Unit>(
@@ -216,8 +225,8 @@ private fun Modifier.drawScrollbar(
     val color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.364f)
     Modifier
         .nestedScroll(nestedScrollConnection)
-        .drawWithCache {
-            onBuildDrawCache(reverseDirection, atEnd, thickness, color, alpha::value)
+        .drawWithContent {
+            onDraw(reverseDirection, atEnd, thickness, color, alpha::value)
         }
 }
 

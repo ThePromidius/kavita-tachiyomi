@@ -5,16 +5,11 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.insertSeparators
-import androidx.paging.map
+import eu.kanade.core.util.insertSeparators
+import eu.kanade.domain.base.BasePreferences
 import eu.kanade.domain.chapter.model.Chapter
-import eu.kanade.domain.history.interactor.DeleteHistoryTable
+import eu.kanade.domain.history.interactor.DeleteAllHistory
 import eu.kanade.domain.history.interactor.GetHistory
 import eu.kanade.domain.history.interactor.GetNextChapter
 import eu.kanade.domain.history.interactor.RemoveHistoryById
@@ -22,7 +17,6 @@ import eu.kanade.domain.history.interactor.RemoveHistoryByMangaId
 import eu.kanade.domain.history.model.HistoryWithRelations
 import eu.kanade.presentation.history.HistoryUiModel
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.util.lang.launchIO
 import eu.kanade.tachiyomi.util.lang.toDateKey
@@ -32,6 +26,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import logcat.LogPriority
@@ -43,10 +38,10 @@ class HistoryPresenter(
     private val state: HistoryStateImpl = HistoryState() as HistoryStateImpl,
     private val getHistory: GetHistory = Injekt.get(),
     private val getNextChapter: GetNextChapter = Injekt.get(),
-    private val deleteHistoryTable: DeleteHistoryTable = Injekt.get(),
+    private val deleteAllHistory: DeleteAllHistory = Injekt.get(),
     private val removeHistoryById: RemoveHistoryById = Injekt.get(),
     private val removeHistoryByMangaId: RemoveHistoryByMangaId = Injekt.get(),
-    preferences: PreferencesHelper = Injekt.get(),
+    preferences: BasePreferences = Injekt.get(),
 ) : BasePresenter<HistoryController>(), HistoryState by state {
 
     private val _events: Channel<Event> = Channel(Int.MAX_VALUE)
@@ -57,11 +52,11 @@ class HistoryPresenter(
     val isIncognitoMode: Boolean by preferences.incognitoMode().asState()
 
     @Composable
-    fun getLazyHistory(): LazyPagingItems<HistoryUiModel> {
-        val scope = rememberCoroutineScope()
+    fun getHistory(): Flow<List<HistoryUiModel>> {
         val query = searchQuery ?: ""
-        val flow = remember(query) {
+        return remember(query) {
             getHistory.subscribe(query)
+                .distinctUntilChanged()
                 .catch { error ->
                     logcat(LogPriority.ERROR, error)
                     _events.send(Event.InternalError)
@@ -69,15 +64,11 @@ class HistoryPresenter(
                 .map { pagingData ->
                     pagingData.toHistoryUiModels()
                 }
-                .cachedIn(scope)
         }
-        return flow.collectAsLazyPagingItems()
     }
 
-    private fun PagingData<HistoryWithRelations>.toHistoryUiModels(): PagingData<HistoryUiModel> {
-        return this.map {
-            HistoryUiModel.Item(it)
-        }
+    private fun List<HistoryWithRelations>.toHistoryUiModels(): List<HistoryUiModel> {
+        return map { HistoryUiModel.Item(it) }
             .insertSeparators { before, after ->
                 val beforeDate = before?.item?.readAt?.time?.toDateKey() ?: Date(0)
                 val afterDate = after?.item?.readAt?.time?.toDateKey() ?: Date(0)
@@ -110,7 +101,7 @@ class HistoryPresenter(
 
     fun deleteAllHistory() {
         presenterScope.launchIO {
-            val result = deleteHistoryTable.await()
+            val result = deleteAllHistory.await()
             if (!result) return@launchIO
             withUIContext {
                 view?.activity?.toast(R.string.clear_history_completed)

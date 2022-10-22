@@ -13,21 +13,33 @@ import eu.kanade.data.AndroidDatabaseHandler
 import eu.kanade.data.DatabaseHandler
 import eu.kanade.data.dateAdapter
 import eu.kanade.data.listOfStringsAdapter
+import eu.kanade.data.updateStrategyAdapter
+import eu.kanade.domain.backup.service.BackupPreferences
+import eu.kanade.domain.base.BasePreferences
+import eu.kanade.domain.download.service.DownloadPreferences
+import eu.kanade.domain.library.service.LibraryPreferences
 import eu.kanade.domain.source.service.SourcePreferences
+import eu.kanade.domain.track.service.TrackPreferences
+import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.tachiyomi.core.preference.AndroidPreferenceStore
 import eu.kanade.tachiyomi.core.preference.PreferenceStore
+import eu.kanade.tachiyomi.core.provider.AndroidBackupFolderProvider
+import eu.kanade.tachiyomi.core.provider.AndroidDownloadFolderProvider
 import eu.kanade.tachiyomi.core.security.SecurityPreferences
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
+import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.saver.ImageSaver
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.job.DelayedTrackingStore
 import eu.kanade.tachiyomi.extension.ExtensionManager
+import eu.kanade.tachiyomi.network.JavaScriptEngine
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.NetworkPreferences
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
 import eu.kanade.tachiyomi.util.system.isDevFlavor
 import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 import kotlinx.serialization.json.Json
@@ -70,7 +82,6 @@ class AppModule(val app: Application) : InjektModule {
                 },
             )
         }
-
         addSingletonFactory {
             Database(
                 driver = get(),
@@ -79,10 +90,10 @@ class AppModule(val app: Application) : InjektModule {
                 ),
                 mangasAdapter = Mangas.Adapter(
                     genreAdapter = listOfStringsAdapter,
+                    update_strategyAdapter = updateStrategyAdapter,
                 ),
             )
         }
-
         addSingletonFactory<DatabaseHandler> { AndroidDatabaseHandler(get(), get()) }
 
         addSingletonFactory {
@@ -91,7 +102,6 @@ class AppModule(val app: Application) : InjektModule {
                 explicitNulls = false
             }
         }
-
         addSingletonFactory {
             XML {
                 unknownChildHandler = UnknownChildHandler { _, _, _, _, _ -> emptyList() }
@@ -100,19 +110,19 @@ class AppModule(val app: Application) : InjektModule {
         }
 
         addSingletonFactory { ChapterCache(app) }
-
         addSingletonFactory { CoverCache(app) }
 
         addSingletonFactory { NetworkHelper(app) }
-
-        addSingletonFactory { ExtensionManager(app) }
+        addSingletonFactory { JavaScriptEngine(app) }
 
         addSingletonFactory { SourceManager(app, get(), get()) }
+        addSingletonFactory { ExtensionManager(app) }
 
+        addSingletonFactory { DownloadProvider(app) }
         addSingletonFactory { DownloadManager(app) }
+        addSingletonFactory { DownloadCache(app) }
 
         addSingletonFactory { TrackManager(app) }
-
         addSingletonFactory { DelayedTrackingStore(app) }
 
         addSingletonFactory { ImageSaver(app) }
@@ -148,10 +158,37 @@ class PreferenceModule(val application: Application) : InjektModule {
             SecurityPreferences(get())
         }
         addSingletonFactory {
-            PreferencesHelper(
-                context = application,
+            LibraryPreferences(get())
+        }
+        addSingletonFactory {
+            ReaderPreferences(get())
+        }
+        addSingletonFactory {
+            TrackPreferences(get())
+        }
+        addSingletonFactory {
+            AndroidDownloadFolderProvider(application)
+        }
+        addSingletonFactory {
+            DownloadPreferences(
+                folderProvider = get<AndroidDownloadFolderProvider>(),
                 preferenceStore = get(),
             )
+        }
+        addSingletonFactory {
+            AndroidBackupFolderProvider(application)
+        }
+        addSingletonFactory {
+            BackupPreferences(
+                folderProvider = get<AndroidBackupFolderProvider>(),
+                preferenceStore = get(),
+            )
+        }
+        addSingletonFactory {
+            UiPreferences(get())
+        }
+        addSingletonFactory {
+            BasePreferences(application, get())
         }
     }
 }

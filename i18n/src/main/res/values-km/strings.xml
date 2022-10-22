@@ -2,7 +2,6 @@
 <resources>
     <string name="label_download_queue">កំពុងទាញយក</string>
     <string name="action_search_settings">ស្វែងរកក្នុងការកំណត់</string>
-    <string name="action_download_unread">ទាញយកភាគដែលមិនទាន់បានអាន</string>
     <string name="chapters">ភាគ</string>
     <string name="label_warning">បំរាម</string>
     <string name="action_filter_unread">មិនទាន់អាន</string>
@@ -13,7 +12,7 @@
     <string name="label_recent_manga">ប្រវត្តិ</string>
     <string name="action_sort_alpha">តម្រៀបតាមអក្សរ</string>
     <string name="name">ឈ្មោះ</string>
-    <string name="categories">ការតម្រៀប</string>
+    <string name="categories">ការតម្រៀបថ្នាក់</string>
     <string name="history">ប្រវត្តិ</string>
     <string name="label_more">ច្រើនទៀត</string>
     <string name="label_settings">ការកំណត់</string>
@@ -86,7 +85,6 @@
     <string name="action_menu">កន្លែងកំណត់</string>
     <string name="action_mark_previous_as_read">បញ្ចាក់ភាគមុនថាបានអាន</string>
     <string name="action_delete">លុប</string>
-    <string name="action_update">ធ្វើបច្ចុប្បន្នភាព</string>
     <string name="action_sort_latest_chapter">ភាគថ្មីបំផុត</string>
     <string name="action_search">ស្វែងរក</string>
     <string name="action_select_all">ជ្រើសទាំងអស់</string>
@@ -115,7 +113,6 @@
     <string name="action_undo">ត្រឡប់វាវិញ</string>
     <string name="action_open_log">បើកlog</string>
     <string name="action_show_errors">ប៉ះដើម្បីមើលលម្អិត</string>
-    <string name="action_create">បង្កើត</string>
     <string name="action_restore">restore</string>
     <string name="action_webview_back">ត្រឡប់</string>
     <string name="action_start_downloading_now">ចាប់ផ្ដើមទាញយកឥឡូវនេះ</string>
@@ -189,6 +186,17 @@
     <string name="update_24hour">រាល់ថ្ងៃ</string>
     <string name="pref_category_library_update">ការធ្វើបច្ចុប្បន្នភាពសកល</string>
     <string name="title">ចំណងជើង</string>
-    <string name="description">សង្ខេបរឿង</string>
     <string name="completed">Concluído</string>
+    <string name="ongoing">កំពុងតែចេញផ្សាយ</string>
+    <string name="default_category">ថ្នាក់ធម្មតា</string>
+    <string name="on_hiatus">ត្រូវបានផ្អាកការចេញផ្សាយ</string>
+    <string name="unknown">មិនច្បាស់</string>
+    <string name="local_invalid_format">ទម្រង់ភាគមិនត្រឹមត្រួវ</string>
+    <string name="chapter_not_found">គ្មានភាគ</string>
+    <string name="no_chapters_error">គ្មានភាគ</string>
+    <string name="cancelled">ត្រូវបានបញ្ឈប់ការចេញផ្សាយ</string>
+    <string name="publishing_finished">ចេញផ្សាយចប់ហើយ</string>
+    <string name="updating_library">កំពុងតែធ្វើបច្ចុប្បន្នភាពបណ្ណាល័យ</string>
+    <string name="licensed">មានឡាយសិន</string>
+    <string name="loader_rar5_error">ទម្រង់RARv5មិនត្រូវបានទទួលយកទេ</string>
 </resources>

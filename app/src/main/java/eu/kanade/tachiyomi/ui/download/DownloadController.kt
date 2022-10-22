@@ -70,7 +70,6 @@ import kotlin.math.roundToInt
 
 /**
  * Controller that shows the currently active downloads.
- * Uses R.layout.fragment_download_queue.
  */
 class DownloadController :
     FullComposeController<DownloadPresenter>(),
@@ -89,19 +88,6 @@ class DownloadController :
     private val progressSubscriptions by lazy { mutableMapOf<Download, Subscription>() }
 
     override fun createPresenter() = DownloadPresenter()
-
-    override fun onViewCreated(view: View) {
-        super.onViewCreated(view)
-
-        viewScope.launchUI {
-            presenter.getDownloadStatusFlow()
-                .collect(this@DownloadController::onStatusChange)
-        }
-        viewScope.launchUI {
-            presenter.getDownloadProgressFlow()
-                .collect(this@DownloadController::onUpdateDownloadedPages)
-        }
-    }
 
     @Composable
     override fun ComposeContent() {
@@ -269,7 +255,10 @@ class DownloadController :
             },
         ) { contentPadding ->
             if (downloadList.isEmpty()) {
-                EmptyScreen(textResource = R.string.information_no_downloads)
+                EmptyScreen(
+                    textResource = R.string.information_no_downloads,
+                    modifier = Modifier.padding(contentPadding),
+                )
                 return@Scaffold
             }
             val density = LocalDensity.current
@@ -290,6 +279,15 @@ class DownloadController :
                         controllerBinding.recycler.layoutManager = LinearLayoutManager(context)
 
                         ViewCompat.setNestedScrollingEnabled(controllerBinding.root, true)
+
+                        viewScope.launchUI {
+                            presenter.getDownloadStatusFlow()
+                                .collect(this@DownloadController::onStatusChange)
+                        }
+                        viewScope.launchUI {
+                            presenter.getDownloadProgressFlow()
+                                .collect(this@DownloadController::onUpdateDownloadedPages)
+                        }
 
                         controllerBinding.root
                     },

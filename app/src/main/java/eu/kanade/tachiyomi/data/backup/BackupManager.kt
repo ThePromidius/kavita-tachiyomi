@@ -7,9 +7,12 @@ import com.hippo.unifile.UniFile
 import data.Manga_sync
 import data.Mangas
 import eu.kanade.data.DatabaseHandler
+import eu.kanade.data.updateStrategyAdapter
+import eu.kanade.domain.backup.service.BackupPreferences
 import eu.kanade.domain.category.interactor.GetCategories
 import eu.kanade.domain.category.model.Category
 import eu.kanade.domain.history.model.HistoryUpdate
+import eu.kanade.domain.library.service.LibraryPreferences
 import eu.kanade.domain.manga.interactor.GetFavorites
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY
@@ -32,7 +35,6 @@ import eu.kanade.tachiyomi.data.backup.models.backupTrackMapper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.copyFrom
 import eu.kanade.tachiyomi.util.system.hasPermission
@@ -56,7 +58,8 @@ class BackupManager(
 
     private val handler: DatabaseHandler = Injekt.get()
     private val sourceManager: SourceManager = Injekt.get()
-    private val preferences: PreferencesHelper = Injekt.get()
+    private val backupPreferences: BackupPreferences = Injekt.get()
+    private val libraryPreferences: LibraryPreferences = Injekt.get()
     private val getCategories: GetCategories = Injekt.get()
     private val getFavorites: GetFavorites = Injekt.get()
 
@@ -91,7 +94,7 @@ class BackupManager(
                     dir = dir.createDirectory("automatic")
 
                     // Delete older backups
-                    val numberOfBackups = preferences.numberOfBackups().get()
+                    val numberOfBackups = backupPreferences.numberOfBackups().get()
                     val backupRegex = Regex("""tachiyomi_\d+-\d+-\d+_\d+-\d+.proto.gz""")
                     dir.listFiles { _, filename -> backupRegex.matches(filename) }
                         .orEmpty()
@@ -271,7 +274,7 @@ class BackupManager(
             category
         }
 
-        preferences.categorizedDisplaySettings().set(
+        libraryPreferences.categorizedDisplaySettings().set(
             (dbCategories + categories)
                 .distinctBy { it.flags }
                 .size > 1,
@@ -504,6 +507,7 @@ class BackupManager(
                 chapterFlags = manga.chapter_flags.toLong(),
                 coverLastModified = manga.cover_last_modified,
                 dateAdded = manga.date_added,
+                updateStrategy = manga.update_strategy,
             )
             mangasQueries.selectLastInsertedRowId()
         }
@@ -529,6 +533,7 @@ class BackupManager(
                 coverLastModified = manga.cover_last_modified,
                 dateAdded = manga.date_added,
                 mangaId = manga.id!!,
+                updateStrategy = manga.update_strategy.let(updateStrategyAdapter::encode),
             )
         }
         return manga.id!!

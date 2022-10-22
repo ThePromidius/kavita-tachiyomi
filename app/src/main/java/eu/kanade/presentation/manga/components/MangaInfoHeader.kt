@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Block
@@ -42,7 +43,6 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -62,6 +62,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -75,7 +76,6 @@ import eu.kanade.domain.manga.model.Manga
 import eu.kanade.presentation.components.MangaCover
 import eu.kanade.presentation.components.TextButton
 import eu.kanade.presentation.util.clickableNoIndication
-import eu.kanade.presentation.util.quantityStringResource
 import eu.kanade.presentation.util.secondaryItemAlpha
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
@@ -87,7 +87,7 @@ private val whitespaceLineRegex = Regex("[\\r\\n]{2,}", setOf(RegexOption.MULTIL
 @Composable
 fun MangaInfoBox(
     modifier: Modifier = Modifier,
-    windowWidthSizeClass: WindowWidthSizeClass,
+    isTabletUi: Boolean,
     appBarPadding: Dp,
     title: String,
     author: String?,
@@ -122,7 +122,7 @@ fun MangaInfoBox(
 
         // Manga & source info
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
+            if (!isTabletUi) {
                 MangaAndSourceTitlesSmall(
                     appBarPadding = appBarPadding,
                     coverDataProvider = coverDataProvider,
@@ -183,7 +183,7 @@ fun MangaActionRow(
                 title = if (trackingCount == 0) {
                     stringResource(R.string.manga_tracking_tab)
                 } else {
-                    quantityStringResource(id = R.plurals.num_trackers, quantity = trackingCount, trackingCount)
+                    pluralStringResource(id = R.plurals.num_trackers, count = trackingCount, trackingCount)
                 },
                 icon = if (trackingCount == 0) Icons.Default.Sync else Icons.Default.Done,
                 color = if (trackingCount == 0) defaultActionButtonColor else MaterialTheme.colorScheme.primary,
@@ -209,7 +209,6 @@ fun ExpandableMangaDescription(
     tagsProvider: () -> List<String>?,
     onTagClicked: (String) -> Unit,
 ) {
-    val context = LocalContext.current
     Column(modifier = modifier) {
         val (expanded, onExpanded) = rememberSaveable {
             mutableStateOf(defaultExpandState)
@@ -228,10 +227,7 @@ fun ExpandableMangaDescription(
             modifier = Modifier
                 .padding(top = 8.dp)
                 .padding(horizontal = 16.dp)
-                .clickableNoIndication(
-                    onLongClick = { context.copyToClipboard(desc, desc) },
-                    onClick = { onExpanded(!expanded) },
-                ),
+                .clickableNoIndication { onExpanded(!expanded) },
         )
         val tags = tagsProvider()
         if (!tags.isNullOrEmpty()) {
@@ -295,11 +291,12 @@ private fun MangaAndSourceTitlesLarge(
         MangaCover.Book(
             modifier = Modifier.fillMaxWidth(0.65f),
             data = coverDataProvider(),
+            contentDescription = stringResource(R.string.manga_cover),
             onClick = onCoverClick,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = title.takeIf { it.isNotBlank() } ?: stringResource(R.string.unknown),
+            text = title.ifBlank { stringResource(R.string.unknown_title) },
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.clickableNoIndication(
                 onLongClick = { if (title.isNotBlank()) context.copyToClipboard(title, title) },
@@ -422,11 +419,12 @@ private fun MangaAndSourceTitlesSmall(
                 .sizeIn(maxWidth = 100.dp)
                 .align(Alignment.Top),
             data = coverDataProvider(),
+            contentDescription = stringResource(R.string.manga_cover),
             onClick = onCoverClick,
         )
         Column(modifier = Modifier.padding(start = 16.dp)) {
             Text(
-                text = title.ifBlank { stringResource(R.string.unknown) },
+                text = title.ifBlank { stringResource(R.string.unknown_title) },
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.clickableNoIndication(
                     onLongClick = {
@@ -566,13 +564,15 @@ private fun MangaSummary(
         expandedHeight = expandedPlaceable.maxByOrNull { it.height }?.height?.coerceAtLeast(shrunkHeight) ?: 0
 
         val actualPlaceable = subcompose("description") {
-            Text(
-                text = if (expanded) expandedDescription else shrunkDescription,
-                maxLines = Int.MAX_VALUE,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.secondaryItemAlpha(),
-            )
+            SelectionContainer {
+                Text(
+                    text = if (expanded) expandedDescription else shrunkDescription,
+                    maxLines = Int.MAX_VALUE,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.secondaryItemAlpha(),
+                )
+            }
         }.map { it.measure(constraints) }
 
         val scrimPlaceable = subcompose("scrim") {
@@ -584,7 +584,7 @@ private fun MangaSummary(
                 val image = AnimatedImageVector.animatedVectorResource(R.drawable.anim_caret_down)
                 Icon(
                     painter = rememberAnimatedVectorPainter(image, !expanded),
-                    contentDescription = null,
+                    contentDescription = stringResource(if (expanded) R.string.manga_info_collapse else R.string.manga_info_expand),
                     tint = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.background(Brush.radialGradient(colors = colors.asReversed())),
                 )

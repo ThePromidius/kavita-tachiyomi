@@ -37,10 +37,14 @@ dependencies {
 
     api(kotlinx.coroutines.core)
     api(kotlinx.serialization.json)
+    api(kotlinx.serialization.json.okio)
 
     api(libs.injekt.core)
 
     api(libs.preferencektx)
 
     implementation(androidx.corektx)
+
+    // JavaScript engine
+    implementation(libs.bundles.js.engine)
 }

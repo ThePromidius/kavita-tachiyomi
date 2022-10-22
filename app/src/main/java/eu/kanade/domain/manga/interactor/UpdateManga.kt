@@ -20,8 +20,8 @@ class UpdateManga(
         return mangaRepository.update(mangaUpdate)
     }
 
-    suspend fun awaitAll(values: List<MangaUpdate>): Boolean {
-        return mangaRepository.updateAll(values)
+    suspend fun awaitAll(mangaUpdates: List<MangaUpdate>): Boolean {
+        return mangaRepository.updateAll(mangaUpdates)
     }
 
     suspend fun awaitUpdateFromSource(
@@ -30,8 +30,14 @@ class UpdateManga(
         manualFetch: Boolean,
         coverCache: CoverCache = Injekt.get(),
     ): Boolean {
+        val remoteTitle = try {
+            remoteManga.title
+        } catch (_: UninitializedPropertyAccessException) {
+            ""
+        }
+
         // if the manga isn't a favorite, set its title from source and update in db
-        val title = if (!localManga.favorite) remoteManga.title else null
+        val title = if (remoteTitle.isEmpty() || localManga.favorite) null else remoteTitle
 
         val coverLastModified =
             when {
@@ -49,17 +55,20 @@ class UpdateManga(
                 }
             }
 
+        val thumbnailUrl = remoteManga.thumbnail_url?.takeIf { it.isNotEmpty() }
+
         return mangaRepository.update(
             MangaUpdate(
                 id = localManga.id,
-                title = title?.takeIf { it.isNotEmpty() },
+                title = title,
                 coverLastModified = coverLastModified,
                 author = remoteManga.author,
                 artist = remoteManga.artist,
                 description = remoteManga.description,
                 genre = remoteManga.getGenres(),
-                thumbnailUrl = remoteManga.thumbnail_url?.takeIf { it.isNotEmpty() },
+                thumbnailUrl = thumbnailUrl,
                 status = remoteManga.status.toLong(),
+                updateStrategy = remoteManga.update_strategy,
                 initialized = true,
             ),
         )

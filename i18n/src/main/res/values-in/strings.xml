@@ -29,7 +29,6 @@
     <string name="action_bookmark">Tandai bab</string>
     <string name="action_remove_bookmark">Hapus penanda bab</string>
     <string name="action_delete">Hapus</string>
-    <string name="action_update">Perbarui</string>
     <string name="action_update_library">Perbarui pustaka</string>
     <string name="action_edit">Ubah</string>
     <string name="action_add">Tambah</string>
@@ -57,7 +56,6 @@
     <string name="action_reset">Atur ulang</string>
     <string name="action_undo">Kembalikan</string>
     <string name="action_open_log">Buka log</string>
-    <string name="action_create">Buat</string>
     <string name="name">Nama</string>
     <string name="action_display_grid">Grid kompak</string>
     <string name="action_restore">Pulihkan</string>
@@ -167,13 +165,10 @@
     <string name="password">Kata sandi</string>
     <string name="login">Masuk</string>
     <string name="login_success">Sudah Masuk</string>
-    <string name="invalid_login">Tidak bisa masuk</string>
     <string name="unknown_error">Terdapat suatu kesalahan</string>
     <string name="updating_category">Memperbarui kategori</string>
     <string name="no_more_results">Tidak ada hasil lainnya</string>
     <string name="local_source">Sumber lokal</string>
-    <string name="manga_not_in_db">Manga ini telah dihapus dari database.</string>
-    <string name="description">Deskripsi</string>
     <string name="ongoing">Berlanjut</string>
     <string name="unknown">Tak diketahui</string>
     <string name="licensed">Berlisensi</string>
@@ -185,7 +180,6 @@
     <string name="chapter_paused">Jeda</string>
     <string name="show_title">Judul</string>
     <string name="show_chapter_number">Nomor bab</string>
-    <string name="sorting_mode">Urutkan menurut</string>
     <string name="sort_by_source">Sumber</string>
     <string name="sort_by_number">Nomor bab</string>
     <string name="manga_download">Unduh</string>
@@ -215,7 +209,6 @@
     <string name="cover_updated">Sampul telah diperbarui</string>
     <string name="chapter_progress">Halaman: %1$d</string>
     <string name="no_next_chapter">Bab berikutnya tak ditemukan</string>
-    <string name="no_previous_chapter">Bab sebelumnya tak ditemukan</string>
     <string name="decode_image_error">Gambar tidak dapat dimuat</string>
     <string name="confirm_set_image_as_cover">Gunakan gambar ini sebagai sampul\?</string>
     <string name="download_queue_error">Tidak dapat mengunduh bab. Anda bisa mencoba lagi di bagian unduhan</string>
@@ -272,7 +265,6 @@
     <string name="double_tap_anim_speed_0">Tanpa animasi</string>
     <string name="double_tap_anim_speed_normal">Normal</string>
     <string name="double_tap_anim_speed_fast">Cepat</string>
-    <string name="manga_info_full_title_label">Judul</string>
     <string name="manga_added_library">Ditambahkan ke pustaka</string>
     <string name="manga_removed_library">Dihapus dari pustaka</string>
     <string name="copied_to_clipboard">Tersalin ke papan klip:
@@ -288,7 +280,6 @@
     <string name="track_status">Status</string>
     <string name="track_start_date">Dimulai</string>
     <string name="track_type">Tipe</string>
-    <string name="track_author">Penulis</string>
     <string name="transition_finished">Selesai:</string>
     <string name="transition_current">Saat ini:</string>
     <string name="transition_next">Selanjutnya:</string>
@@ -314,7 +305,6 @@
     <string name="action_webview_forward">Teruskan</string>
     <string name="action_webview_refresh">Muat ulang</string>
     <string name="pref_category_library">Pustaka</string>
-    <string name="invalid_download_dir">Lokasi unduhan tidak valid</string>
     <string name="ext_obsolete">Usang</string>
     <string name="obsolete_extension_message">Ekstensi ini sudah tidak tersedia.</string>
     <string name="pref_date_format">Format tanggal</string>
@@ -409,7 +399,6 @@
     <string name="webtoon_side_padding_20">20%</string>
     <string name="webtoon_side_padding_15">15%</string>
     <string name="vertical_plus_viewer">Tegak kontinu</string>
-    <string name="error_invalid_date_supplied">Tanggal yang salah telah dimasukkan</string>
     <string name="local_source_help_guide">Petunjuk sumber lokal</string>
     <string name="last_used_source">Terakhir digunakan</string>
     <plurals name="download_queue_summary">
@@ -445,7 +434,6 @@
     <string name="backup_restore_missing_sources">Sumber yang hilang:</string>
     <string name="invalid_backup_file_missing_manga">Cadangan tidak berisi manga apapun.</string>
     <string name="invalid_backup_file">Berkas cadangan tidak valid</string>
-    <string name="tracker_not_logged_in">Belum masuk dalam: %1$s</string>
     <string name="sort_by_upload_date">Menurut tanggal pengunggahan</string>
     <string name="action_display_comfortable_grid">Grid nyaman</string>
     <string name="tabs_header">Tab</string>
@@ -473,7 +461,6 @@
     <string name="unknown_author">Penulis tidak diketahui</string>
     <string name="updated_version">Diperbarui ke v%1$s</string>
     <string name="whats_new">Apa yang baru</string>
-    <string name="action_download_unread">Unduh bab yang belum dibaca</string>
     <string name="download_insufficient_space">Tidak dapat mengunduh bab karena ruang penyimpanan rendah</string>
     <string name="action_global_search_query">Pencarian untuk \"%1$s\" secara global</string>
     <string name="pref_category_reading_mode">Mode membaca</string>
@@ -547,7 +534,7 @@
     <string name="pref_create_folder_per_manga_summary">Buat folder sesuai judul manga</string>
     <string name="exclude">Kecuali: %s</string>
     <string name="include">Termasuk: %s</string>
-    <string name="pref_dual_page_split">Bagi dua halaman</string>
+    <string name="pref_dual_page_split">Membagi halaman lebar</string>
     <string name="cancel_all_for_series">Batal semua untuk seri ini</string>
     <string name="update_check_eol">Versi Android ini tidak lagi didukung</string>
     <string name="clipboard_copy_error">Gagal menyalin ke papan klip</string>
@@ -572,8 +559,8 @@
     <string name="local_filter_order_by">Urutkan menurut</string>
     <string name="local_invalid_format">Format bab tidak valid</string>
     <string name="chapter_not_found">Bab tak ditemukan</string>
-    <string name="pref_dual_page_invert_summary">Jika penempatan dari pemisah halaman ganda tidak cocok dengan arah membaca</string>
-    <string name="pref_dual_page_invert">Balikkan penempatan pemisah halaman ganda</string>
+    <string name="pref_dual_page_invert_summary">Jika penempatan halaman lebar terpisah tidak sesuai dengan arah membaca</string>
+    <string name="pref_dual_page_invert">Balikkan penempatan halaman pemisah</string>
     <string name="pref_show_navigation_mode_summary">Tunjukkan secara singkat saat pembaca dibuka</string>
     <string name="pref_library_update_refresh_trackers_summary">Perbarui pelacak ketika memperbarui pustaka</string>
     <string name="pref_library_update_refresh_trackers">Segarkan pelacak secara otomatis</string>
@@ -656,7 +643,7 @@
     <string name="pref_library_update_show_tab_badge">Tampilkan jumlah yang belum dibaca pada ikon Pembaruan</string>
     <string name="ext_update_all">Perbarui semuanya</string>
     <string name="pref_auto_clear_chapter_cache">Bersihkan cache saat aplikasi tertutup</string>
-    <string name="database_clean">Bersihkan database</string>
+    <string name="database_clean">Tidak ada yang perlu dibersihkan</string>
     <string name="clear_database_source_item_count">%1$d manga diluar kategori pustaka pada database</string>
     <string name="extension_api_error">Gagal mendapatkan daftar ekstensi</string>
     <string name="pref_library_update_manga_restriction">Lewati pembaruan judul</string>
@@ -668,7 +655,6 @@
     <string name="library_errors_help">Untuk bantuan cara memperbaiki kesalahan pembaruan pustaka, lihat %1$s</string>
     <string name="save_chapter_as_cbz">Simpan sebagai arsip CBZ</string>
     <string name="action_faq_and_guides">Tanya Jawab dan Panduan</string>
-    <string name="backup_restore_invalid_uri">Kesalahan: URI kosong</string>
     <string name="action_show_manga">Lihat Manga</string>
     <string name="webtoon_side_padding_5">5%</string>
     <string name="action_display_cover_only_grid">Grid sampul saja</string>
@@ -681,7 +667,7 @@
     <string name="skipped_reason_not_caught_up">Dilewati karena ada bab yang belum dibaca</string>
     <string name="skipped_reason_not_started">Dilewati karena tidak ada bab yang dibaca</string>
     <string name="pref_landscape_zoom">Perbesar gambar lanskap</string>
-    <string name="pref_navigate_pan">Navigasikan ke panorama</string>
+    <string name="pref_navigate_pan">Geser gambar lebar saat mengetuk</string>
     <string name="notification_update_skipped">%1$d pembaruan terlewat</string>
     <string name="learn_more">Pelajari lebih lanjut</string>
     <string name="channel_skipped">Terlewat</string>
@@ -746,11 +732,26 @@
         <item quantity="other">Selanjutnya chapter %d yang belum dibaca</item>
     </plurals>
     <string name="download_ahead_info">Hanya berfungsi pada entri di perpustakaan dan jika bab saat ini ditambah yang berikutnya sudah diunduh</string>
-    <string name="remove_manga">Kamu akan menghapus manga ini dari pustaka</string>
+    <string name="remove_manga">Kamu akan menghapus \"%s\" dari pustaka</string>
     <string name="updates_last_update_info">Pustaka terakhir diperbarui: %1$s</string>
     <string name="multi_lang">Multi</string>
     <string name="pref_long_strip_split">Potong gambar panjang (BETA)</string>
     <string name="are_you_sure">Apa kamu yakin\?</string>
     <string name="popular">Popular</string>
     <string name="missing_storage_permission">Izin penyimpanan tidak diberikan</string>
+    <string name="skipped_reason_not_always_update">Dilewati karena seri ini tidak memerlukan pembaruan</string>
+    <string name="action_search_hint">Cari…</string>
+    <string name="pref_browse_summary">Sumber, ekstensi, pencarian global</string>
+    <string name="pref_reader_summary">Mode membaca, tampilan, navigasi</string>
+    <string name="pref_tracking_summary">Sinkronisasi kemajuan satu arah, sinkronisasi yang ditingkatkan</string>
+    <string name="crash_screen_description">%s mengalami kesalahan yang tak terduga. Kami menyarankan Anda mengambil tangkapan layar pesan ini, membuat log kerusakan, dan kemudian membagikannya di saluran dukungan kami di Discord.</string>
+    <string name="pref_downloads_summary">Unduh otomatis, unduh di depan</string>
+    <string name="pref_security_summary">Kunci aplikasi, layar aman</string>
+    <string name="pref_general_summary">Bahasa aplikasi, notifikasi</string>
+    <string name="pref_appearance_summary">Tema, format tanggal &amp; waktu</string>
+    <string name="pref_library_summary">Kategori, pembaruan global</string>
+    <string name="pref_backup_summary">Pencadangan manual &amp; otomatis</string>
+    <string name="pref_advanced_summary">Buat log kerusakan, pengoptimalan baterai</string>
+    <string name="crash_screen_title">Terjadi Kesalahan Yang Tak Terduga</string>
+    <string name="crash_screen_restart_application">Mulai ulang aplikasi</string>
 </resources>

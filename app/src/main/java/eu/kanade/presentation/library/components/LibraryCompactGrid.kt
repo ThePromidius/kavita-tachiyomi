@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,15 +20,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import androidx.compose.ui.util.fastAny
+import eu.kanade.domain.library.model.LibraryManga
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 
 @Composable
 fun LibraryCompactGrid(
     items: List<LibraryItem>,
+    showDownloadBadges: Boolean,
+    showUnreadBadges: Boolean,
+    showLocalBadges: Boolean,
+    showLanguageBadges: Boolean,
     columns: Int,
+    contentPadding: PaddingValues,
     selection: List<LibraryManga>,
     onClick: (LibraryManga) -> Unit,
     onLongClick: (LibraryManga) -> Unit,
@@ -37,6 +45,7 @@ fun LibraryCompactGrid(
     LazyLibraryGrid(
         modifier = Modifier.fillMaxSize(),
         columns = columns,
+        contentPadding = contentPadding,
     ) {
         globalSearchItem(searchQuery, onGlobalSearchClicked)
 
@@ -46,7 +55,11 @@ fun LibraryCompactGrid(
         ) { libraryItem ->
             LibraryCompactGridItem(
                 item = libraryItem,
-                isSelected = libraryItem.manga in selection,
+                showDownloadBadge = showDownloadBadges,
+                showUnreadBadge = showUnreadBadges,
+                showLocalBadge = showLocalBadges,
+                showLanguageBadge = showLanguageBadges,
+                isSelected = selection.fastAny { it.id == libraryItem.libraryManga.id },
                 onClick = onClick,
                 onLongClick = onLongClick,
             )
@@ -57,33 +70,39 @@ fun LibraryCompactGrid(
 @Composable
 fun LibraryCompactGridItem(
     item: LibraryItem,
+    showDownloadBadge: Boolean,
+    showUnreadBadge: Boolean,
+    showLocalBadge: Boolean,
+    showLanguageBadge: Boolean,
     isSelected: Boolean,
     onClick: (LibraryManga) -> Unit,
     onLongClick: (LibraryManga) -> Unit,
 ) {
-    val manga = item.manga
+    val libraryManga = item.libraryManga
+    val manga = libraryManga.manga
     LibraryGridCover(
         modifier = Modifier
             .selectedOutline(isSelected)
             .combinedClickable(
                 onClick = {
-                    onClick(manga)
+                    onClick(libraryManga)
                 },
                 onLongClick = {
-                    onLongClick(manga)
+                    onLongClick(libraryManga)
                 },
             ),
         mangaCover = eu.kanade.domain.manga.model.MangaCover(
-            manga.id!!,
+            manga.id,
             manga.source,
             manga.favorite,
-            manga.thumbnail_url,
-            manga.cover_last_modified,
+            manga.thumbnailUrl,
+            manga.coverLastModified,
         ),
-        downloadCount = item.downloadCount,
-        unreadCount = item.unreadCount,
-        isLocal = item.isLocal,
-        language = item.sourceLanguage,
+        item = item,
+        showDownloadBadge = showDownloadBadge,
+        showUnreadBadge = showUnreadBadge,
+        showLocalBadge = showLocalBadge,
+        showLanguageBadge = showLanguageBadge,
     ) {
         Box(
             modifier = Modifier
@@ -114,6 +133,7 @@ fun BoxScope.MangaGridCompactText(
         color = Color.White,
         fontSize = 12.sp,
         maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
         style = MaterialTheme.typography.titleSmall.copy(
             shadow = Shadow(
                 color = Color.Black,

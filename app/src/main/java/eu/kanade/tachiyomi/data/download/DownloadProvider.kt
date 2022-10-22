@@ -3,10 +3,10 @@ package eu.kanade.tachiyomi.data.download
 import android.content.Context
 import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
+import eu.kanade.domain.download.service.DownloadPreferences
 import eu.kanade.domain.manga.model.Manga
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.logcat
@@ -14,7 +14,8 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import logcat.LogPriority
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import eu.kanade.domain.chapter.model.Chapter as DomainChapter
 
 /**
@@ -23,23 +24,24 @@ import eu.kanade.domain.chapter.model.Chapter as DomainChapter
  *
  * @param context the application context.
  */
-class DownloadProvider(private val context: Context) {
-
-    private val preferences: PreferencesHelper by injectLazy()
+class DownloadProvider(
+    private val context: Context,
+    downloadPreferences: DownloadPreferences = Injekt.get(),
+) {
 
     private val scope = MainScope()
 
     /**
      * The root directory for downloads.
      */
-    private var downloadsDir = preferences.downloadsDirectory().get().let {
+    private var downloadsDir = downloadPreferences.downloadsDirectory().get().let {
         val dir = UniFile.fromUri(context, it.toUri())
         DiskUtil.createNoMediaFile(dir, context)
         dir
     }
 
     init {
-        preferences.downloadsDirectory().changes()
+        downloadPreferences.downloadsDirectory().changes()
             .onEach { downloadsDir = UniFile.fromUri(context, it.toUri()) }
             .launchIn(scope)
     }
@@ -57,7 +59,7 @@ class DownloadProvider(private val context: Context) {
                 .createDirectory(getMangaDirName(mangaTitle))
         } catch (e: Throwable) {
             logcat(LogPriority.ERROR, e) { "Invalid download directory" }
-            throw Exception(context.getString(R.string.invalid_download_dir))
+            throw Exception(context.getString(R.string.invalid_location, downloadsDir))
         }
     }
 

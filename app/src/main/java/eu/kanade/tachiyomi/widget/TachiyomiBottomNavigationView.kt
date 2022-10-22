@@ -8,12 +8,24 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.ViewPropertyAnimator
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.customview.view.AbsSavedState
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.applySystemAnimatorScale
+import eu.kanade.tachiyomi.util.system.pxToDp
 
 class TachiyomiBottomNavigationView @JvmOverloads constructor(
     context: Context,
@@ -50,6 +62,11 @@ class TachiyomiBottomNavigationView @JvmOverloads constructor(
         super.setTranslationY(translationY)
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        bottomNavPadding = h.pxToDp.dp
+    }
+
     /**
      * Shows this view up.
      */
@@ -63,6 +80,7 @@ class TachiyomiBottomNavigationView @JvmOverloads constructor(
             SLIDE_UP_ANIMATION_DURATION,
             LinearOutSlowInInterpolator(),
         )
+        bottomNavPadding = height.pxToDp.dp
     }
 
     /**
@@ -78,6 +96,7 @@ class TachiyomiBottomNavigationView @JvmOverloads constructor(
             SLIDE_DOWN_ANIMATION_DURATION,
             FastOutLinearInInterpolator(),
         )
+        bottomNavPadding = 0.dp
     }
 
     private fun animateTranslation(targetY: Float, duration: Long, interpolator: TimeInterpolator) {
@@ -137,5 +156,22 @@ class TachiyomiBottomNavigationView @JvmOverloads constructor(
 
         private const val SLIDE_UP_ANIMATION_DURATION = 225L
         private const val SLIDE_DOWN_ANIMATION_DURATION = 175L
+
+        private var bottomNavPadding by mutableStateOf(0.dp)
+
+        /**
+         * Merges [bottomNavPadding] to the origin's [PaddingValues] bottom side.
+         */
+        @ReadOnlyComposable
+        @Composable
+        fun withBottomNavPadding(origin: PaddingValues = PaddingValues()): PaddingValues {
+            val layoutDirection = LocalLayoutDirection.current
+            return PaddingValues(
+                start = origin.calculateStartPadding(layoutDirection),
+                top = origin.calculateTopPadding(),
+                end = origin.calculateEndPadding(layoutDirection),
+                bottom = max(origin.calculateBottomPadding(), bottomNavPadding),
+            )
+        }
     }
 }

@@ -1,5 +1,6 @@
 package eu.kanade.domain.source.service
 
+import eu.kanade.domain.library.model.LibraryDisplayMode
 import eu.kanade.domain.source.interactor.SetMigrateSorting
 import eu.kanade.tachiyomi.core.preference.PreferenceStore
 import eu.kanade.tachiyomi.core.preference.getEnum
@@ -9,25 +10,27 @@ class SourcePreferences(
     private val preferenceStore: PreferenceStore,
 ) {
 
-    fun enabledLanguages() = this.preferenceStore.getStringSet("source_languages", LocaleHelper.getDefaultEnabledLanguages())
+    fun sourceDisplayMode() = preferenceStore.getObject("pref_display_mode_catalogue", LibraryDisplayMode.default, LibraryDisplayMode.Serializer::serialize, LibraryDisplayMode.Serializer::deserialize)
 
-    fun disabledSources() = this.preferenceStore.getStringSet("hidden_catalogues", emptySet())
+    fun enabledLanguages() = preferenceStore.getStringSet("source_languages", LocaleHelper.getDefaultEnabledLanguages())
 
-    fun pinnedSources() = this.preferenceStore.getStringSet("pinned_catalogues", emptySet())
+    fun disabledSources() = preferenceStore.getStringSet("hidden_catalogues", emptySet())
 
-    fun duplicatePinnedSources() = this.preferenceStore.getBoolean("duplicate_pinned_sources", false)
+    fun pinnedSources() = preferenceStore.getStringSet("pinned_catalogues", emptySet())
 
-    fun lastUsedSource() = this.preferenceStore.getLong("last_catalogue_source", -1)
+    fun duplicatePinnedSources() = preferenceStore.getBoolean("duplicate_pinned_sources", false)
 
-    fun showNsfwSource() = this.preferenceStore.getBoolean("show_nsfw_source", true)
+    fun lastUsedSource() = preferenceStore.getLong("last_catalogue_source", -1)
 
-    fun migrationSortingMode() = this.preferenceStore.getEnum("pref_migration_sorting", SetMigrateSorting.Mode.ALPHABETICAL)
+    fun showNsfwSource() = preferenceStore.getBoolean("show_nsfw_source", true)
 
-    fun migrationSortingDirection() = this.preferenceStore.getEnum("pref_migration_direction", SetMigrateSorting.Direction.ASCENDING)
+    fun migrationSortingMode() = preferenceStore.getEnum("pref_migration_sorting", SetMigrateSorting.Mode.ALPHABETICAL)
 
-    fun extensionUpdatesCount() = this.preferenceStore.getInt("ext_updates_count", 0)
+    fun migrationSortingDirection() = preferenceStore.getEnum("pref_migration_direction", SetMigrateSorting.Direction.ASCENDING)
 
-    fun trustedSignatures() = this.preferenceStore.getStringSet("trusted_signatures", emptySet())
+    fun extensionUpdatesCount() = preferenceStore.getInt("ext_updates_count", 0)
 
-    fun searchPinnedSourcesOnly() = this.preferenceStore.getBoolean("search_pinned_sources_only", false)
+    fun trustedSignatures() = preferenceStore.getStringSet("trusted_signatures", emptySet())
+
+    fun searchPinnedSourcesOnly() = preferenceStore.getBoolean("search_pinned_sources_only", false)
 }

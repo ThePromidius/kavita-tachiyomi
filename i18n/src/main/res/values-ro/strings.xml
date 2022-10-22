@@ -8,7 +8,7 @@
     <string name="history">Istoric</string>
     <string name="label_settings">Setări</string>
     <string name="label_download_queue">Descărcări în așteptare</string>
-    <string name="label_library">Biblioteca</string>
+    <string name="label_library">Bibliotecă</string>
     <string name="label_recent_manga">Istoric</string>
     <string name="label_recent_updates">Actualizări</string>
     <string name="label_backup">Backup și restaurare</string>
@@ -34,7 +34,6 @@
     <string name="action_bookmark">Marchează Capitolul</string>
     <string name="action_remove_bookmark">Demarcați capitolul</string>
     <string name="action_delete">Șterge</string>
-    <string name="action_update">Actualizează</string>
     <string name="action_update_library">Actualizează biblioteca</string>
     <string name="action_edit">Modifică</string>
     <string name="action_add">Adaugă</string>
@@ -63,7 +62,6 @@
     <string name="action_reset">Resetează</string>
     <string name="action_undo">Anulează</string>
     <string name="action_open_log">Deschide jurnal</string>
-    <string name="action_create">Creează</string>
     <string name="action_restore">Restaurează</string>
     <string name="loading">Se încarcă…</string>
     <string name="app_not_available">Aplicația nu este accesibilă</string>
@@ -194,7 +192,6 @@
     <string name="password">Parolă</string>
     <string name="login">Autentificare</string>
     <string name="login_success">Autentificat</string>
-    <string name="invalid_login">Nu s-a putut face autentificarea</string>
     <string name="unknown_error">Eroare necunoscută</string>
     <string name="updating_category">Categorie in curs de actualizare</string>
     <string name="local_source_badge">Local</string>
@@ -204,13 +201,10 @@
     <string name="action_global_search_hint">Căutare globală…</string>
     <string name="latest">Cel mai recent</string>
     <string name="browse">Caută</string>
-    <string name="manga_not_in_db">Acest manga a fost eliminat din baza de date.</string>
-    <string name="description">Descriere</string>
     <string name="ongoing">În desfășurare</string>
     <string name="unknown">Necunoscut</string>
     <string name="licensed">Licențiat</string>
     <string name="remove_from_library">Elimină din bibliotecă</string>
-    <string name="manga_info_full_title_label">Titlu</string>
     <string name="manga_added_library">Adăugat la bibliotecă</string>
     <string name="manga_removed_library">Eliminat din bibliotecă</string>
     <string name="delete_downloads_for_manga">Ștergeți capitolele descărcate\?</string>
@@ -223,7 +217,6 @@
     <string name="chapter_paused">Întrerupt</string>
     <string name="show_title">Titlul sursei</string>
     <string name="show_chapter_number">Numărul capitolului</string>
-    <string name="sorting_mode">Mod de sortare</string>
     <string name="sort_by_source">După sursă</string>
     <string name="sort_by_number">După numărul capitolului</string>
     <string name="manga_download">Descarcă</string>
@@ -248,7 +241,6 @@
     <string name="track_status">Status</string>
     <string name="track_start_date">Început</string>
     <string name="track_type">Tip</string>
-    <string name="track_author">Autor</string>
     <string name="error_category_exists">O categorie cu acest nume deja există!</string>
     <string name="snack_categories_deleted">Categoriile au fost șterse</string>
     <string name="dialog_with_checkbox_remove_description">Acest lucru va șterge data citirii acestui capitol. Ești sigur\?</string>
@@ -260,7 +252,6 @@
     <string name="cover_updated">Copertă actualizată</string>
     <string name="chapter_progress">Pagina: %1$d</string>
     <string name="no_next_chapter">Capitolul următor nu a fost găsit</string>
-    <string name="no_previous_chapter">Capitolul precedent nu a fost găsit</string>
     <string name="decode_image_error">Imaginea nu a putut să fie încărcată</string>
     <string name="confirm_set_image_as_cover">Folosiți această imagine ca și copertă\?</string>
     <string name="transition_finished">Terminat:</string>
@@ -316,7 +307,6 @@
     <string name="action_webview_forward">Înainte</string>
     <string name="action_webview_refresh">Actualizați</string>
     <string name="pref_category_library">Biblioteca</string>
-    <string name="invalid_download_dir">Locație de descărcare nevalidă</string>
     <string name="ext_obsolete">Învechit</string>
     <string name="obsolete_extension_message">Această extensie nu mai este disponibilă.</string>
     <string name="pref_date_format">Formatul datei</string>
@@ -421,7 +411,6 @@
     <string name="pref_confirm_exit">Confirmare ieșire</string>
     <string name="confirm_exit">Apăsați din nou pentru a ieși</string>
     <string name="label_downloaded_only">Doar descărcate</string>
-    <string name="error_invalid_date_supplied">Data furnizată este invalidă</string>
     <string name="restoring_backup_canceled">Restaurare anulată</string>
     <string name="restore_in_progress">Restaurarea este deja în curs de desfășurare</string>
     <string name="backup_in_progress">Crearea copiei de rezervă este deja în curs de desfășurare</string>
@@ -463,7 +452,6 @@
     <string name="action_migrate">Migrează</string>
     <string name="label_data">Date</string>
     <string name="invalid_backup_file">Fișierul de rezerva este invalid</string>
-    <string name="tracker_not_logged_in">Nu ești autentificat: %1$s</string>
     <string name="unofficial_extension_message">Aceasta extensie nu face parte din lista oficială de extensii Tachiyomi.</string>
     <string name="ext_unofficial">Neoficial</string>
     <string name="page_list_empty_error">Nu s-au găsit pagini</string>
@@ -493,7 +481,6 @@
     <string name="unknown_author">Autor necunoscut</string>
     <string name="updated_version">Actualizat la v%1$s</string>
     <string name="whats_new">Ce este nou</string>
-    <string name="action_download_unread">Descărcați capitolele necitite</string>
     <string name="download_insufficient_space">Nu s-au putut descărca capitole din cauza spațiului de stocare redus</string>
     <string name="action_global_search_query">Căutați „%1$s” la nivel global</string>
     <string name="pref_category_reading_mode">Mod citire</string>
@@ -517,9 +504,9 @@
     <string name="no_pinned_sources">Nu aveți surse fixate</string>
     <string name="no_chapters_error">Nu a fost găsit niciun capitol</string>
     <plurals name="missing_chapters_warning">
-        <item quantity="one">Săriți peste %d capitolul, fie că sursa nu îl are, fie că a fost filtrat</item>
-        <item quantity="few">Săriți peste %d capitole, fie că sursa nu le au, fie că au fost filtrate</item>
-        <item quantity="other">Săriți peste %d capitole, fie că sursa nu le au, fie că au fost filtrate</item>
+        <item quantity="one">Se trece peste capitolul %d, fie sursa nu îl are, fie a fost filtrat</item>
+        <item quantity="few">Se trece peste capitolele %d, fie sursa nu le are, fie au fost filtrate</item>
+        <item quantity="other">Se trece peste capitolele %d, fie sursa nu le are, fie au fost filtrate</item>
     </plurals>
     <string name="chapter_settings_updated">S-au actualizat setările implicite ale capitolului</string>
     <string name="share_page_info">%1$s: %2$s, pagina %3$d</string>
@@ -543,7 +530,7 @@
     <string name="file_picker_error">Nicio aplicație de ales fișiere nu a fost găsite</string>
     <string name="myanimelist_relogin">Te rugăm să te loghezi la MAL din nou</string>
     <string name="pref_dual_page_invert">Inversează plasamentul paginilor duble despărțite</string>
-    <string name="pref_dual_page_split">împărțirea paginilor duble</string>
+    <string name="pref_dual_page_split">Împărțire pagini duble</string>
     <string name="pref_show_navigation_mode_summary">Afișați pe scurt când cititorul este deschis</string>
     <string name="pref_show_navigation_mode">Afișați suprapunerea zonelor de atingere</string>
     <string name="action_desc">Descendent</string>
@@ -621,10 +608,9 @@
     <string name="delete_category">Ștergeți categoria</string>
     <string name="pref_inverted_colors">Inversate</string>
     <string name="enhanced_services">Servicii îmbunătățite</string>
-    <string name="backup_restore_invalid_uri">Eroare: URI gol</string>
     <string name="webview_data_deleted">Datele WebView au fost șterse</string>
     <string name="about_dont_kill_my_app">Unii producători au restricții suplimentare privind aplicațiile care opresc serviciile de fundal. Acest site web conține mai multe informații despre cum să le rezolvați.</string>
-    <string name="database_clean">Bază de date curațată</string>
+    <string name="database_clean">Nimic de curățat</string>
     <string name="help_translate">Ajută la traducere</string>
     <string name="source_unsupported">Sursa nu este acceptată</string>
     <string name="network_not_metered">Numai în rețea necontorizată</string>
@@ -648,7 +634,7 @@
     <string name="alignment_top">Partea de sus</string>
     <string name="alignment_bottom">Partea de jos</string>
     <string name="enhanced_tracking_info">Servicii care oferă caracteristici îmbunătățite pentru anumite surse. Manga sunt urmărite în mod automat atunci când sunt adăugate la biblioteca dumneavoastră.</string>
-    <string name="backup_info">Backupurile automate sunt foarte recomandate. Ar trebui să păstrați copii și în alte locuri.</string>
+    <string name="backup_info">Ar trebui să păstrați copii ale backupurilor și în alte locuri.</string>
     <string name="split_tall_images">Împărțiți imagini înalte</string>
     <string name="split_tall_images_summary">Îmbunătățește performanța cititorului</string>
     <string name="action_close">Închide</string>
@@ -710,19 +696,19 @@
     <string name="cant_open_last_read_chapter">Nu se poate deschide ultimul capitol citit</string>
     <string name="extension_api_error">Nu s-a putut obține lista de extensii</string>
     <string name="ext_install_service_notif">Se instalează extensia…</string>
-    <string name="ext_installer_pref">Installer</string>
+    <string name="ext_installer_pref">Program instalare</string>
     <plurals name="relative_time">
         <item quantity="one">Ieri</item>
-        <item quantity="few"/>
-        <item quantity="other"/>
+        <item quantity="few">Acum %1$d zile</item>
+        <item quantity="other">Acum %1$d zile</item>
     </plurals>
     <string name="pref_create_folder_per_manga_summary">Creează foldere în funcție de titlul manga</string>
     <string name="automatic_background">Automat</string>
     <string name="on">Pornit</string>
     <plurals name="next_unread_chapters">
         <item quantity="one">Următorul capitol necitit</item>
-        <item quantity="few"/>
-        <item quantity="other"/>
+        <item quantity="few">Următoarele %d capitole necitite</item>
+        <item quantity="other">Următoarele %d capitole necitite</item>
     </plurals>
     <string name="are_you_sure">Ești sigur\?</string>
     <string name="error_saving_picture">Eroare la salvarea imaginii</string>
@@ -734,4 +720,44 @@
     <string name="description_placeholder">Fără descriere</string>
     <string name="notification_incognito_text">Dezactivează modul incognito</string>
     <string name="download_ahead_info">Funcționează numai pentru intrările din bibliotecă și dacă capitolul curent și următorul sunt deja descărcate</string>
+    <string name="library_errors_help">Pentru ajutor în cum se repară erori de actualizări de bibliotecă, vezi %1$s</string>
+    <string name="pref_grayscale">Alb-negru</string>
+    <string name="rotation_landscape">Peisaj</string>
+    <string name="pref_duplicate_pinned_sources_summary">Repetați sursele fixate în grupele lor de limbaje</string>
+    <string name="pref_duplicate_pinned_sources">Arătați sursele fixate duplicate</string>
+    <string name="learn_more">Apasă pentru a afla mai multe</string>
+    <string name="pref_landscape_zoom">Măriți imaginea în format peisaj</string>
+    <string name="pref_reset_viewer_flags">Resetați setările de cititor per serie</string>
+    <string name="pref_tablet_ui_mode">Interfață de tabletă</string>
+    <string name="action_track">Urmăriți</string>
+    <string name="pref_reset_viewer_flags_summary">Resetați modul de citire si orientare pentru toate seriile</string>
+    <string name="download_ahead">Descarcă înainte</string>
+    <string name="multi_lang">Multi</string>
+    <string name="notification_size_warning">Actualizări mari dăunează surselor și pot duce la actualizări mai lente și creșterea nivelului de utilizare a bateriei. Apasă pentru a afla mai multe.</string>
+    <string name="label_background_activity">Activități în fundal</string>
+    <string name="update_check_open">Deschide pe GitHub</string>
+    <string name="update_check_fdroid_migration_info">O versiune nouă este disponibilă ca release oficial. Apasă pentru a învăța cum să migrezi de la release-urile neoficiale F-Droid.</string>
+    <string name="not_installed">Nu este instalat</string>
+    <string name="action_sort_count">Manga totale</string>
+    <string name="action_search_hint">Caută…</string>
+    <string name="theme_tidalwave">Tsunami</string>
+    <string name="ext_info_age_rating">Vârsta minimă</string>
+    <string name="ext_installer_legacy">Versiune veche</string>
+    <string name="pref_long_strip_split">Împărțiți imaginile înalte (BETA)</string>
+    <string name="notification_updating">Actualizăm biblioteca… (%1$d/%2$d)</string>
+    <string name="tracking_guide">Ghid de urmărire</string>
+    <string name="rotation_reverse_portrait">Format portret întors</string>
+    <string name="missing_storage_permission">Permisiunile de stocare nu au fost acceptate</string>
+    <string name="pref_reset_viewer_flags_success">Toate setările de citire au fost resetate</string>
+    <string name="popular">Popular</string>
+    <string name="error_no_match">Nimic asemănător nu a fost găsit</string>
+    <string name="remove_manga">Ești pe cale să elimini această manga din biblioteca ta</string>
+    <string name="source_filter_empty_screen">Nici o sursă instalată nu a fost găsită</string>
+    <string name="appwidget_updates_description">Vezi manga recent actualizate</string>
+    <string name="pref_reset_viewer_flags_error">Nu am putut reseta setările de citire</string>
+    <string name="source_empty_screen">Nici o sursă găsită</string>
+    <string name="skipped_reason_not_always_update">Ignorat deoarece seria nu necesită actualizări</string>
+    <string name="updates_last_update_info">Ultima actualizare a bibliotecii : %1$s</string>
+    <string name="empty_screen">Ei bine, nu ar trebui sa vezi asta...</string>
+    <string name="download_notifier_split_page_path_not_found">Nu am putut găsi calea paginii %d</string>
 </resources>

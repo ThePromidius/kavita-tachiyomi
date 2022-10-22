@@ -71,19 +71,20 @@ class DownloadQueue(
         updatedRelay.call(Unit)
     }
 
-    fun getActiveDownloads(): Observable<Download> =
+    private fun getActiveDownloads(): Observable<Download> =
         Observable.from(this).filter { download -> download.status == Download.State.DOWNLOADING }
 
-    @Deprecated("Use getStatusAsFlow instead")
-    fun getStatusObservable(): Observable<Download> = statusSubject.onBackpressureBuffer()
+    private fun getStatusObservable(): Observable<Download> = statusSubject
+        .startWith(getActiveDownloads())
+        .onBackpressureBuffer()
 
-    fun getStatusAsFlow(): Flow<Download> = getStatusObservable().asFlow()
+    fun statusFlow(): Flow<Download> = getStatusObservable().asFlow()
 
-    fun getUpdatedObservable(): Observable<List<Download>> = updatedRelay.onBackpressureBuffer()
+    private fun getUpdatedObservable(): Observable<List<Download>> = updatedRelay.onBackpressureBuffer()
         .startWith(Unit)
         .map { this }
 
-    fun getUpdatedAsFlow(): Flow<List<Download>> = getUpdatedObservable().asFlow()
+    fun updatedFlow(): Flow<List<Download>> = getUpdatedObservable().asFlow()
 
     private fun setPagesFor(download: Download) {
         if (download.status == Download.State.DOWNLOADED || download.status == Download.State.ERROR) {
@@ -91,8 +92,7 @@ class DownloadQueue(
         }
     }
 
-    @Deprecated("Use getProgressAsFlow instead")
-    fun getProgressObservable(): Observable<Download> {
+    private fun getProgressObservable(): Observable<Download> {
         return statusSubject.onBackpressureBuffer()
             .startWith(getActiveDownloads())
             .flatMap { download ->
@@ -111,9 +111,7 @@ class DownloadQueue(
             .filter { it.status == Download.State.DOWNLOADING }
     }
 
-    fun getProgressAsFlow(): Flow<Download> {
-        return getProgressObservable().asFlow()
-    }
+    fun progressFlow(): Flow<Download> = getProgressObservable().asFlow()
 
     private fun setPagesSubject(pages: List<Page>?, subject: PublishSubject<Int>?) {
         pages?.forEach { it.setStatusSubject(subject) }

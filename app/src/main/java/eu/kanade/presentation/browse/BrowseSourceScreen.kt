@@ -1,20 +1,28 @@
 package eu.kanade.presentation.browse
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -34,6 +42,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import eu.kanade.data.source.NoResultsException
+import eu.kanade.domain.library.model.LibraryDisplayMode
 import eu.kanade.domain.manga.model.Manga
 import eu.kanade.domain.source.interactor.GetRemoteManga
 import eu.kanade.presentation.browse.components.BrowseSourceComfortableGrid
@@ -41,22 +50,22 @@ import eu.kanade.presentation.browse.components.BrowseSourceCompactGrid
 import eu.kanade.presentation.browse.components.BrowseSourceList
 import eu.kanade.presentation.browse.components.BrowseSourceToolbar
 import eu.kanade.presentation.components.AppStateBanners
+import eu.kanade.presentation.components.Divider
 import eu.kanade.presentation.components.EmptyScreen
+import eu.kanade.presentation.components.EmptyScreenAction
 import eu.kanade.presentation.components.ExtendedFloatingActionButton
 import eu.kanade.presentation.components.LoadingScreen
 import eu.kanade.presentation.components.Scaffold
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourcePresenter
-import eu.kanade.tachiyomi.ui.library.setting.LibraryDisplayMode
 import eu.kanade.tachiyomi.ui.more.MoreController
-import eu.kanade.tachiyomi.widget.EmptyView
 
 @Composable
 fun BrowseSourceScreen(
     presenter: BrowseSourcePresenter,
     navigateUp: () -> Unit,
-    onFabClick: () -> Unit,
+    openFilterSheet: () -> Unit,
     onMangaClick: (Manga) -> Unit,
     onMangaLongClick: (Manga) -> Unit,
     onWebViewClick: () -> Unit,
@@ -76,8 +85,8 @@ fun BrowseSourceScreen(
     }
 
     Scaffold(
-        topBar = { scrollBehavior ->
-            Column {
+        topBar = {
+            Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
                 BrowseSourceToolbar(
                     state = presenter,
                     source = presenter.source!!,
@@ -86,44 +95,19 @@ fun BrowseSourceScreen(
                     navigateUp = navigateUp,
                     onWebViewClick = onWebViewClick,
                     onHelpClick = onHelpClick,
-                    onSearch = { presenter.search() },
-                    scrollBehavior = scrollBehavior,
+                    onSearch = { presenter.search(it) },
                 )
 
-                AppStateBanners(downloadedOnlyMode, incognitoMode)
-            }
-        },
-        floatingActionButton = {
-            BrowseSourceFloatingActionButton(
-                isVisible = presenter.filters.isNotEmpty() && presenter.currentFilter is BrowseSourcePresenter.Filter.UserInput,
-                onFabClick = onFabClick,
-            )
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-    ) { paddingValues ->
-        BrowseSourceContent(
-            state = presenter,
-            mangaList = mangaList,
-            getMangaState = { presenter.getManga(it) },
-            columns = columns,
-            displayMode = presenter.displayMode,
-            snackbarHostState = snackbarHostState,
-            contentPadding = paddingValues,
-            onWebViewClick = onWebViewClick,
-            onHelpClick = { uriHandler.openUri(MoreController.URL_HELP) },
-            onLocalSourceHelpClick = onHelpClick,
-            onMangaClick = onMangaClick,
-            onMangaLongClick = onMangaLongClick,
-            header = {
                 Row(
+                    modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     FilterChip(
                         selected = presenter.currentFilter == BrowseSourcePresenter.Filter.Popular,
                         onClick = {
-                            presenter.resetFilter()
+                            presenter.reset()
                             presenter.search(GetRemoteManga.QUERY_POPULAR)
                         },
                         leadingIcon = {
@@ -142,7 +126,7 @@ fun BrowseSourceScreen(
                         FilterChip(
                             selected = presenter.currentFilter == BrowseSourcePresenter.Filter.Latest,
                             onClick = {
-                                presenter.resetFilter()
+                                presenter.reset()
                                 presenter.search(GetRemoteManga.QUERY_LATEST)
                             },
                             leadingIcon = {
@@ -161,7 +145,7 @@ fun BrowseSourceScreen(
                     if (presenter.filters.isNotEmpty()) {
                         FilterChip(
                             selected = presenter.currentFilter is BrowseSourcePresenter.Filter.UserInput,
-                            onClick = onFabClick,
+                            onClick = openFilterSheet,
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Outlined.FilterList,
@@ -176,7 +160,29 @@ fun BrowseSourceScreen(
                         )
                     }
                 }
-            },
+
+                Divider()
+
+                AppStateBanners(downloadedOnlyMode, incognitoMode)
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+    ) { paddingValues ->
+        BrowseSourceContent(
+            state = presenter,
+            mangaList = mangaList,
+            getMangaState = { presenter.getManga(it) },
+            columns = columns,
+            displayMode = presenter.displayMode,
+            snackbarHostState = snackbarHostState,
+            contentPadding = paddingValues,
+            onWebViewClick = onWebViewClick,
+            onHelpClick = { uriHandler.openUri(MoreController.URL_HELP) },
+            onLocalSourceHelpClick = onHelpClick,
+            onMangaClick = onMangaClick,
+            onMangaLongClick = onMangaLongClick,
         )
     }
 }
@@ -202,7 +208,6 @@ fun BrowseSourceContent(
     state: BrowseSourceState,
     mangaList: LazyPagingItems<Manga>,
     getMangaState: @Composable ((Manga) -> State<Manga>),
-    header: (@Composable () -> Unit)? = null,
     columns: GridCells,
     displayMode: LibraryDisplayMode,
     snackbarHostState: SnackbarHostState,
@@ -246,13 +251,29 @@ fun BrowseSourceContent(
             message = getErrorMessage(errorState),
             actions = if (state.source is LocalSource) {
                 listOf(
-                    EmptyView.Action(R.string.local_source_help_guide, R.drawable.ic_help_24dp) { onLocalSourceHelpClick() },
+                    EmptyScreenAction(
+                        stringResId = R.string.local_source_help_guide,
+                        icon = Icons.Default.HelpOutline,
+                        onClick = onLocalSourceHelpClick,
+                    ),
                 )
             } else {
                 listOf(
-                    EmptyView.Action(R.string.action_retry, R.drawable.ic_refresh_24dp) { mangaList.refresh() },
-                    EmptyView.Action(R.string.action_open_in_web_view, R.drawable.ic_public_24dp) { onWebViewClick() },
-                    EmptyView.Action(R.string.label_help, R.drawable.ic_help_24dp) { onHelpClick() },
+                    EmptyScreenAction(
+                        stringResId = R.string.action_retry,
+                        icon = Icons.Default.Refresh,
+                        onClick = mangaList::refresh,
+                    ),
+                    EmptyScreenAction(
+                        stringResId = R.string.action_open_in_web_view,
+                        icon = Icons.Default.Public,
+                        onClick = onWebViewClick,
+                    ),
+                    EmptyScreenAction(
+                        stringResId = R.string.label_help,
+                        icon = Icons.Default.HelpOutline,
+                        onClick = onHelpClick,
+                    ),
                 )
             },
         )
@@ -274,7 +295,6 @@ fun BrowseSourceContent(
                 contentPadding = contentPadding,
                 onMangaClick = onMangaClick,
                 onMangaLongClick = onMangaLongClick,
-                header = header,
             )
         }
         LibraryDisplayMode.List -> {
@@ -284,7 +304,6 @@ fun BrowseSourceContent(
                 contentPadding = contentPadding,
                 onMangaClick = onMangaClick,
                 onMangaLongClick = onMangaLongClick,
-                header = header,
             )
         }
         else -> {
@@ -295,7 +314,6 @@ fun BrowseSourceContent(
                 contentPadding = contentPadding,
                 onMangaClick = onMangaClick,
                 onMangaLongClick = onMangaLongClick,
-                header = header,
             )
         }
     }
