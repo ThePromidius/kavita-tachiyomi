@@ -169,6 +169,23 @@ class SettingsTrackingScreen : SearchableSettings {
                         },
                         logout = trackManager.komga::logout,
                     ),
+                    Preference.PreferenceItem.TrackingPreference(
+                        title = stringResource(trackManager.kavita.nameRes()),
+                        service = trackManager.kavita,
+                        login = {
+                            val sourceManager = Injekt.get<SourceManager>()
+                            val acceptedSources = trackManager.kavita.getAcceptedSources()
+                            val hasValidSourceInstalled = sourceManager.getCatalogueSources()
+                                .any { it::class.qualifiedName in acceptedSources }
+
+                            if (hasValidSourceInstalled) {
+                                trackManager.kavita.loginNoop()
+                            } else {
+                                context.toast(R.string.tracker_kavita_warning, Toast.LENGTH_LONG)
+                            }
+                        },
+                        logout = trackManager.kavita::logout,
+                    ),
                     Preference.PreferenceItem.InfoPreference(stringResource(R.string.enhanced_tracking_info)),
                 ),
             ),
