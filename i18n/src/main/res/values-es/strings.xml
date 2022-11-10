@@ -184,7 +184,7 @@
     <string name="update_check_look_for_updates">Buscando actualizaciones…</string>
     <!--UpdateCheck Notifications-->
     <string name="update_check_notification_download_in_progress">Descargando…</string>
-    <string name="update_check_notification_download_complete">Toca aquí para instalar</string>
+    <string name="update_check_notification_download_complete">Toca aquí para instalar la actualización</string>
     <string name="update_check_notification_download_error">Error de descarga</string>
     <string name="update_check_notification_update_available">¡Nueva versión disponible!</string>
     <!--Content Description-->
@@ -340,7 +340,7 @@
     <string name="action_webview_refresh">Actualizar</string>
     <string name="pref_category_library">Biblioteca</string>
     <string name="ext_obsolete">Obsoleto</string>
-    <string name="obsolete_extension_message">Esta extensión ya no está disponible.</string>
+    <string name="obsolete_extension_message">Esta extensión ya no está disponible. Puede que no funcione bien y te cause problemas con el resto de la aplicación, te recomendamos desinstalarla.</string>
     <string name="pref_date_format">Formato de fecha</string>
     <string name="pref_category_library_update">Actualización global</string>
     <string name="logout">Cerrar sesión</string>
@@ -613,9 +613,6 @@
     <string name="pref_dark_theme_pure_black">Modo oscuro negro puro</string>
     <string name="theme_tako">Tako</string>
     <string name="restrictions">Restricciones: %s</string>
-    <string name="alignment_bottom">Inferior</string>
-    <string name="alignment_center">Centrada</string>
-    <string name="alignment_top">Superior</string>
     <string name="theme_yotsuba">Yotsuba</string>
     <string name="theme_yinyang">Yin y yang</string>
     <string name="theme_greenapple">Manzana verde</string>
@@ -649,7 +646,6 @@
     <string name="categorized_display_settings">Hacer que cada categoría tenga sus propios ajustes de ordenar y mostrar</string>
     <string name="pref_library_update_refresh_trackers_summary">Actualizar los servicios de seguimiento al actualizar la biblioteca</string>
     <string name="pref_library_update_refresh_trackers">Actualizar automáticamente los servicios de seguimiento</string>
-    <string name="pref_side_nav_icon_alignment">Alineación del icono de navegación lateral</string>
     <string name="label_background_activity">Actividad en segundo plano</string>
     <string name="action_track">Seguir</string>
     <string name="getting_started_guide">Guía de introducción</string>
@@ -671,7 +667,6 @@
     <string name="pref_relative_time_short">Cortas (Hoy, ayer)</string>
     <string name="pref_relative_format">Marcas de tiempo relativas</string>
     <string name="pref_category_timestamps">Marcas de tiempo</string>
-    <string name="pref_category_navigation">Navegación</string>
     <string name="theme_tealturquoise">Azul marino y turquesa</string>
     <string name="pref_category_appearance">Apariencia</string>
     <string name="confirm_lock_change">Identifícate para confirmar el cambio</string>
@@ -791,7 +786,7 @@
     </plurals>
     <string name="are_you_sure">¿Estás seguro\?</string>
     <string name="pref_long_strip_split">Separar imágenes más altas que anchas (en desarrollo)</string>
-    <string name="updates_last_update_info">La biblioteca se actualizó: %1$s</string>
+    <string name="updates_last_update_info">La biblioteca se actualizó: %s</string>
     <string name="remove_manga">Estás a punto de borrar «%s» de tu biblioteca</string>
     <string name="popular">Popular</string>
     <string name="multi_lang">Multi</string>
@@ -812,4 +807,12 @@
     <string name="crash_screen_title">Tenemos un problema</string>
     <string name="crash_screen_restart_application">Reiniciar la aplicación</string>
     <string name="unknown_title">Título desconocido</string>
+    <string name="invalid_location">Ubicación incorrecta: %s</string>
+    <string name="updates_last_update_info_just_now">Ahora mismo</string>
+    <string name="error_user_agent_string_invalid">El nombre de agente de usuario no vale</string>
+    <string name="download_notifier_cache_renewal">Reindexando descargas</string>
+    <string name="channel_downloader_cache">Caché de descargas</string>
+    <string name="action_open_random_manga">Abrir manga al azar</string>
+    <string name="information_no_entries_found">No se ha encontrado ningún manga en esta categoría</string>
+    <string name="fdroid_warning">No damos soporte oficial a las versiones de F-Droid. Toca para más información.</string>
 </resources>

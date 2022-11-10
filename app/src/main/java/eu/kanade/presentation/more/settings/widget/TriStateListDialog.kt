@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckBox
 import androidx.compose.material.icons.rounded.CheckBoxOutlineBlank
@@ -79,7 +78,7 @@ fun <T> TriStateListDialog(
                             val state = selected[index]
                             Row(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .clip(MaterialTheme.shapes.small)
                                     .clickable {
                                         selected[index] = when (state) {
                                             State.UNCHECKED -> State.CHECKED
@@ -103,7 +102,13 @@ fun <T> TriStateListDialog(
                                     } else {
                                         MaterialTheme.colorScheme.primary
                                     },
-                                    contentDescription = null,
+                                    contentDescription = stringResource(
+                                        when (state) {
+                                            State.UNCHECKED -> R.string.not_selected
+                                            State.CHECKED -> R.string.selected
+                                            State.INVERSED -> R.string.disabled
+                                        },
+                                    ),
                                 )
                                 Text(text = itemLabel(item))
                             }
@@ -117,7 +122,7 @@ fun <T> TriStateListDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(android.R.string.cancel))
+                Text(text = stringResource(R.string.action_cancel))
             }
         },
         confirmButton = {

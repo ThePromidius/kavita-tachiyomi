@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -35,6 +34,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -43,6 +43,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.util.fastAll
+import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastMap
 import eu.kanade.domain.chapter.model.Chapter
 import eu.kanade.presentation.components.ChapterDownloadAction
 import eu.kanade.presentation.components.ExtendedFloatingActionButton
@@ -204,7 +207,7 @@ private fun MangaScreenSmallImpl(
     val chapters = remember(state) { state.processedChapters.toList() }
 
     val internalOnBackPressed = {
-        if (chapters.any { it.selected }) {
+        if (chapters.fastAny { it.selected }) {
             onAllChapterSelected(false)
         } else {
             onBackClicked()
@@ -213,8 +216,6 @@ private fun MangaScreenSmallImpl(
     BackHandler(onBack = internalOnBackPressed)
 
     Scaffold(
-        modifier = Modifier
-            .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal).asPaddingValues()),
         topBar = {
             val firstVisibleItemIndex by remember {
                 derivedStateOf { chapterListState.firstVisibleItemIndex }
@@ -260,24 +261,22 @@ private fun MangaScreenSmallImpl(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = chapters.any { !it.chapter.read } && chapters.none { it.selected },
+                visible = chapters.fastAny { !it.chapter.read } && chapters.fastAll { !it.selected },
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
                 ExtendedFloatingActionButton(
                     text = {
-                        val id = if (chapters.any { it.chapter.read }) {
+                        val id = if (chapters.fastAny { it.chapter.read }) {
                             R.string.action_resume
                         } else {
                             R.string.action_start
                         }
                         Text(text = stringResource(id))
                     },
-                    icon = { Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null) },
+                    icon = { Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null) },
                     onClick = onContinueReading,
                     expanded = chapterListState.isScrollingUp() || chapterListState.isScrolledToEnd(),
-                    modifier = Modifier
-                        .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues()),
                 )
             }
         },
@@ -287,17 +286,21 @@ private fun MangaScreenSmallImpl(
         SwipeRefresh(
             refreshing = state.isRefreshingData,
             onRefresh = onRefresh,
-            enabled = chapters.none { it.selected },
+            enabled = chapters.fastAll { !it.selected },
             indicatorPadding = contentPadding,
         ) {
+            val layoutDirection = LocalLayoutDirection.current
             VerticalFastScroller(
                 listState = chapterListState,
                 topContentPadding = topPadding,
+                endContentPadding = contentPadding.calculateEndPadding(layoutDirection),
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxHeight(),
                     state = chapterListState,
                     contentPadding = PaddingValues(
+                        start = contentPadding.calculateStartPadding(layoutDirection),
+                        end = contentPadding.calculateEndPadding(layoutDirection),
                         bottom = contentPadding.calculateBottomPadding(),
                     ),
                 ) {
@@ -351,6 +354,7 @@ private fun MangaScreenSmallImpl(
                         contentType = MangaScreenItem.CHAPTER_HEADER,
                     ) {
                         ChapterHeader(
+                            enabled = chapters.fastAll { !it.selected },
                             chapterCount = chapters.size,
                             onClick = onFilterClicked,
                         )
@@ -410,11 +414,11 @@ fun MangaScreenLargeImpl(
     val chapters = remember(state) { state.processedChapters.toList() }
 
     val insetPadding = WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
-    val (topBarHeight, onTopBarHeightChanged) = remember { mutableStateOf(0) }
+    var topBarHeight by remember { mutableStateOf(0) }
     SwipeRefresh(
         refreshing = state.isRefreshingData,
         onRefresh = onRefresh,
-        enabled = chapters.none { it.selected },
+        enabled = chapters.fastAll { !it.selected },
         indicatorPadding = PaddingValues(
             start = insetPadding.calculateStartPadding(layoutDirection),
             top = with(density) { topBarHeight.toDp() },
@@ -424,7 +428,7 @@ fun MangaScreenLargeImpl(
         val chapterListState = rememberLazyListState()
 
         val internalOnBackPressed = {
-            if (chapters.any { it.selected }) {
+            if (chapters.fastAny { it.selected }) {
                 onAllChapterSelected(false)
             } else {
                 onBackClicked()
@@ -433,12 +437,11 @@ fun MangaScreenLargeImpl(
         BackHandler(onBack = internalOnBackPressed)
 
         Scaffold(
-            modifier = Modifier.padding(insetPadding),
             topBar = {
                 MangaToolbar(
-                    modifier = Modifier.onSizeChanged { onTopBarHeightChanged(it.height) },
+                    modifier = Modifier.onSizeChanged { topBarHeight = it.height },
                     title = state.manga.title,
-                    titleAlphaProvider = { if (chapters.any { it.selected }) 1f else 0f },
+                    titleAlphaProvider = { if (chapters.fastAny { it.selected }) 1f else 0f },
                     backgroundAlphaProvider = { 1f },
                     hasFilters = state.manga.chaptersFiltered(),
                     incognitoMode = state.isIncognitoMode,
@@ -473,33 +476,36 @@ fun MangaScreenLargeImpl(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
             floatingActionButton = {
                 AnimatedVisibility(
-                    visible = chapters.any { !it.chapter.read } && chapters.none { it.selected },
+                    visible = chapters.fastAny { !it.chapter.read } && chapters.fastAll { !it.selected },
                     enter = fadeIn(),
                     exit = fadeOut(),
                 ) {
                     ExtendedFloatingActionButton(
                         text = {
-                            val id = if (chapters.any { it.chapter.read }) {
+                            val id = if (chapters.fastAny { it.chapter.read }) {
                                 R.string.action_resume
                             } else {
                                 R.string.action_start
                             }
                             Text(text = stringResource(id))
                         },
-                        icon = { Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null) },
+                        icon = { Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null) },
                         onClick = onContinueReading,
                         expanded = chapterListState.isScrollingUp() || chapterListState.isScrolledToEnd(),
-                        modifier = Modifier
-                            .padding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom).asPaddingValues()),
                     )
                 }
             },
         ) { contentPadding ->
             TwoPanelBox(
+                modifier = Modifier.padding(
+                    start = contentPadding.calculateStartPadding(layoutDirection),
+                    end = contentPadding.calculateEndPadding(layoutDirection),
+                ),
                 startContent = {
                     Column(
                         modifier = Modifier
-                            .verticalScroll(rememberScrollState()),
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = contentPadding.calculateBottomPadding()),
                     ) {
                         MangaInfoBox(
                             isTabletUi = true,
@@ -548,6 +554,7 @@ fun MangaScreenLargeImpl(
                                 contentType = MangaScreenItem.CHAPTER_HEADER,
                             ) {
                                 ChapterHeader(
+                                    enabled = chapters.fastAll { !it.selected },
                                     chapterCount = chapters.size,
                                     onClick = onFilterButtonClicked,
                                 )
@@ -582,29 +589,29 @@ private fun SharedMangaBottomActionMenu(
         visible = selected.isNotEmpty(),
         modifier = modifier.fillMaxWidth(fillFraction),
         onBookmarkClicked = {
-            onMultiBookmarkClicked.invoke(selected.map { it.chapter }, true)
-        }.takeIf { selected.any { !it.chapter.bookmark } },
+            onMultiBookmarkClicked.invoke(selected.fastMap { it.chapter }, true)
+        }.takeIf { selected.fastAny { !it.chapter.bookmark } },
         onRemoveBookmarkClicked = {
-            onMultiBookmarkClicked.invoke(selected.map { it.chapter }, false)
-        }.takeIf { selected.all { it.chapter.bookmark } },
+            onMultiBookmarkClicked.invoke(selected.fastMap { it.chapter }, false)
+        }.takeIf { selected.fastAll { it.chapter.bookmark } },
         onMarkAsReadClicked = {
-            onMultiMarkAsReadClicked(selected.map { it.chapter }, true)
-        }.takeIf { selected.any { !it.chapter.read } },
+            onMultiMarkAsReadClicked(selected.fastMap { it.chapter }, true)
+        }.takeIf { selected.fastAny { !it.chapter.read } },
         onMarkAsUnreadClicked = {
-            onMultiMarkAsReadClicked(selected.map { it.chapter }, false)
-        }.takeIf { selected.any { it.chapter.read || it.chapter.lastPageRead > 0L } },
+            onMultiMarkAsReadClicked(selected.fastMap { it.chapter }, false)
+        }.takeIf { selected.fastAny { it.chapter.read || it.chapter.lastPageRead > 0L } },
         onMarkPreviousAsReadClicked = {
             onMarkPreviousAsReadClicked(selected[0].chapter)
         }.takeIf { selected.size == 1 },
         onDownloadClicked = {
             onDownloadChapter!!(selected.toList(), ChapterDownloadAction.START)
         }.takeIf {
-            onDownloadChapter != null && selected.any { it.downloadState != Download.State.DOWNLOADED }
+            onDownloadChapter != null && selected.fastAny { it.downloadState != Download.State.DOWNLOADED }
         },
         onDeleteClicked = {
-            onMultiDeleteClicked(selected.map { it.chapter })
+            onMultiDeleteClicked(selected.fastMap { it.chapter })
         }.takeIf {
-            onDownloadChapter != null && selected.any { it.downloadState == Download.State.DOWNLOADED }
+            onDownloadChapter != null && selected.fastAny { it.downloadState == Download.State.DOWNLOADED }
         },
     )
 }
@@ -629,6 +636,7 @@ private fun LazyListScope.sharedChapterItems(
             read = chapterItem.chapter.read,
             bookmark = chapterItem.chapter.bookmark,
             selected = chapterItem.selected,
+            downloadIndicatorEnabled = chapters.fastAll { !it.selected },
             downloadStateProvider = { chapterItem.downloadState },
             downloadProgressProvider = { chapterItem.downloadProgress },
             onLongClick = {
@@ -660,7 +668,7 @@ private fun onChapterItemClick(
 ) {
     when {
         chapterItem.selected -> onToggleSelection(false)
-        chapters.any { it.selected } -> onToggleSelection(true)
+        chapters.fastAny { it.selected } -> onToggleSelection(true)
         else -> onChapterClicked(chapterItem.chapter)
     }
 }

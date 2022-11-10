@@ -2,15 +2,12 @@ package eu.kanade.presentation.updates
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.outlined.FlipToBack
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -23,31 +20,32 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.util.fastAll
+import androidx.compose.ui.util.fastAny
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.ChapterDownloadAction
 import eu.kanade.presentation.components.EmptyScreen
-import eu.kanade.presentation.components.LazyColumn
+import eu.kanade.presentation.components.FastScrollLazyColumn
 import eu.kanade.presentation.components.LoadingScreen
 import eu.kanade.presentation.components.MangaBottomActionMenu
 import eu.kanade.presentation.components.Scaffold
 import eu.kanade.presentation.components.SwipeRefresh
-import eu.kanade.presentation.components.VerticalFastScroller
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.recent.updates.UpdatesItem
-import eu.kanade.tachiyomi.ui.recent.updates.UpdatesPresenter
-import eu.kanade.tachiyomi.ui.recent.updates.UpdatesPresenter.Dialog
-import eu.kanade.tachiyomi.ui.recent.updates.UpdatesPresenter.Event
+import eu.kanade.tachiyomi.ui.updates.UpdatesItem
+import eu.kanade.tachiyomi.ui.updates.UpdatesPresenter
+import eu.kanade.tachiyomi.ui.updates.UpdatesPresenter.Dialog
+import eu.kanade.tachiyomi.ui.updates.UpdatesPresenter.Event
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.widget.TachiyomiBottomNavigationView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Date
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun UpdateScreen(
@@ -123,7 +121,6 @@ private fun UpdateScreenContent(
     onClickCover: (UpdatesItem) -> Unit,
 ) {
     val context = LocalContext.current
-    val updatesListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
 
@@ -135,41 +132,33 @@ private fun UpdateScreenContent(
             scope.launch {
                 // Fake refresh status but hide it after a second as it's a long running task
                 isRefreshing = true
-                delay(1000)
+                delay(1.seconds)
                 isRefreshing = false
             }
         },
         enabled = presenter.selectionMode.not(),
         indicatorPadding = contentPadding,
     ) {
-        VerticalFastScroller(
-            listState = updatesListState,
-            topContentPadding = contentPadding.calculateTopPadding(),
-            endContentPadding = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
+        FastScrollLazyColumn(
+            contentPadding = contentPadding,
         ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxHeight(),
-                state = updatesListState,
-                contentPadding = contentPadding,
-            ) {
-                if (presenter.lastUpdated > 0L) {
-                    updatesLastUpdatedItem(presenter.lastUpdated)
-                }
-
-                updatesUiItems(
-                    uiModels = presenter.uiModels,
-                    selectionMode = presenter.selectionMode,
-                    onUpdateSelected = presenter::toggleSelection,
-                    onClickCover = onClickCover,
-                    onClickUpdate = {
-                        val intent = ReaderActivity.newIntent(context, it.update.mangaId, it.update.chapterId)
-                        context.startActivity(intent)
-                    },
-                    onDownloadChapter = presenter::downloadChapters,
-                    relativeTime = presenter.relativeTime,
-                    dateFormat = presenter.dateFormat,
-                )
+            if (presenter.lastUpdated > 0L) {
+                updatesLastUpdatedItem(presenter.lastUpdated)
             }
+
+            updatesUiItems(
+                uiModels = presenter.uiModels,
+                selectionMode = presenter.selectionMode,
+                onUpdateSelected = presenter::toggleSelection,
+                onClickCover = onClickCover,
+                onClickUpdate = {
+                    val intent = ReaderActivity.newIntent(context, it.update.mangaId, it.update.chapterId)
+                    context.startActivity(intent)
+                },
+                onDownloadChapter = presenter::downloadChapters,
+                relativeTime = presenter.relativeTime,
+                dateFormat = presenter.dateFormat,
+            )
         }
     }
 
@@ -214,7 +203,7 @@ private fun UpdatesAppBar(
         actions = {
             IconButton(onClick = onUpdateLibrary) {
                 Icon(
-                    imageVector = Icons.Default.Refresh,
+                    imageVector = Icons.Outlined.Refresh,
                     contentDescription = stringResource(R.string.action_update_library),
                 )
             }
@@ -224,13 +213,13 @@ private fun UpdatesAppBar(
         actionModeActions = {
             IconButton(onClick = onSelectAll) {
                 Icon(
-                    imageVector = Icons.Default.SelectAll,
+                    imageVector = Icons.Outlined.SelectAll,
                     contentDescription = stringResource(R.string.action_select_all),
                 )
             }
             IconButton(onClick = onInvertSelection) {
                 Icon(
-                    imageVector = Icons.Default.FlipToBack,
+                    imageVector = Icons.Outlined.FlipToBack,
                     contentDescription = stringResource(R.string.action_select_inverse),
                 )
             }
@@ -254,24 +243,24 @@ private fun UpdatesBottomBar(
         modifier = Modifier.fillMaxWidth(),
         onBookmarkClicked = {
             onMultiBookmarkClicked.invoke(selected, true)
-        }.takeIf { selected.any { !it.update.bookmark } },
+        }.takeIf { selected.fastAny { !it.update.bookmark } },
         onRemoveBookmarkClicked = {
             onMultiBookmarkClicked.invoke(selected, false)
-        }.takeIf { selected.all { it.update.bookmark } },
+        }.takeIf { selected.fastAll { it.update.bookmark } },
         onMarkAsReadClicked = {
             onMultiMarkAsReadClicked(selected, true)
-        }.takeIf { selected.any { !it.update.read } },
+        }.takeIf { selected.fastAny { !it.update.read } },
         onMarkAsUnreadClicked = {
             onMultiMarkAsReadClicked(selected, false)
-        }.takeIf { selected.any { it.update.read } },
+        }.takeIf { selected.fastAny { it.update.read } },
         onDownloadClicked = {
             onDownloadChapter(selected, ChapterDownloadAction.START)
         }.takeIf {
-            selected.any { it.downloadStateProvider() != Download.State.DOWNLOADED }
+            selected.fastAny { it.downloadStateProvider() != Download.State.DOWNLOADED }
         },
         onDeleteClicked = {
             onMultiDeleteClicked(selected)
-        }.takeIf { selected.any { it.downloadStateProvider() == Download.State.DOWNLOADED } },
+        }.takeIf { selected.fastAny { it.downloadStateProvider() == Download.State.DOWNLOADED } },
     )
 }
 

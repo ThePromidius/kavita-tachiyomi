@@ -10,21 +10,24 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.lang.launchIO
+import eu.kanade.tachiyomi.util.lang.launchNonCancellable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.withTimeout
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Cache where we dump the downloads directory from the filesystem. This class is needed because
@@ -40,12 +43,12 @@ class DownloadCache(
     private val downloadPreferences: DownloadPreferences = Injekt.get(),
 ) {
 
-    // This is just a mechanism of notifying consumers of updates to the cache, the value itself
-    // is meaningless.
-    private val _state: MutableStateFlow<Long> = MutableStateFlow(0L)
-    val changes = _state.asStateFlow()
+    private val _changes: Channel<Unit> = Channel(Channel.UNLIMITED)
+    val changes = _changes.receiveAsFlow().onStart { emit(Unit) }
 
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    private val notifier by lazy { DownloadNotifier(context) }
 
     /**
      * The interval after which this cache should be invalidated. 1 hour shouldn't cause major
@@ -204,7 +207,7 @@ class DownloadCache(
     fun removeManga(manga: Manga) {
         val sourceDir = rootDownloadsDir.sourceDirs[manga.source] ?: return
         val mangaDirName = provider.getMangaDirName(manga.title)
-        if (mangaDirName in sourceDir.mangaDirs) {
+        if (sourceDir.mangaDirs.containsKey(mangaDirName)) {
             sourceDir.mangaDirs -= mangaDirName
         }
 
@@ -240,57 +243,62 @@ class DownloadCache(
         }
 
         renewalJob = scope.launchIO {
-            var sources = getSources()
+            try {
+                notifier.onCacheProgress()
 
-            // Try to wait until extensions and sources have loaded
-            withTimeout(30000L) {
-                while (!extensionManager.isInitialized) {
-                    delay(2000L)
-                }
+                var sources = getSources()
 
-                while (sources.isEmpty()) {
-                    delay(2000L)
-                    sources = getSources()
-                }
-            }
+                // Try to wait until extensions and sources have loaded
+                withTimeout(30.seconds) {
+                    while (!extensionManager.isInitialized) {
+                        delay(2.seconds)
+                    }
 
-            val sourceDirs = rootDownloadsDir.dir.listFiles().orEmpty()
-                .associate { it.name to SourceDirectory(it) }
-                .mapNotNullKeys { entry ->
-                    sources.find {
-                        provider.getSourceDirName(it).equals(entry.key, ignoreCase = true)
-                    }?.id
-                }
-
-            rootDownloadsDir.sourceDirs = sourceDirs
-
-            sourceDirs.values
-                .map { sourceDir ->
-                    async {
-                        val mangaDirs = sourceDir.dir.listFiles().orEmpty()
-                            .filterNot { it.name.isNullOrBlank() }
-                            .associate { it.name!! to MangaDirectory(it) }
-                            .toMutableMap()
-
-                        sourceDir.mangaDirs = mangaDirs
-
-                        mangaDirs.values.forEach { mangaDir ->
-                            val chapterDirs = mangaDir.dir.listFiles().orEmpty()
-                                .mapNotNull { chapterDir ->
-                                    chapterDir.name
-                                        ?.replace(".cbz", "")
-                                        ?.takeUnless { it.endsWith(Downloader.TMP_DIR_SUFFIX) }
-                                }
-                                .toMutableSet()
-
-                            mangaDir.chapterDirs = chapterDirs
-                        }
+                    while (sources.isEmpty()) {
+                        delay(2.seconds)
+                        sources = getSources()
                     }
                 }
-                .awaitAll()
 
-            lastRenew = System.currentTimeMillis()
-            notifyChanges()
+                val sourceDirs = rootDownloadsDir.dir.listFiles().orEmpty()
+                    .associate { it.name to SourceDirectory(it) }
+                    .mapNotNullKeys { entry ->
+                        sources.find {
+                            provider.getSourceDirName(it).equals(entry.key, ignoreCase = true)
+                        }?.id
+                    }
+
+                rootDownloadsDir.sourceDirs = sourceDirs
+
+                sourceDirs.values
+                    .map { sourceDir ->
+                        async {
+                            val mangaDirs = sourceDir.dir.listFiles().orEmpty()
+                                .filterNot { it.name.isNullOrBlank() }
+                                .associate { it.name!! to MangaDirectory(it) }
+
+                            sourceDir.mangaDirs = ConcurrentHashMap(mangaDirs)
+
+                            mangaDirs.values.forEach { mangaDir ->
+                                val chapterDirs = mangaDir.dir.listFiles().orEmpty()
+                                    .mapNotNull { chapterDir ->
+                                        chapterDir.name
+                                            ?.replace(".cbz", "")
+                                            ?.takeUnless { it.endsWith(Downloader.TMP_DIR_SUFFIX) }
+                                    }
+                                    .toMutableSet()
+
+                                mangaDir.chapterDirs = chapterDirs
+                            }
+                        }
+                    }
+                    .awaitAll()
+
+                lastRenew = System.currentTimeMillis()
+                notifyChanges()
+            } finally {
+                notifier.dismissCacheProgress()
+            }
         }
     }
 
@@ -299,13 +307,15 @@ class DownloadCache(
     }
 
     private fun notifyChanges() {
-        _state.value += 1
+        scope.launchNonCancellable {
+            _changes.send(Unit)
+        }
     }
 
     /**
      * Returns a new map containing only the key entries of [transform] that are not null.
      */
-    private inline fun <K, V, R> Map<out K, V>.mapNotNullKeys(transform: (Map.Entry<K?, V>) -> R?): MutableMap<R, V> {
+    private inline fun <K, V, R> Map<out K, V>.mapNotNullKeys(transform: (Map.Entry<K?, V>) -> R?): ConcurrentHashMap<R, V> {
         val mutableMap = ConcurrentHashMap<R, V>()
         forEach { element -> transform(element)?.let { mutableMap[it] = element.value } }
         return mutableMap
@@ -317,7 +327,7 @@ class DownloadCache(
  */
 private class RootDirectory(
     val dir: UniFile,
-    var sourceDirs: MutableMap<Long, SourceDirectory> = mutableMapOf(),
+    var sourceDirs: ConcurrentHashMap<Long, SourceDirectory> = ConcurrentHashMap(),
 )
 
 /**
@@ -325,7 +335,7 @@ private class RootDirectory(
  */
 private class SourceDirectory(
     val dir: UniFile,
-    var mangaDirs: MutableMap<String, MangaDirectory> = mutableMapOf(),
+    var mangaDirs: ConcurrentHashMap<String, MangaDirectory> = ConcurrentHashMap(),
 )
 
 /**

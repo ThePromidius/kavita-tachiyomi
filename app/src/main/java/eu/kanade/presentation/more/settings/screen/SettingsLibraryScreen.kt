@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.util.fastMap
 import androidx.core.content.ContextCompat
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.bluelinelabs.conductor.Router
@@ -124,9 +125,9 @@ class SettingsLibraryScreen : SearchableSettings {
 
         // For default category
         val ids = listOf(libraryPreferences.defaultCategory().defaultValue()) +
-            allCategories.map { it.id.toInt() }
+            allCategories.fastMap { it.id.toInt() }
         val labels = listOf(stringResource(R.string.default_category_summary)) +
-            allCategories.map { it.visualName(context) }
+            allCategories.fastMap { it.visualName(context) }
 
         return Preference.PreferenceGroup(
             title = stringResource(R.string.categories),
@@ -177,28 +178,6 @@ class SettingsLibraryScreen : SearchableSettings {
 
         val libraryUpdateInterval by libraryUpdateIntervalPref.collectAsState()
 
-        val deviceRestrictionEntries = mapOf(
-            DEVICE_ONLY_ON_WIFI to stringResource(R.string.connected_to_wifi),
-            DEVICE_NETWORK_NOT_METERED to stringResource(R.string.network_not_metered),
-            DEVICE_CHARGING to stringResource(R.string.charging),
-            DEVICE_BATTERY_NOT_LOW to stringResource(R.string.battery_not_low),
-        )
-        val deviceRestrictions = libraryUpdateDeviceRestrictionPref.collectAsState()
-            .value
-            .sorted()
-            .map { deviceRestrictionEntries.getOrElse(it) { it } }
-            .let { if (it.isEmpty()) stringResource(R.string.none) else it.joinToString() }
-
-        val mangaRestrictionEntries = mapOf(
-            MANGA_HAS_UNREAD to stringResource(R.string.pref_update_only_completely_read),
-            MANGA_NON_READ to stringResource(R.string.pref_update_only_started),
-            MANGA_NON_COMPLETED to stringResource(R.string.pref_update_only_non_completed),
-        )
-        val mangaRestrictions = libraryUpdateMangaRestrictionPref.collectAsState()
-            .value
-            .map { mangaRestrictionEntries.getOrElse(it) { it } }
-            .let { if (it.isEmpty()) stringResource(R.string.none) else it.joinToString() }
-
         val included by libraryUpdateCategoriesPref.collectAsState()
         val excluded by libraryUpdateCategoriesExcludePref.collectAsState()
         var showDialog by rememberSaveable { mutableStateOf(false) }
@@ -224,7 +203,6 @@ class SettingsLibraryScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     pref = libraryUpdateIntervalPref,
                     title = stringResource(R.string.pref_library_update_interval),
-                    subtitle = "%s",
                     entries = mapOf(
                         0 to stringResource(R.string.update_never),
                         12 to stringResource(R.string.update_12hour),
@@ -242,8 +220,13 @@ class SettingsLibraryScreen : SearchableSettings {
                     pref = libraryUpdateDeviceRestrictionPref,
                     enabled = libraryUpdateInterval > 0,
                     title = stringResource(R.string.pref_library_update_restriction),
-                    subtitle = stringResource(R.string.restrictions, deviceRestrictions),
-                    entries = deviceRestrictionEntries,
+                    subtitle = stringResource(R.string.restrictions),
+                    entries = mapOf(
+                        DEVICE_ONLY_ON_WIFI to stringResource(R.string.connected_to_wifi),
+                        DEVICE_NETWORK_NOT_METERED to stringResource(R.string.network_not_metered),
+                        DEVICE_CHARGING to stringResource(R.string.charging),
+                        DEVICE_BATTERY_NOT_LOW to stringResource(R.string.battery_not_low),
+                    ),
                     onValueChanged = {
                         // Post to event looper to allow the preference to be updated.
                         ContextCompat.getMainExecutor(context).execute { LibraryUpdateJob.setupTask(context) }
@@ -253,8 +236,11 @@ class SettingsLibraryScreen : SearchableSettings {
                 Preference.PreferenceItem.MultiSelectListPreference(
                     pref = libraryUpdateMangaRestrictionPref,
                     title = stringResource(R.string.pref_library_update_manga_restriction),
-                    subtitle = mangaRestrictions,
-                    entries = mangaRestrictionEntries,
+                    entries = mapOf(
+                        MANGA_HAS_UNREAD to stringResource(R.string.pref_update_only_completely_read),
+                        MANGA_NON_READ to stringResource(R.string.pref_update_only_started),
+                        MANGA_NON_COMPLETED to stringResource(R.string.pref_update_only_non_completed),
+                    ),
                 ),
                 Preference.PreferenceItem.TextPreference(
                     title = stringResource(R.string.categories),
@@ -341,7 +327,7 @@ class SettingsLibraryScreen : SearchableSettings {
             },
             dismissButton = {
                 TextButton(onClick = onDismissRequest) {
-                    Text(text = stringResource(android.R.string.cancel))
+                    Text(text = stringResource(R.string.action_cancel))
                 }
             },
             confirmButton = {

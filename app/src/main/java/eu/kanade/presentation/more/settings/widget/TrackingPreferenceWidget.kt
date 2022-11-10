@@ -10,9 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,8 +20,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.LocalPreferenceHighlighted
+import eu.kanade.tachiyomi.R
 
 @Composable
 fun TrackingPreferenceWidget(
@@ -45,7 +46,7 @@ fun TrackingPreferenceWidget(
             Box(
                 modifier = Modifier
                     .size(48.dp)
-                    .background(color = Color(logoColor), shape = RoundedCornerShape(8.dp))
+                    .background(color = Color(logoColor), shape = MaterialTheme.shapes.small)
                     .padding(4.dp),
                 contentAlignment = Alignment.Center,
             ) {
@@ -65,12 +66,12 @@ fun TrackingPreferenceWidget(
             )
             if (checked) {
                 Icon(
-                    imageVector = Icons.Default.Check,
+                    imageVector = Icons.Outlined.Done,
                     modifier = Modifier
                         .padding(4.dp)
                         .size(32.dp),
                     tint = Color(0xFF4CAF50),
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.login_success),
                 )
             }
         }

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
@@ -53,13 +52,13 @@ import eu.kanade.tachiyomi.ui.browse.BrowseController
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.GlobalSearchController
 import eu.kanade.tachiyomi.ui.download.DownloadController
+import eu.kanade.tachiyomi.ui.history.HistoryController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaController
 import eu.kanade.tachiyomi.ui.more.MoreController
 import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
-import eu.kanade.tachiyomi.ui.recent.history.HistoryController
-import eu.kanade.tachiyomi.ui.recent.updates.UpdatesController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.ui.updates.UpdatesController
 import eu.kanade.tachiyomi.util.lang.launchIO
 import eu.kanade.tachiyomi.util.lang.launchUI
 import eu.kanade.tachiyomi.util.preference.asHotFlow
@@ -78,6 +77,7 @@ import logcat.LogPriority
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : BaseActivity() {
 
@@ -156,18 +156,6 @@ class MainActivity : BaseActivity() {
             elapsed <= SPLASH_MIN_DURATION || (!ready && elapsed <= SPLASH_MAX_DURATION)
         }
         setSplashScreenExitAnimation(splashScreen)
-
-        if (binding.sideNav != null) {
-            uiPreferences.sideNavIconAlignment()
-                .asHotFlow {
-                    binding.sideNav?.menuGravity = when (it) {
-                        1 -> Gravity.CENTER
-                        2 -> Gravity.BOTTOM
-                        else -> Gravity.TOP
-                    }
-                }
-                .launchIn(lifecycleScope)
-        }
 
         nav.setOnItemSelectedListener { item ->
             val id = item.itemId
@@ -550,7 +538,7 @@ class MainActivity : BaseActivity() {
     private suspend fun resetExitConfirmation() {
         isConfirmingExit = true
         val toast = toast(R.string.confirm_exit, Toast.LENGTH_LONG)
-        delay(2000)
+        delay(2.seconds)
         toast.cancel()
         isConfirmingExit = false
     }

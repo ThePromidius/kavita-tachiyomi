@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.ConcurrentHashMap
 
 class SourceManager(
     private val context: Context,
@@ -31,15 +32,9 @@ class SourceManager(
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
-    private var sourcesMap = emptyMap<Long, Source>()
-        set(value) {
-            field = value
-            sourcesMapFlow.value = field
-        }
+    private val sourcesMapFlow = MutableStateFlow(ConcurrentHashMap<Long, Source>())
 
-    private val sourcesMapFlow = MutableStateFlow(sourcesMap)
-
-    private val stubSourcesMap = mutableMapOf<Long, StubSource>()
+    private val stubSourcesMap = ConcurrentHashMap<Long, StubSource>()
 
     val catalogueSources: Flow<List<CatalogueSource>> = sourcesMapFlow.map { it.values.filterIsInstance<CatalogueSource>() }
     val onlineSources: Flow<List<HttpSource>> = catalogueSources.map { sources -> sources.filterIsInstance<HttpSource>() }
@@ -48,14 +43,14 @@ class SourceManager(
         scope.launch {
             extensionManager.installedExtensionsFlow
                 .collectLatest { extensions ->
-                    val mutableMap = mutableMapOf<Long, Source>(LocalSource.ID to LocalSource(context))
+                    val mutableMap = ConcurrentHashMap<Long, Source>(mapOf(LocalSource.ID to LocalSource(context)))
                     extensions.forEach { extension ->
                         extension.sources.forEach {
                             mutableMap[it.id] = it
                             registerStubSource(it.toSourceData())
                         }
                     }
-                    sourcesMap = mutableMap
+                    sourcesMapFlow.value = mutableMap
                 }
         }
 
@@ -71,18 +66,18 @@ class SourceManager(
     }
 
     fun get(sourceKey: Long): Source? {
-        return sourcesMap[sourceKey]
+        return sourcesMapFlow.value[sourceKey]
     }
 
     fun getOrStub(sourceKey: Long): Source {
-        return sourcesMap[sourceKey] ?: stubSourcesMap.getOrPut(sourceKey) {
+        return sourcesMapFlow.value[sourceKey] ?: stubSourcesMap.getOrPut(sourceKey) {
             runBlocking { createStubSource(sourceKey) }
         }
     }
 
-    fun getOnlineSources() = sourcesMap.values.filterIsInstance<HttpSource>()
+    fun getOnlineSources() = sourcesMapFlow.value.values.filterIsInstance<HttpSource>()
 
-    fun getCatalogueSources() = sourcesMap.values.filterIsInstance<CatalogueSource>()
+    fun getCatalogueSources() = sourcesMapFlow.value.values.filterIsInstance<CatalogueSource>()
 
     fun getStubSources(): List<StubSource> {
         val onlineSourceIds = getOnlineSources().map { it.id }

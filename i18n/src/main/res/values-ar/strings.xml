@@ -629,10 +629,6 @@
     <string name="categorized_display_settings">اعدادات فرز والعرض لكل صنف</string>
     <string name="pref_library_update_refresh_trackers_summary">تحديث المتعقبات عند تحديث المكتبة</string>
     <string name="pref_library_update_refresh_trackers">تحديث المتعقبات تلقائياً</string>
-    <string name="alignment_bottom">أسفل</string>
-    <string name="alignment_center">وسط</string>
-    <string name="alignment_top">أعلى</string>
-    <string name="pref_side_nav_icon_alignment">محاذاة رموز التنقل الجانبية</string>
     <string name="cancel_all_for_series">إلغاء الكل لهذه السلسلة</string>
     <string name="action_display_local_badge">المانجا المحلية</string>
     <string name="information_empty_category_dialog">ليس لديك اي قوائم بعد.</string>
@@ -676,7 +672,6 @@
     <string name="pref_relative_time_long">طويل (القصير، +منذ كم يوم)</string>
     <string name="pref_relative_format">الوقت النسبي</string>
     <string name="pref_category_timestamps">الوقت</string>
-    <string name="pref_category_navigation">التنقل</string>
     <string name="theme_tealturquoise">ازرق مخضر و فيروز</string>
     <string name="pref_category_appearance">المظهر</string>
     <string name="getting_started_guide">دليل البدء</string>

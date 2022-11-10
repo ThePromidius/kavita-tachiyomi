@@ -19,7 +19,6 @@ import eu.kanade.domain.ui.model.setAppCompatDelegateThemeMode
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.util.collectAsState
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.system.isAutoTabletUiAvailable
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
@@ -73,7 +72,6 @@ class SettingsAppearanceScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     pref = themeModePref,
                     title = stringResource(R.string.pref_theme_mode),
-                    subtitle = "%s",
                     entries = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         mapOf(
                             ThemeMode.SYSTEM to stringResource(R.string.theme_system),
@@ -105,39 +103,17 @@ class SettingsAppearanceScreen : SearchableSettings {
         context: Context,
         uiPreferences: UiPreferences,
     ): Preference.PreferenceGroup {
-        val tabletUiModePref = uiPreferences.tabletUiMode()
-        val tabletUiMode by tabletUiModePref.collectAsState()
-
-        val isTabletUiAvailable = remember(tabletUiMode) { // won't survive config change
-            when (tabletUiMode) {
-                TabletUiMode.AUTOMATIC -> context.resources.configuration.isAutoTabletUiAvailable()
-                TabletUiMode.NEVER -> false
-                else -> true
-            }
-        }
-
         return Preference.PreferenceGroup(
             title = stringResource(R.string.pref_category_display),
             preferenceItems = listOf(
                 Preference.PreferenceItem.ListPreference(
-                    pref = tabletUiModePref,
+                    pref = uiPreferences.tabletUiMode(),
                     title = stringResource(R.string.pref_tablet_ui_mode),
                     entries = TabletUiMode.values().associateWith { stringResource(it.titleResId) },
                     onValueChanged = {
                         context.toast(R.string.requires_app_restart)
                         true
                     },
-                ),
-                Preference.PreferenceItem.ListPreference(
-                    pref = uiPreferences.sideNavIconAlignment(),
-                    title = stringResource(R.string.pref_side_nav_icon_alignment),
-                    subtitle = "%s",
-                    enabled = isTabletUiAvailable,
-                    entries = mapOf(
-                        0 to stringResource(R.string.alignment_top),
-                        1 to stringResource(R.string.alignment_center),
-                        2 to stringResource(R.string.alignment_bottom),
-                    ),
                 ),
             ),
         )
@@ -152,7 +128,6 @@ class SettingsAppearanceScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     pref = uiPreferences.relativeTime(),
                     title = stringResource(R.string.pref_relative_format),
-                    subtitle = "%s",
                     entries = mapOf(
                         0 to stringResource(R.string.off),
                         2 to stringResource(R.string.pref_relative_time_short),
@@ -162,7 +137,6 @@ class SettingsAppearanceScreen : SearchableSettings {
                 Preference.PreferenceItem.ListPreference(
                     pref = uiPreferences.dateFormat(),
                     title = stringResource(R.string.pref_date_format),
-                    subtitle = "%s",
                     entries = DateFormats
                         .associateWith {
                             val formattedDate = UiPreferences.dateFormat(it).format(now)

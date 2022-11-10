@@ -134,7 +134,6 @@
     <string name="action_undo">పూర్వ స్థితికి వెళ్ళుము</string>
     <string name="theme_monet">క్రియాశీలము</string>
     <string name="action_show_errors">తప్పిద వివరములను చూచుటకై నొక్కుము</string>
-    <string name="pref_category_navigation">మార్గదర్శనము</string>
     <string name="theme_greenapple">ఆకుపచ్చ సేవఫలము</string>
     <string name="theme_yinyang">యిన్ మరియు యాంగ్</string>
     <string name="lock_never">ఎప్పుడూ వద్దు</string>
@@ -153,10 +152,6 @@
     <string name="theme_tealturquoise">టీల్ మరియు మణి</string>
     <string name="theme_yotsuba">యోట్సూబ</string>
     <string name="pref_dark_theme_pure_black">స్వచ్ఛమైన నలుపు వీక్షణ</string>
-    <string name="pref_side_nav_icon_alignment">ప్రక్క మార్గదర్శన చిహ్న యోజనము</string>
-    <string name="alignment_top">పైన</string>
-    <string name="alignment_center">మధ్య</string>
-    <string name="alignment_bottom">క్రింద</string>
     <string name="pref_category_timestamps">సమయ ముద్రణలు</string>
     <string name="pref_relative_format">సంబంధిత సమయ ముద్రణలు</string>
     <string name="pref_confirm_exit">నిష్రమణమును నిర్ధారించుము</string>

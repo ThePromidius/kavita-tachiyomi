@@ -6,15 +6,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +27,7 @@ import eu.kanade.presentation.components.ScrollbarLazyColumn
 import eu.kanade.presentation.util.isScrolledToEnd
 import eu.kanade.presentation.util.isScrolledToStart
 import eu.kanade.presentation.util.minimumTouchTargetSize
+import eu.kanade.tachiyomi.R
 
 @Composable
 fun <T> ListPreferenceWidget(
@@ -36,18 +38,18 @@ fun <T> ListPreferenceWidget(
     entries: Map<out T, String>,
     onValueChange: (T) -> Unit,
 ) {
-    val (isDialogShown, showDialog) = remember { mutableStateOf(false) }
+    var isDialogShown by remember { mutableStateOf(false) }
 
     TextPreferenceWidget(
         title = title,
-        subtitle = subtitle?.format(entries[value]),
+        subtitle = subtitle,
         icon = icon,
-        onPreferenceClick = { showDialog(true) },
+        onPreferenceClick = { isDialogShown = true },
     )
 
     if (isDialogShown) {
         AlertDialog(
-            onDismissRequest = { showDialog(false) },
+            onDismissRequest = { isDialogShown = false },
             title = { Text(text = title) },
             text = {
                 Box {
@@ -61,7 +63,7 @@ fun <T> ListPreferenceWidget(
                                     isSelected = isSelected,
                                     onSelected = {
                                         onValueChange(current.key!!)
-                                        showDialog(false)
+                                        isDialogShown = false
                                     },
                                 )
                             }
@@ -72,8 +74,8 @@ fun <T> ListPreferenceWidget(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showDialog(false) }) {
-                    Text(text = stringResource(android.R.string.cancel))
+                TextButton(onClick = { isDialogShown = false }) {
+                    Text(text = stringResource(R.string.action_cancel))
                 }
             },
         )
@@ -89,7 +91,7 @@ private fun DialogRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(MaterialTheme.shapes.small)
             .selectable(
                 selected = isSelected,
                 onClick = { if (!isSelected) onSelected() },

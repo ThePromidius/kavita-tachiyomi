@@ -244,6 +244,10 @@ class Downloader(
      * @param autoStart whether to start the downloader after enqueing the chapters.
      */
     fun queueChapters(manga: Manga, chapters: List<Chapter>, autoStart: Boolean) = launchIO {
+        if (chapters.isEmpty()) {
+            return@launchIO
+        }
+
         val source = sourceManager.get(manga.source) as? HttpSource ?: return@launchIO
         val wasEmpty = queue.isEmpty()
         // Called in background thread, the operation can be slow with SAF.
@@ -485,17 +489,15 @@ class Downloader(
     private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile): Boolean {
         if (!downloadPreferences.splitTallImages().get()) return true
 
-        val filename = String.format("%03d", page.number)
-        val imageFile = tmpDir.listFiles()?.find { it.name!!.startsWith(filename) }
+        val filenamePrefix = String.format("%03d", page.number)
+        val imageFile = tmpDir.listFiles()?.firstOrNull { it.name.orEmpty().startsWith(filenamePrefix) }
             ?: throw Error(context.getString(R.string.download_notifier_split_page_not_found, page.number))
-        val imageFilePath = imageFile.filePath
-            ?: throw Error(context.getString(R.string.download_notifier_split_page_path_not_found, page.number))
 
         // check if the original page was previously splitted before then skip.
         if (imageFile.name!!.contains("__")) return true
 
         return try {
-            ImageUtil.splitTallImage(imageFile, imageFilePath)
+            ImageUtil.splitTallImage(tmpDir, imageFile, filenamePrefix)
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e)
             false

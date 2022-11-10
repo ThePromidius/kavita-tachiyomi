@@ -46,10 +46,10 @@
     <!-- reserved for #4048 -->
     <string name="action_filter_empty">Remove filter</string>
     <string name="action_sort_alpha">Alphabetically</string>
-    <string name="action_sort_count">Total manga</string>
+    <string name="action_sort_count">Total entries</string>
     <string name="action_sort_total">Total chapters</string>
     <string name="action_sort_last_read">Last read</string>
-    <string name="action_sort_last_manga_update">Last manga update</string>
+    <string name="action_sort_last_manga_update">Last update check</string>
     <string name="action_sort_unread_count">Unread count</string>
     <string name="action_sort_latest_chapter">Latest chapter</string>
     <string name="action_sort_chapter_fetch_date">Chapter fetch date</string>
@@ -72,6 +72,7 @@
     <string name="action_disable_all">Disable all</string>
     <string name="action_edit">Edit</string>
     <string name="action_add">Add</string>
+    <string name="action_open_random_manga">Open random entry</string>
     <string name="action_add_category">Add category</string>
     <string name="action_edit_categories">Edit categories</string>
     <string name="action_rename_category">Rename category</string>
@@ -90,7 +91,7 @@
     <string name="action_start">Start</string>
     <string name="action_resume">Resume</string>
     <string name="action_open_in_browser">Open in browser</string>
-    <string name="action_show_manga">Show manga</string>
+    <string name="action_show_manga">Show entry</string>
     <!-- Do not translate "WebView" -->
     <string name="action_open_in_web_view">Open in WebView</string>
     <string name="action_web_view" translatable="false">WebView</string>
@@ -103,10 +104,11 @@
     <string name="action_display_cover_only_grid">Cover-only grid</string>
     <string name="action_display_download_badge">Downloaded chapters</string>
     <string name="action_display_unread_badge">Unread chapters</string>
-    <string name="action_display_local_badge">Local manga</string>
+    <string name="action_display_local_badge">Local source</string>
     <string name="action_display_language_badge">Language</string>
     <string name="action_display_show_tabs">Show category tabs</string>
     <string name="action_display_show_number_of_items">Show number of items</string>
+    <string name="action_display_show_continue_reading_button">Show continue reading button</string>
     <string name="action_disable">Disable</string>
     <string name="action_pin">Pin</string>
     <string name="action_unpin">Unpin</string>
@@ -187,10 +189,6 @@
     <string name="theme_yotsuba">Yotsuba</string>
     <string name="theme_tidalwave">Tidal Wave</string>
     <string name="pref_dark_theme_pure_black">Pure black dark mode</string>
-    <string name="pref_side_nav_icon_alignment">Side navigation icon alignment</string>
-    <string name="alignment_top">Top</string>
-    <string name="alignment_center">Center</string>
-    <string name="alignment_bottom">Bottom</string>
     <string name="pref_category_timestamps">Timestamps</string>
     <string name="pref_relative_format">Relative timestamps</string>
     <string name="pref_relative_time_short">Short (Today, Yesterday)</string>
@@ -247,7 +245,7 @@
     <string name="battery_not_low">When battery not low</string>
     <string name="restrictions">Restrictions: %s</string>
 
-    <string name="pref_library_update_manga_restriction">Skip updating titles</string>
+    <string name="pref_library_update_manga_restriction">Skip updating entries</string>
     <string name="pref_update_only_completely_read">With unread chapter(s)</string>
     <string name="pref_update_only_non_completed">With \"Completed\" status</string>
     <string name="pref_update_only_started">That haven\'t been started</string>
@@ -264,7 +262,7 @@
         <item quantity="one">%d category</item>
         <item quantity="other">%d categories</item>
     </plurals>
-    <string name="pref_library_update_categories_details">Manga in excluded categories will not be updated even if they are also in included categories.</string>
+    <string name="pref_library_update_categories_details">Entries in excluded categories will not be updated even if they are also in included categories.</string>
     <string name="all">All</string>
     <string name="none">None</string>
     <string name="include">Include: %s</string>
@@ -288,7 +286,7 @@
     <string name="ext_app_info">App info</string>
     <string name="untrusted_extension">Untrusted extension</string>
     <string name="untrusted_extension_message">This extension was signed with an untrusted certificate and wasn\'t activated.\n\nA malicious extension could read any login credentials stored in Tachiyomi or execute arbitrary code.\n\nBy trusting this certificate you accept these risks.</string>
-    <string name="obsolete_extension_message">This extension is no longer available.</string>
+    <string name="obsolete_extension_message">This extension is no longer available. It may not function properly and can cause issues with the app. Uninstalling it is recommended.</string>
     <string name="unofficial_extension_message">This extension is not from the official Tachiyomi extensions list.</string>
     <string name="extension_api_error">Failed to get extensions list</string>
     <string name="ext_info_version">Version</string>
@@ -345,7 +343,7 @@
     <string name="pref_reader_actions">Actions</string>
     <string name="pref_read_with_long_tap">Show on long tap</string>
     <string name="pref_create_folder_per_manga">Save pages into separate folders</string>
-    <string name="pref_create_folder_per_manga_summary">Creates folders according to manga title</string>
+    <string name="pref_create_folder_per_manga_summary">Creates folders according to entries\' title</string>
     <string name="pref_reader_theme">Background color</string>
     <string name="white_background">White</string>
     <string name="gray_background">Gray</string>
@@ -430,7 +428,7 @@
     <string name="fifth_to_last">Fifth to last read chapter</string>
     <string name="pref_category_auto_download">Auto-download</string>
     <string name="pref_download_new">Download new chapters</string>
-    <string name="pref_download_new_categories_details">Manga in excluded categories will not be downloaded even if they are also in included categories.</string>
+    <string name="pref_download_new_categories_details">Entries in excluded categories will not be downloaded even if they are also in included categories.</string>
     <string name="download_ahead">Download ahead</string>
     <string name="auto_download_while_reading">Auto download while reading</string>
     <plurals name="next_unread_chapters">
@@ -446,7 +444,7 @@
     <string name="tracking_guide">Tracking guide</string>
     <string name="pref_auto_update_manga_sync">Update progress after reading</string>
     <string name="services">Services</string>
-    <string name="tracking_info">One-way sync to update the chapter progress in tracking services. Set up tracking for individual manga entries from their tracking button.</string>
+    <string name="tracking_info">One-way sync to update the chapter progress in tracking services. Set up tracking for individual entries from their tracking button.</string>
     <string name="enhanced_services">Enhanced services</string>
     <string name="enhanced_tracking_info">Services that provide enhanced features for specific sources. Manga are automatically tracked when added to your library.</string>
     <string name="enhanced_tracking_warning">This tracker is only compatible with the %1$s source.</string>
@@ -469,7 +467,7 @@
     <string name="pref_backup_slots">Maximum backups</string>
     <string name="backup_created">Backup created</string>
     <string name="invalid_backup_file">Invalid backup file</string>
-    <string name="invalid_backup_file_missing_manga">Backup does not contain any manga.</string>
+    <string name="invalid_backup_file_missing_manga">Backup does not contain any library entries.</string>
     <string name="backup_restore_missing_sources">Missing sources:</string>
     <string name="backup_restore_missing_trackers">Trackers not logged into:</string>
     <string name="backup_restore_content_full">Data from the backup file will be restored.\n\nYou will need to install any missing extensions and log in to tracking services afterwards to use them.</string>
@@ -509,9 +507,9 @@
     <string name="cache_delete_error">Error occurred while clearing</string>
     <string name="pref_auto_clear_chapter_cache">Clear chapter cache on app close</string>
     <string name="pref_clear_database">Clear database</string>
-    <string name="pref_clear_database_summary">Delete history for manga that are not saved in your library</string>
-    <string name="clear_database_source_item_count">%1$d non-library manga in database</string>
-    <string name="clear_database_confirmation">Are you sure? Read chapters and progress of non-library manga will be lost</string>
+    <string name="pref_clear_database_summary">Delete history for entries that are not saved in your library</string>
+    <string name="clear_database_source_item_count">%1$d non-library entries in database</string>
+    <string name="clear_database_confirmation">Are you sure? Read chapters and progress of non-library entries will be lost</string>
     <string name="clear_database_completed">Entries deleted</string>
     <string name="database_clean">Nothing to clear</string>
     <string name="pref_clear_webview_data">Clear WebView data</string>
@@ -552,11 +550,12 @@
 
 
     <!-- More -->
+    <string name="fdroid_warning">F-Droid builds are not officially supported.\nTap to learn more.</string>
     <string name="label_downloaded_only">Downloaded only</string>
     <string name="pref_incognito_mode">Incognito mode</string>
     <string name="pref_incognito_mode_summary">Pauses reading history</string>
     <string name="notification_incognito_text">Disable incognito mode</string>
-    <string name="downloaded_only_summary">Filters all manga in your library</string>
+    <string name="downloaded_only_summary">Filters all entries in your library</string>
     <plurals name="download_queue_summary">
         <item quantity="one">%1$s remaining</item>
         <item quantity="other">%1$s remaining</item>
@@ -578,10 +577,11 @@
     <!-- Library fragment -->
     <string name="updating_category">Updating category</string>
     <string name="local_source_badge">Local</string>
-    <string name="manga_from_library">Manga from library</string>
+    <string name="manga_from_library">From library</string>
     <string name="downloaded_chapters">Downloaded chapters</string>
     <string name="badges_header">Badges</string>
     <string name="tabs_header">Tabs</string>
+    <string name="other_header">Other</string>
 
     <!-- Catalogue fragment -->
     <!-- missing prompt after Compose rewrite #7901 -->
@@ -633,7 +633,7 @@
     <string name="copied_to_clipboard">Copied to clipboard:\n%1$s</string>
     <string name="clipboard_copy_error">Failed to copy to clipboard</string>
     <string name="source_not_installed">Source not installed: %1$s</string>
-    <string name="snack_add_to_library">Add manga to library?</string>
+    <string name="snack_add_to_library">Add to library?</string>
     <string name="description_placeholder">No description</string>
 
     <!-- Manga chapters fragment -->
@@ -662,7 +662,7 @@
     <string name="confirm_delete_chapters">Are you sure you want to delete the selected chapters?</string>
     <string name="chapter_settings">Chapter settings</string>
     <string name="confirm_set_chapter_settings">Are you sure you want to save these settings as default?</string>
-    <string name="also_set_chapter_settings_for_library">Also apply to all manga in my library</string>
+    <string name="also_set_chapter_settings_for_library">Also apply to all entries in my library</string>
     <string name="set_chapter_settings_as_default">Set as default</string>
     <string name="no_chapters_error">No chapters found</string>
     <string name="are_you_sure">Are you sure?</string>
@@ -706,6 +706,9 @@
     <string name="myanimelist_relogin">Please login to MAL again</string>
     <string name="source_unsupported">Source is not supported</string>
     <string name="error_no_match">No match found</string>
+    <string name="track_remove_date_conf_title">Remove date?</string>
+    <string name="track_remove_start_date_conf_text">This will remove your previously selected start date from %s</string>
+    <string name="track_remove_finish_date_conf_text">This will remove your previously selected finish date from %s</string>
 
     <!-- Category activity -->
     <string name="error_category_exists">A category with this name already exists!</string>
@@ -714,7 +717,7 @@
 
     <!-- Dialog option with checkbox view -->
     <string name="dialog_with_checkbox_remove_description">This will remove the read date of this chapter. Are you sure?</string>
-    <string name="dialog_with_checkbox_reset">Reset all chapters for this manga</string>
+    <string name="dialog_with_checkbox_reset">Reset all chapters for this entry</string>
 
     <!-- Image notifier -->
     <string name="picture_saved">Picture saved</string>
@@ -751,7 +754,8 @@
     <string name="updating_library">Updating library</string>
     <string name="update_already_running">An update is already running</string>
     <string name="cant_open_last_read_chapter">Unable to open last read chapter</string>
-    <string name="updates_last_update_info">Library last updated: %1$s</string>
+    <string name="updates_last_update_info">Library last updated: %s</string>
+    <string name="updates_last_update_info_just_now">Just now</string>
 
     <!-- History fragment -->
     <string name="recent_manga_time">Ch. %1$s - %2$s</string>
@@ -790,8 +794,8 @@
     <string name="notification_size_warning">Large updates harm sources and may lead to slower updates and also increased battery usage. Tap to learn more.</string>
     <string name="notification_new_chapters">New chapters found</string>
     <plurals name="notification_new_chapters_summary">
-        <item quantity="one">For %d title</item>
-        <item quantity="other">For %d titles</item>
+        <item quantity="one">For %d entry</item>
+        <item quantity="other">For %d entries</item>
     </plurals>
     <plurals name="notification_chapters_generic">
         <item quantity="one">%1$d new chapter</item>
@@ -808,7 +812,7 @@
     <string name="notification_update_skipped">%1$d update(s) skipped</string>
     <string name="learn_more">Tap to learn more</string>
     <string name="notification_cover_update_failed">Failed to update cover</string>
-    <string name="notification_first_add_to_library">Please add the manga to your library before doing this</string>
+    <string name="notification_first_add_to_library">Please add the entry to your library before doing this</string>
     <string name="library_errors_help">For help on how to fix library update errors, see %1$s</string>
     <string name="skipped_reason_completed">Skipped because series is complete</string>
     <string name="skipped_reason_not_caught_up">Skipped because there are unread chapters</string>
@@ -830,7 +834,7 @@
 
     <!--UpdateCheck Notifications-->
     <string name="update_check_notification_download_in_progress">Downloading…</string>
-    <string name="update_check_notification_download_complete">Tap to install</string>
+    <string name="update_check_notification_download_complete">Tap to install update</string>
     <string name="update_check_notification_download_error">Download error</string>
     <string name="update_check_notification_update_available">New version available!</string>
     <string name="update_check_fdroid_migration_info">A new version is available from the official releases. Tap to learn how to migrate from unofficial F-Droid releases.</string>
@@ -846,6 +850,7 @@
     <string name="information_no_recent">No recent updates</string>
     <string name="information_no_recent_manga">Nothing read recently</string>
     <string name="information_empty_library">Your library is empty</string>
+    <string name="information_no_entries_found">No entries found in this category</string>
     <string name="getting_started_guide">Getting started guide</string>
     <string name="information_empty_category">You have no categories. Tap the plus button to create one for organizing your library.</string>
     <string name="information_empty_category_dialog">You don\'t have any categories yet.</string>
@@ -867,6 +872,7 @@
     <string name="download_notifier_split_page_not_found">Page %d not found while splitting</string>
     <string name="download_notifier_split_page_path_not_found">Couldn\'t find file path of page %d</string>
     <string name="download_notifier_split_failed">Couldn\'t split downloaded image</string>
+    <string name="download_notifier_cache_renewal">Indexing downloads</string>
 
     <!-- Notification channels -->
     <string name="channel_common">Common</string>
@@ -877,6 +883,7 @@
     <string name="channel_new_chapters">Chapter updates</string>
     <string name="channel_app_updates">App updates</string>
     <string name="channel_ext_updates">Extension updates</string>
+    <string name="channel_downloader_cache">Download cache</string>
     <string name="channel_crash_logs">Crash logs</string>
 
     <!-- S Pen actions -->
@@ -884,7 +891,7 @@
     <string name="spen_next_page">Next page</string>
 
     <!-- App widget -->
-    <string name="appwidget_updates_description">See your recently updated manga</string>
+    <string name="appwidget_updates_description">See your recently updated library entries</string>
     <string name="appwidget_unavailable_locked">Widget not available when app lock is enabled</string>
     <string name="remove_manga">You are about to remove \"%s\" from your library</string>
 </resources>

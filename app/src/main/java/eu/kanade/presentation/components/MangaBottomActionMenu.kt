@@ -22,13 +22,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BookmarkAdd
-import androidx.compose.material.icons.filled.BookmarkRemove
-import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.RemoveDone
+import androidx.compose.material.icons.outlined.BookmarkAdd
+import androidx.compose.material.icons.outlined.BookmarkRemove
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DoneAll
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material.icons.outlined.RemoveDone
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,8 +37,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,11 +50,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.manga.DownloadAction
 import eu.kanade.tachiyomi.R
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun MangaBottomActionMenu(
@@ -85,7 +89,7 @@ fun MangaBottomActionMenu(
                 (0 until 7).forEach { i -> confirm[i] = i == toConfirmIndex }
                 resetJob?.cancel()
                 resetJob = scope.launch {
-                    delay(1000)
+                    delay(1.seconds)
                     if (isActive) confirm[toConfirmIndex] = false
                 }
             }
@@ -97,7 +101,7 @@ fun MangaBottomActionMenu(
                 if (onBookmarkClicked != null) {
                     Button(
                         title = stringResource(R.string.action_bookmark),
-                        icon = Icons.Default.BookmarkAdd,
+                        icon = Icons.Outlined.BookmarkAdd,
                         toConfirm = confirm[0],
                         onLongClick = { onLongClickItem(0) },
                         onClick = onBookmarkClicked,
@@ -106,7 +110,7 @@ fun MangaBottomActionMenu(
                 if (onRemoveBookmarkClicked != null) {
                     Button(
                         title = stringResource(R.string.action_remove_bookmark),
-                        icon = Icons.Default.BookmarkRemove,
+                        icon = Icons.Outlined.BookmarkRemove,
                         toConfirm = confirm[1],
                         onLongClick = { onLongClickItem(1) },
                         onClick = onRemoveBookmarkClicked,
@@ -115,7 +119,7 @@ fun MangaBottomActionMenu(
                 if (onMarkAsReadClicked != null) {
                     Button(
                         title = stringResource(R.string.action_mark_as_read),
-                        icon = Icons.Default.DoneAll,
+                        icon = Icons.Outlined.DoneAll,
                         toConfirm = confirm[2],
                         onLongClick = { onLongClickItem(2) },
                         onClick = onMarkAsReadClicked,
@@ -124,7 +128,7 @@ fun MangaBottomActionMenu(
                 if (onMarkAsUnreadClicked != null) {
                     Button(
                         title = stringResource(R.string.action_mark_as_unread),
-                        icon = Icons.Default.RemoveDone,
+                        icon = Icons.Outlined.RemoveDone,
                         toConfirm = confirm[3],
                         onLongClick = { onLongClickItem(3) },
                         onClick = onMarkAsUnreadClicked,
@@ -169,6 +173,7 @@ private fun RowScope.Button(
     toConfirm: Boolean,
     onLongClick: () -> Unit,
     onClick: () -> Unit,
+    content: (@Composable () -> Unit)? = null,
 ) {
     val animatedWeight by animateFloatAsState(if (toConfirm) 2f else 1f)
     Column(
@@ -200,6 +205,7 @@ private fun RowScope.Button(
                 style = MaterialTheme.typography.labelSmall,
             )
         }
+        content?.invoke()
     }
 }
 
@@ -210,7 +216,7 @@ fun LibraryBottomActionMenu(
     onChangeCategoryClicked: (() -> Unit)?,
     onMarkAsReadClicked: (() -> Unit)?,
     onMarkAsUnreadClicked: (() -> Unit)?,
-    onDownloadClicked: (() -> Unit)?,
+    onDownloadClicked: ((DownloadAction) -> Unit)?,
     onDeleteClicked: (() -> Unit)?,
 ) {
     AnimatedVisibility(
@@ -232,7 +238,7 @@ fun LibraryBottomActionMenu(
                 (0 until 5).forEach { i -> confirm[i] = i == toConfirmIndex }
                 resetJob?.cancel()
                 resetJob = scope.launch {
-                    delay(1000)
+                    delay(1.seconds)
                     if (isActive) confirm[toConfirmIndex] = false
                 }
             }
@@ -253,7 +259,7 @@ fun LibraryBottomActionMenu(
                 if (onMarkAsReadClicked != null) {
                     Button(
                         title = stringResource(R.string.action_mark_as_read),
-                        icon = Icons.Default.DoneAll,
+                        icon = Icons.Outlined.DoneAll,
                         toConfirm = confirm[1],
                         onLongClick = { onLongClickItem(1) },
                         onClick = onMarkAsReadClicked,
@@ -262,20 +268,29 @@ fun LibraryBottomActionMenu(
                 if (onMarkAsUnreadClicked != null) {
                     Button(
                         title = stringResource(R.string.action_mark_as_unread),
-                        icon = Icons.Default.RemoveDone,
+                        icon = Icons.Outlined.RemoveDone,
                         toConfirm = confirm[2],
                         onLongClick = { onLongClickItem(2) },
                         onClick = onMarkAsUnreadClicked,
                     )
                 }
                 if (onDownloadClicked != null) {
+                    var downloadExpanded by remember { mutableStateOf(false) }
                     Button(
                         title = stringResource(R.string.action_download),
                         icon = Icons.Outlined.Download,
                         toConfirm = confirm[3],
                         onLongClick = { onLongClickItem(3) },
-                        onClick = onDownloadClicked,
-                    )
+                        onClick = { downloadExpanded = !downloadExpanded },
+                    ) {
+                        val onDismissRequest = { downloadExpanded = false }
+                        DownloadDropdownMenu(
+                            expanded = downloadExpanded,
+                            onDismissRequest = onDismissRequest,
+                            onDownloadClicked = onDownloadClicked,
+                            includeDownloadAllOption = false,
+                        )
+                    }
                 }
                 if (onDeleteClicked != null) {
                     Button(

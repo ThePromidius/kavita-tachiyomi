@@ -20,11 +20,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastMap
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.coroutineScope
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -46,6 +48,8 @@ import eu.kanade.presentation.util.selectedBackground
 import eu.kanade.tachiyomi.Database
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.launchIO
+import eu.kanade.tachiyomi.util.lang.launchUI
+import eu.kanade.tachiyomi.util.lang.withNonCancellableContext
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -60,6 +64,7 @@ class ClearDatabaseScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val model = rememberScreenModel { ClearDatabaseScreenModel() }
         val state by model.state.collectAsState()
+        val scope = rememberCoroutineScope()
 
         when (val s = state) {
             is ClearDatabaseScreenModel.State.Loading -> LoadingScreen()
@@ -70,10 +75,12 @@ class ClearDatabaseScreen : Screen {
                         confirmButton = {
                             TextButton(
                                 onClick = {
-                                    model.removeMangaBySourceId()
-                                    model.clearSelection()
-                                    model.hideConfirmation()
-                                    context.toast(R.string.clear_database_completed)
+                                    scope.launchUI {
+                                        model.removeMangaBySourceId()
+                                        model.clearSelection()
+                                        model.hideConfirmation()
+                                        context.toast(R.string.clear_database_completed)
+                                    }
                                 },
                             ) {
                                 Text(text = stringResource(android.R.string.ok))
@@ -81,7 +88,7 @@ class ClearDatabaseScreen : Screen {
                         },
                         dismissButton = {
                             TextButton(onClick = model::hideConfirmation) {
-                                Text(text = stringResource(android.R.string.cancel))
+                                Text(text = stringResource(R.string.action_cancel))
                             }
                         },
                         text = {
@@ -216,8 +223,8 @@ private class ClearDatabaseScreenModel : StateScreenModel<ClearDatabaseScreenMod
         }
     }
 
-    fun removeMangaBySourceId() {
-        val state = state.value as? State.Ready ?: return
+    suspend fun removeMangaBySourceId() = withNonCancellableContext {
+        val state = state.value as? State.Ready ?: return@withNonCancellableContext
         database.mangasQueries.deleteMangasNotInLibraryBySourceIds(state.selection)
         database.historyQueries.removeResettedHistory()
     }
@@ -240,14 +247,14 @@ private class ClearDatabaseScreenModel : StateScreenModel<ClearDatabaseScreenMod
 
     fun selectAll() = mutableState.update { state ->
         if (state !is State.Ready) return@update state
-        state.copy(selection = state.items.map { it.id })
+        state.copy(selection = state.items.fastMap { it.id })
     }
 
     fun invertSelection() = mutableState.update { state ->
         if (state !is State.Ready) return@update state
         state.copy(
             selection = state.items
-                .map { it.id }
+                .fastMap { it.id }
                 .filterNot { it in state.selection },
         )
     }

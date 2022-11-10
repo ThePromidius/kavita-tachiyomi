@@ -2,16 +2,13 @@ package eu.kanade.presentation.manga.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FlipToBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.FlipToBack
+import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,7 +27,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.AppStateBanners
-import eu.kanade.presentation.components.DropdownMenu
+import eu.kanade.presentation.components.DownloadDropdownMenu
+import eu.kanade.presentation.components.OverflowMenu
 import eu.kanade.presentation.manga.DownloadAction
 import eu.kanade.presentation.theme.active
 import eu.kanade.tachiyomi.R
@@ -71,7 +69,7 @@ fun MangaToolbar(
             navigationIcon = {
                 IconButton(onClick = onBackClicked) {
                     Icon(
-                        imageVector = if (isActionMode) Icons.Default.Close else Icons.Default.ArrowBack,
+                        imageVector = if (isActionMode) Icons.Outlined.Close else Icons.Outlined.ArrowBack,
                         contentDescription = stringResource(R.string.abc_action_bar_up_description),
                     )
                 }
@@ -80,13 +78,13 @@ fun MangaToolbar(
                 if (isActionMode) {
                     IconButton(onClick = onSelectAll) {
                         Icon(
-                            imageVector = Icons.Default.SelectAll,
+                            imageVector = Icons.Outlined.SelectAll,
                             contentDescription = stringResource(R.string.action_select_all),
                         )
                     }
                     IconButton(onClick = onInvertSelection) {
                         Icon(
-                            imageVector = Icons.Default.FlipToBack,
+                            imageVector = Icons.Outlined.FlipToBack,
                             contentDescription = stringResource(R.string.action_select_inverse),
                         )
                     }
@@ -101,53 +99,11 @@ fun MangaToolbar(
                                 )
                             }
                             val onDismissRequest = { onDownloadExpanded(false) }
-                            DropdownMenu(
+                            DownloadDropdownMenu(
                                 expanded = downloadExpanded,
                                 onDismissRequest = onDismissRequest,
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.download_1)) },
-                                    onClick = {
-                                        onClickDownload(DownloadAction.NEXT_1_CHAPTER)
-                                        onDismissRequest()
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.download_5)) },
-                                    onClick = {
-                                        onClickDownload(DownloadAction.NEXT_5_CHAPTERS)
-                                        onDismissRequest()
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.download_10)) },
-                                    onClick = {
-                                        onClickDownload(DownloadAction.NEXT_10_CHAPTERS)
-                                        onDismissRequest()
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.download_custom)) },
-                                    onClick = {
-                                        onClickDownload(DownloadAction.CUSTOM)
-                                        onDismissRequest()
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.download_unread)) },
-                                    onClick = {
-                                        onClickDownload(DownloadAction.UNREAD_CHAPTERS)
-                                        onDismissRequest()
-                                    },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(text = stringResource(R.string.download_all)) },
-                                    onClick = {
-                                        onClickDownload(DownloadAction.ALL_CHAPTERS)
-                                        onDismissRequest()
-                                    },
-                                )
-                            }
+                                onDownloadClicked = onClickDownload,
+                            )
                         }
                     }
 
@@ -156,49 +112,39 @@ fun MangaToolbar(
                         Icon(Icons.Outlined.FilterList, contentDescription = stringResource(R.string.action_filter), tint = filterTint)
                     }
 
-                    if (onClickEditCategory != null && onClickMigrate != null) {
-                        val (moreExpanded, onMoreExpanded) = remember { mutableStateOf(false) }
-                        Box {
-                            IconButton(onClick = { onMoreExpanded(!moreExpanded) }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = stringResource(R.string.abc_action_menu_overflow_description),
-                                )
-                            }
-                            val onDismissRequest = { onMoreExpanded(false) }
-                            DropdownMenu(
-                                expanded = moreExpanded,
-                                onDismissRequest = onDismissRequest,
-                            ) {
+                    if (onClickEditCategory != null || onClickMigrate != null || onClickShare != null) {
+                        OverflowMenu { closeMenu ->
+                            if (onClickEditCategory != null) {
                                 DropdownMenuItem(
                                     text = { Text(text = stringResource(R.string.action_edit_categories)) },
                                     onClick = {
                                         onClickEditCategory()
-                                        onDismissRequest()
+                                        closeMenu()
                                     },
                                 )
+                            }
+                            if (onClickMigrate != null) {
                                 DropdownMenuItem(
                                     text = { Text(text = stringResource(R.string.action_migrate)) },
                                     onClick = {
                                         onClickMigrate()
-                                        onDismissRequest()
+                                        closeMenu()
                                     },
                                 )
-                                if (onClickShare != null) {
-                                    DropdownMenuItem(
-                                        text = { Text(text = stringResource(R.string.action_share)) },
-                                        onClick = {
-                                            onClickShare()
-                                            onDismissRequest()
-                                        },
-                                    )
-                                }
+                            }
+                            if (onClickShare != null) {
+                                DropdownMenuItem(
+                                    text = { Text(text = stringResource(R.string.action_share)) },
+                                    onClick = {
+                                        onClickShare()
+                                        closeMenu()
+                                    },
+                                )
                             }
                         }
                     }
                 }
             },
-            windowInsets = WindowInsets.statusBars,
             colors = TopAppBarDefaults.smallTopAppBarColors(
                 containerColor = MaterialTheme.colorScheme
                     .surfaceColorAtElevation(3.dp)

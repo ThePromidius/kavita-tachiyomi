@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.window.DialogProperties
+import eu.kanade.tachiyomi.R
 import kotlinx.coroutines.launch
 
 @Composable
@@ -27,18 +28,18 @@ fun EditTextPreferenceWidget(
     value: String,
     onConfirm: suspend (String) -> Boolean,
 ) {
-    val (isDialogShown, showDialog) = remember { mutableStateOf(false) }
+    var isDialogShown by remember { mutableStateOf(false) }
 
     TextPreferenceWidget(
         title = title,
         subtitle = subtitle?.format(value),
         icon = icon,
-        onPreferenceClick = { showDialog(true) },
+        onPreferenceClick = { isDialogShown = true },
     )
 
     if (isDialogShown) {
         val scope = rememberCoroutineScope()
-        val onDismissRequest = { showDialog(false) }
+        val onDismissRequest = { isDialogShown = false }
         var textFieldValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
             mutableStateOf(TextFieldValue(value))
         }
@@ -71,7 +72,7 @@ fun EditTextPreferenceWidget(
             },
             dismissButton = {
                 TextButton(onClick = onDismissRequest) {
-                    Text(text = stringResource(android.R.string.cancel))
+                    Text(text = stringResource(R.string.action_cancel))
                 }
             },
         )

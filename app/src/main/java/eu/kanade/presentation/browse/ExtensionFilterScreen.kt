@@ -3,7 +3,6 @@ package eu.kanade.presentation.browse
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -11,10 +10,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.EmptyScreen
-import eu.kanade.presentation.components.LazyColumn
+import eu.kanade.presentation.components.FastScrollLazyColumn
 import eu.kanade.presentation.components.LoadingScreen
-import eu.kanade.presentation.components.PreferenceRow
 import eu.kanade.presentation.components.Scaffold
+import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.browse.extension.ExtensionFilterPresenter
 import eu.kanade.tachiyomi.util.system.LocaleHelper
@@ -42,15 +41,13 @@ fun ExtensionFilterScreen(
                 textResource = R.string.empty_screen,
                 modifier = Modifier.padding(contentPadding),
             )
-            else -> {
-                SourceFilterContent(
-                    contentPadding = contentPadding,
-                    state = presenter,
-                    onClickLang = {
-                        presenter.toggleLanguage(it)
-                    },
-                )
-            }
+            else -> ExtensionFilterContent(
+                contentPadding = contentPadding,
+                state = presenter,
+                onClickLang = {
+                    presenter.toggleLanguage(it)
+                },
+            )
         }
     }
     LaunchedEffect(Unit) {
@@ -65,40 +62,24 @@ fun ExtensionFilterScreen(
 }
 
 @Composable
-private fun SourceFilterContent(
+private fun ExtensionFilterContent(
     contentPadding: PaddingValues,
     state: ExtensionFilterState,
     onClickLang: (String) -> Unit,
 ) {
-    LazyColumn(
+    FastScrollLazyColumn(
         contentPadding = contentPadding,
     ) {
         items(
             items = state.items,
         ) { model ->
-            ExtensionFilterItem(
+            val lang = model.lang
+            SwitchPreferenceWidget(
                 modifier = Modifier.animateItemPlacement(),
-                lang = model.lang,
-                enabled = model.enabled,
-                onClickItem = onClickLang,
+                title = LocaleHelper.getSourceDisplayName(lang, LocalContext.current),
+                checked = model.enabled,
+                onCheckedChanged = { onClickLang(lang) },
             )
         }
     }
-}
-
-@Composable
-private fun ExtensionFilterItem(
-    modifier: Modifier,
-    lang: String,
-    enabled: Boolean,
-    onClickItem: (String) -> Unit,
-) {
-    PreferenceRow(
-        modifier = modifier,
-        title = LocaleHelper.getSourceDisplayName(lang, LocalContext.current),
-        action = {
-            Switch(checked = enabled, onCheckedChange = null)
-        },
-        onClick = { onClickItem(lang) },
-    )
 }

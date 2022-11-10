@@ -355,7 +355,6 @@
     </plurals>
     <string name="secure_screen">Zabezpečená obrazovka</string>
     <string name="action_show_errors">Ťuknutím zobrazíte podrobnosti</string>
-    <string name="pref_category_navigation">Navigácia</string>
     <string name="theme_system">Podľa systému</string>
     <string name="theme_tako">Tako</string>
     <string name="action_show_manga">Zobraziť mangu</string>
@@ -401,10 +400,6 @@
     <string name="theme_yotsuba">Jotsuba</string>
     <string name="theme_midnightdusk">Polnočný súmrak</string>
     <string name="pref_dark_theme_pure_black">Čisto čierny tmavý režim</string>
-    <string name="pref_side_nav_icon_alignment">Zarovnanie ikony bočnej navigácie</string>
-    <string name="alignment_top">Vrchol</string>
-    <string name="alignment_center">Stred</string>
-    <string name="alignment_bottom">Dole</string>
     <string name="theme_strawberrydaiquiri">Jahodové Daiquiri</string>
     <string name="theme_tealturquoise">Modrozelená a tyrkysová</string>
     <string name="pref_category_timestamps">Časová značka</string>

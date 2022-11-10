@@ -45,6 +45,7 @@ import eu.kanade.presentation.components.DIVIDER_ALPHA
 import eu.kanade.presentation.components.MangaCover
 import eu.kanade.presentation.theme.TachiyomiTheme
 import eu.kanade.presentation.util.secondaryItemAlpha
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.DeviceUtil
 import eu.kanade.tachiyomi.util.system.isDynamicColorAvailable
 
@@ -158,7 +159,7 @@ fun AppThemePreviewItem(
                     .padding(end = 4.dp)
                     .background(
                         color = MaterialTheme.colorScheme.onSurface,
-                        shape = RoundedCornerShape(9.dp),
+                        shape = MaterialTheme.shapes.small,
                     ),
             )
 
@@ -168,8 +169,8 @@ fun AppThemePreviewItem(
             ) {
                 if (selected) {
                     Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = stringResource(R.string.selected),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }
@@ -182,7 +183,7 @@ fun AppThemePreviewItem(
                 .padding(start = 8.dp, top = 2.dp)
                 .background(
                     color = dividerColor,
-                    shape = RoundedCornerShape(9.dp),
+                    shape = MaterialTheme.shapes.small,
                 )
                 .fillMaxWidth(0.5f)
                 .aspectRatio(MangaCover.Book.ratio),
@@ -242,7 +243,7 @@ fun AppThemePreviewItem(
                             .weight(1f)
                             .background(
                                 color = MaterialTheme.colorScheme.onSurface,
-                                shape = RoundedCornerShape(9.dp),
+                                shape = MaterialTheme.shapes.small,
                             ),
                     )
                 }

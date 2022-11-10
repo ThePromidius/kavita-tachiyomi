@@ -523,7 +523,7 @@
     <string name="action_display_show_number_of_items">Tampilkan jumlah item</string>
     <string name="none">Kosong</string>
     <string name="action_show_errors">Ketuk untuk melihat detail</string>
-    <string name="action_sort_chapter_fetch_date">Tanggal pengambilan bab</string>
+    <string name="action_sort_chapter_fetch_date">Tanggal bab dimasukkan</string>
     <string name="pref_reader_actions">Aksi</string>
     <string name="nav_zone_right">Kanan</string>
     <string name="nav_zone_left">Kiri</string>
@@ -572,10 +572,6 @@
     <string name="manga_cover">Sampul</string>
     <string name="off">Nonaktif</string>
     <string name="on">Aktif</string>
-    <string name="alignment_bottom">Bawah</string>
-    <string name="alignment_center">Tengah</string>
-    <string name="alignment_top">Atas</string>
-    <string name="pref_side_nav_icon_alignment">Penyelarasan ikon navigasi samping</string>
     <string name="tracking_guide">Panduan pelacakan</string>
     <string name="categorized_display_settings">Pengaturan per-kategori untuk tampilan dan urutan</string>
     <string name="information_empty_category_dialog">Anda belum memiliki kategori apapun.</string>
@@ -613,7 +609,6 @@
     <string name="getting_started_guide">Panduan awal mulai</string>
     <string name="action_track">Lacak</string>
     <string name="pref_category_timestamps">Stempel waktu</string>
-    <string name="pref_category_navigation">Navigasi</string>
     <string name="theme_tealturquoise">Teal &amp; Pirus</string>
     <string name="pref_category_appearance">Penampilan</string>
     <string name="confirm_lock_change">Autentikasi untuk mengonfirmasi perubahan</string>
@@ -687,7 +682,7 @@
     <string name="pref_duplicate_pinned_sources_summary">Ulang sumber ditandai pada kelompok bahasa masing-masing</string>
     <string name="source_filter_empty_screen">Sumber yang diinstal tidak ditemukan</string>
     <string name="source_empty_screen">Tidak ada sumber yang ditemukan</string>
-    <string name="action_sort_last_manga_update">Pembaruan manga terakhir</string>
+    <string name="action_sort_last_manga_update">Pembaruan terakhir</string>
     <string name="action_sort_unread_count">Jumlah belum dibaca</string>
     <string name="split_tall_images">Membagi gambar panjang</string>
     <string name="split_tall_images_summary">Meningkatkan kinerja pembaca</string>
@@ -733,7 +728,7 @@
     </plurals>
     <string name="download_ahead_info">Hanya berfungsi pada entri di perpustakaan dan jika bab saat ini ditambah yang berikutnya sudah diunduh</string>
     <string name="remove_manga">Kamu akan menghapus \"%s\" dari pustaka</string>
-    <string name="updates_last_update_info">Pustaka terakhir diperbarui: %1$s</string>
+    <string name="updates_last_update_info">Pustaka terakhir diperbarui: %s</string>
     <string name="multi_lang">Multi</string>
     <string name="pref_long_strip_split">Potong gambar panjang (BETA)</string>
     <string name="are_you_sure">Apa kamu yakin\?</string>
@@ -754,4 +749,8 @@
     <string name="pref_advanced_summary">Buat log kerusakan, pengoptimalan baterai</string>
     <string name="crash_screen_title">Terjadi Kesalahan Yang Tak Terduga</string>
     <string name="crash_screen_restart_application">Mulai ulang aplikasi</string>
+    <string name="invalid_location">Lokasi tidak valid: %s</string>
+    <string name="unknown_title">Judul tidak diketahui</string>
+    <string name="error_user_agent_string_invalid">String agen pengguna tidak valid</string>
+    <string name="updates_last_update_info_just_now">Baru saja</string>
 </resources>

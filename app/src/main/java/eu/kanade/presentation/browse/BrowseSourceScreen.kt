@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.HelpOutline
-import androidx.compose.material.icons.filled.Public
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.NewReleases
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -89,7 +89,7 @@ fun BrowseSourceScreen(
             Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
                 BrowseSourceToolbar(
                     state = presenter,
-                    source = presenter.source!!,
+                    source = presenter.source,
                     displayMode = presenter.displayMode,
                     onDisplayModeChange = { presenter.displayMode = it },
                     navigateUp = navigateUp,
@@ -226,9 +226,9 @@ fun BrowseSourceContent(
     val getErrorMessage: (LoadState.Error) -> String = { state ->
         when {
             state.error is NoResultsException -> context.getString(R.string.no_results_found)
-            state.error.message == null -> ""
-            state.error.message!!.startsWith("HTTP error") -> "${state.error.message}: ${context.getString(R.string.http_error_hint)}"
-            else -> state.error.message!!
+            state.error.message.isNullOrEmpty() -> ""
+            state.error.message.orEmpty().startsWith("HTTP error") -> "${state.error.message}: ${context.getString(R.string.http_error_hint)}"
+            else -> state.error.message.orEmpty()
         }
     }
 
@@ -253,7 +253,7 @@ fun BrowseSourceContent(
                 listOf(
                     EmptyScreenAction(
                         stringResId = R.string.local_source_help_guide,
-                        icon = Icons.Default.HelpOutline,
+                        icon = Icons.Outlined.HelpOutline,
                         onClick = onLocalSourceHelpClick,
                     ),
                 )
@@ -261,17 +261,17 @@ fun BrowseSourceContent(
                 listOf(
                     EmptyScreenAction(
                         stringResId = R.string.action_retry,
-                        icon = Icons.Default.Refresh,
+                        icon = Icons.Outlined.Refresh,
                         onClick = mangaList::refresh,
                     ),
                     EmptyScreenAction(
                         stringResId = R.string.action_open_in_web_view,
-                        icon = Icons.Default.Public,
+                        icon = Icons.Outlined.Public,
                         onClick = onWebViewClick,
                     ),
                     EmptyScreenAction(
                         stringResId = R.string.label_help,
-                        icon = Icons.Default.HelpOutline,
+                        icon = Icons.Outlined.HelpOutline,
                         onClick = onHelpClick,
                     ),
                 )

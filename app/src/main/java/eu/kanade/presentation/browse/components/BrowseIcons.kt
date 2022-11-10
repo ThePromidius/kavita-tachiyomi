@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Dangerous
 import androidx.compose.material.icons.filled.Warning
@@ -48,7 +47,7 @@ fun SourceIcon(
     when {
         source.isStub && icon == null -> {
             Image(
-                imageVector = Icons.Default.Warning,
+                imageVector = Icons.Filled.Warning,
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
                 modifier = modifier.then(defaultModifier),
@@ -85,7 +84,7 @@ fun ExtensionIcon(
                 placeholder = ColorPainter(Color(0x1F888888)),
                 error = rememberResourceBitmapPainter(id = R.drawable.cover_error),
                 modifier = modifier
-                    .clip(RoundedCornerShape(4.dp)),
+                    .clip(MaterialTheme.shapes.extraSmall),
             )
         }
         is Extension.Installed -> {
@@ -105,7 +104,7 @@ fun ExtensionIcon(
             }
         }
         is Extension.Untrusted -> Image(
-            imageVector = Icons.Default.Dangerous,
+            imageVector = Icons.Filled.Dangerous,
             contentDescription = null,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.error),
             modifier = modifier.then(defaultModifier),
