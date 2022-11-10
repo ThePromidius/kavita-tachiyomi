@@ -164,7 +164,7 @@ class SettingsTrackingScreen : SearchableSettings {
                             if (hasValidSourceInstalled) {
                                 trackManager.komga.loginNoop()
                             } else {
-                                context.toast(R.string.tracker_komga_warning, Toast.LENGTH_LONG)
+                                context.toast(context.getString(R.string.enhanced_tracking_warning, "Komga"), Toast.LENGTH_LONG)
                             }
                         },
                         logout = trackManager.komga::logout,
@@ -181,7 +181,7 @@ class SettingsTrackingScreen : SearchableSettings {
                             if (hasValidSourceInstalled) {
                                 trackManager.kavita.loginNoop()
                             } else {
-                                context.toast(R.string.tracker_kavita_warning, Toast.LENGTH_LONG)
+                                context.toast(context.getString(R.string.enhanced_tracking_warning, "Kavita"), Toast.LENGTH_LONG)
                             }
                         },
                         logout = trackManager.kavita::logout,
