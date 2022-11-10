@@ -39,12 +39,12 @@ class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor
                     return it.parseAs<AuthenticationDto>().token
                 }
                 if (it.code == 401) {
-                    logcat(LogPriority.WARN) { "Unauthorized / api key not valid:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
+                    logcat(LogPriority.WARN) { "Unauthorized / api key not valid:Cleaned api URL:${apiUrl}Api key is empty:${apiKey.isEmpty()}" }
                     throw Exception("Unauthorized / api key not valid")
                 }
                 if (it.code == 500) {
-                    logcat(LogPriority.WARN) { "Error fetching jwd token:\nCleaned api URL:${apiUrl}\nApi key is empty:${apiKey.isEmpty()}\n" }
-                    throw Exception("Error fetching jwd token")
+                    logcat(LogPriority.WARN) { "Error fetching jwt token. Cleaned api URL:$apiUrl Api key is empty:${apiKey.isEmpty()}" }
+                    throw Exception("Error fetching jwt token")
                 }
             }
             // Not sure which one to cathc
@@ -94,7 +94,7 @@ class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor
 
             return if (maxChapterNumber > volumeNumber) maxChapterNumber else volumeNumber
         } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "Exception fetching Total Chapters\nRequest:$requestUrl" }
+            logcat(LogPriority.WARN, e) { "Exception fetching Total Chapters. Request:$requestUrl" }
             throw e
         }
     }
@@ -113,7 +113,7 @@ class KavitaApi(private val client: OkHttpClient, interceptor: KavitaInterceptor
                     }
                 }
         } catch (e: Exception) {
-            logcat(LogPriority.WARN, e) { "exception in latest-chapter\nCould not get item\nRequest:$requestUrl" }
+            logcat(LogPriority.WARN, e) { "Exception getting latest chapter read. Could not get itemRequest:$requestUrl" }
             throw e
         }
         return 0F
